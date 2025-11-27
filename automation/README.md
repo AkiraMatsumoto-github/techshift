@@ -125,3 +125,67 @@ automation/
 ## ライセンス
 
 このプロジェクトは内部利用のみを目的としています。
+
+---
+
+## Phase 2: The Collector (記事収集・選別システム)
+
+### 概要
+RSS/Sitemapから最新記事を自動収集し、Gemini APIで物流業界への関連性をスコアリングするシステムです。
+
+### 使い方
+
+#### 1. 記事の収集 (`collector.py`)
+
+```bash
+# すべてのソースから収集
+python automation/collector.py --source all > articles.json
+
+# 特定のソースのみ
+python automation/collector.py --source techcrunch,wsj_logistics > articles.json
+
+# 過去N日間の記事のみ
+python automation/collector.py --source all --days 1 > articles.json
+```
+
+**対応ソース:**
+- `techcrunch`: TechCrunch
+- `wsj_logistics`: WSJ Logistics Report
+- `supply_chain_dive`: Supply Chain Dive
+- `logistics_mgmt`: Logistics Management (Technology)
+
+#### 2. 記事のスコアリング (`scorer.py`)
+
+```bash
+# 収集した記事をスコアリング
+python automation/scorer.py --input articles.json --threshold 80 --output scored.json
+
+# 閾値を変更
+python automation/scorer.py --input articles.json --threshold 70
+
+# 異なるモデルを使用
+python automation/scorer.py --input articles.json --model gemini-2.5-flash
+```
+
+**スコアリング基準:**
+- 物流業界へのインパクト (0-40点)
+- DX/テクノロジー要素 (0-30点)
+- 読者への有益性 (0-30点)
+
+#### 3. パイプライン実行例
+
+```bash
+# 収集 → スコアリング → 高スコア記事のみ抽出
+python automation/collector.py --source all | \
+python automation/scorer.py --input /dev/stdin --threshold 80 --output high_score_articles.json
+```
+
+### ファイル構成 (Phase 2追加分)
+
+```
+automation/
+├── collector.py           # RSS/Sitemap収集スクリプト
+├── scorer.py              # Geminiによる関連性スコアリング
+└── requirements.txt       # feedparser, python-dateutil追加
+```
+

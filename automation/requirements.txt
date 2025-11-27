@@ -1,4 +1,4 @@
 google-generativeai
-requests
 python-dotenv
-google-cloud-aiplatform
+feedparser
+python-dateutil

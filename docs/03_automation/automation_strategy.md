@@ -27,20 +27,20 @@ AIは以下のキャラクター設定に基づいて記事を生成する。
 
 ## 4. ロードマップ (Roadmap)
 
-### Phase 1: "The Analyst" (URL指定型・半自動) - **NOW**
+### Phase 1: "The Writer" (キーワード指定型・自動生成) - **✅ Completed**
 **目的**: 品質の基準作りとプロンプトのチューニング。
-*   **フロー**:
-    1.  人間が選定したニュースURLを入力。
-    2.  AIが記事を解析し、ドラフトを作成。
-    3.  WordPressに「下書き」保存。
-    4.  人間がリライト・承認して公開。
+*   **実績**:
+    1.  人間が「キーワード」を指定。
+    2.  Geminiが構成案作成から執筆までを一貫して実行。
+    3.  WordPressに「下書き」または「予約投稿」として保存。
+    4.  MarkdownからHTMLへの自動変換、アイキャッチ画像の自動設定（No Image対応）も実装済み。
 
-### Phase 2: "The Collector" (収集・選別の自動化)
-**目的**: ネタ探しの効率化。
+### Phase 2: "The Collector" (収集・選別の自動化) - **🚀 NEXT**
+**目的**: ネタ探しの効率化とトレンドへの即応。
 *   **フロー**:
-    1.  Geminiを活用したクローラーが定期的にニュースを収集。
-    2.  ペルソナに基づいて「LogiShiftで取り上げる価値があるか」をスコアリング。
-    3.  高スコア記事のみをドラフト生成フローに回す。
+    1.  **Feeder**: RSSや特定サイトのSitemapから最新記事URLを収集。
+    2.  **Scorer**: 収集した記事が「LogiShiftのペルソナ」に合致するかをGeminiでスコアリング。
+    3.  **Filter**: 一定スコア以上の記事のみを抽出し、Phase 1の生成エンジン（または要約エンジン）に渡す。
 
 ### Phase 3: "The Synthesizer" (週次・月次レポート)
 **目的**: ストック情報の資産化。
@@ -48,11 +48,44 @@ AIは以下のキャラクター設定に基づいて記事を生成する。
     1.  蓄積された記事データを分析。
     2.  「今週の物流テック動向」などのまとめ記事を自動生成。
 
-## 5. Phase 1 実装計画
-まずは「URLを渡すと、DXエバンジェリスト視点の記事下書きができる」ツールの開発に着手する。
+## 5. Phase 1 実装実績 (Completed Implementation)
+キーワードを入力するだけで、SEOを意識した記事を生成し、WordPressへ投稿するCLIツールを構築しました。
 
-### 必要な機能
-1.  **Web Scraper**: 指定URLの本文を抽出（Geminiのブラウジング機能または `BeautifulSoup` 等）。
-2.  **Analyzer**: 記事内容を要約し、評価軸（コスト、実現性、将来性）で分析。
-3.  **Writer**: Markdown形式で記事を執筆。内部リンクの提案も行う。
-4.  **Poster**: WordPress REST APIで投稿。
+### 実装された機能
+1.  **Article Generator (`generate_article.py`)**:
+    *   キーワードに基づき、タイトル・構成案・本文をステップバイステップで生成。
+    *   Gemini 1.5 Pro/Flash を活用し、4,000文字程度の充実したコンテンツを作成。
+2.  **WordPress Integrator (`wp_client.py`)**:
+    *   Application Passwords認証を用いたREST API連携。
+    *   投稿ステータス（draft/future）の制御。
+3.  **Content Formatter**:
+    *   MarkdownからHTMLへのクリーンな変換。
+    *   H2/H3タグの適切な構造化。
+
+## 6. Phase 2 実装計画 (Next Steps)
+「自ら情報を探しに行き、選別する」機能を追加し、完全自動化への布石を打ちます。
+
+### 開発予定のコンポーネント
+1.  **RSS/Sitemap Crawler (`collector.py`)**:
+    *   主要な物流ニュースサイト、テックブログのRSSを定期巡回。
+    *   未処理のURLをデータベース（またはJSONファイル）にストック。
+2.  **Relevance Scorer (`scorer.py`)**:
+    *   記事のタイトルと冒頭文（リード）をGeminiに投げ、以下の基準で0-100点のスコアを付与。
+        *   物流業界へのインパクト
+        *   DX/テクノロジー要素の有無
+        *   読者（経営層・現場管理者）への有益性
+3.  **Pipeline Manager**:
+    *   `Collector` -> `Scorer` -> (80点以上) -> `Generator` という一連の流れを制御。
+
+### 実行方法 (Execution Method)
+まずは手動実行から開始し、安定稼働後に自動化へ移行します。
+
+1.  **Step 1: 手動実行 (Manual CLI)**
+    *   **コマンド**: `python automation/collector.py --source "techcrunch,wsj"`
+    *   **運用**: 毎朝、担当者がコマンドを叩いてニュースを収集・選別し、生成された下書きを確認する。
+    *   **目的**: 選別ロジック（スコアリング）の精度を目視で確認・調整するため。
+
+2.  **Step 2: 自動実行 (Scheduled Automation)**
+    *   **ツール**: `cron` (Mac/Linux) または GitHub Actions (Schedule Event)。
+    *   **運用**: 毎日AM 8:00に自動実行。Slack等に「○件の記事を下書き保存しました」と通知。
+    *   **目的**: 完全な自律運用。
