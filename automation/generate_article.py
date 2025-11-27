@@ -3,8 +3,12 @@ import sys
 import re
 import markdown
 from datetime import datetime
-from automation.gemini_client import GeminiClient
-from automation.wp_client import WordPressClient
+try:
+    from automation.gemini_client import GeminiClient
+    from automation.wp_client import WordPressClient
+except ImportError:
+    from gemini_client import GeminiClient
+    from wp_client import WordPressClient
 
 def parse_article_content(text):
     """
@@ -19,8 +23,20 @@ def parse_article_content(text):
     content_start_index = 0
     
     for i, line in enumerate(lines):
-        if line.strip().startswith("タイトル:"):
-            title = line.replace("タイトル:", "").strip()
+        # Match "タイトル:", "**タイトル**:", "# タイトル" etc.
+        clean_line = line.strip()
+        # Remove markdown bold/heading chars for checking
+        check_line = clean_line.replace("*", "").replace("#", "").strip()
+        
+        if check_line.startswith("タイトル:") or check_line.startswith("タイトル："):
+            # Extract title content
+            if ":" in clean_line:
+                title = clean_line.split(":", 1)[1].strip()
+            elif "：" in clean_line:
+                title = clean_line.split("：", 1)[1].strip()
+            
+            # Clean up markdown from title
+            title = title.replace("**", "").strip()
             content_start_index = i + 1
             break
             
@@ -80,13 +96,27 @@ def main():
     print(f"Generated Title: {title}")
     print(f"Content Length: {len(content)} chars")
     
+    # 3. Generate SEO Metadata
+    print("Generating SEO metadata...")
+    try:
+        from seo_optimizer import SEOOptimizer
+    except ImportError:
+        from automation.seo_optimizer import SEOOptimizer
+    
+    seo = SEOOptimizer()
+    meta_description = seo.generate_meta_description(title, content, args.keyword)
+    print(f"Meta Description: {meta_description}")
+    
+    # 4. Save to Local File
+    save_to_file(title, content, args.keyword)
+
     if args.dry_run:
         print("Dry run mode. Skipping WordPress posting.")
         print("--- Preview ---")
         print(content[:500] + "...")
         return
 
-    # 3. Post to WordPress
+    # 5. Post to WordPress
     print("Posting to WordPress...")
     try:
         wp = WordPressClient()
@@ -110,7 +140,8 @@ def main():
             title=title, 
             content=html_content, 
             status=status,
-            date=schedule_date
+            date=schedule_date,
+            excerpt=meta_description  # Use excerpt for meta description
         )
         
         if result:
@@ -120,6 +151,38 @@ def main():
             print("Failed to create post.")
     except Exception as e:
         print(f"Failed to post to WordPress: {e}")
+
+def save_to_file(title, content, keyword):
+    """Save the article to a local markdown file."""
+    import os
+    
+    # Create directory if not exists
+    output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    # Format filename: YYYY-MM-DD_keyword.md
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    safe_keyword = re.sub(r'[\\/*?:"<>| ]', '_', keyword)
+    filename = f"{date_str}_{safe_keyword}.md"
+    filepath = os.path.join(output_dir, filename)
+    
+    # Add frontmatter
+    file_content = f"""---
+title: {title}
+date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+keyword: {keyword}
+---
+
+{content}
+"""
+    
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+        print(f"Saved local copy to: {filepath}")
+    except Exception as e:
+        print(f"Warning: Failed to save local file: {e}")
 
 if __name__ == "__main__":
     main()
