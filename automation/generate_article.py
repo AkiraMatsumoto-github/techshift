@@ -114,8 +114,12 @@ def main():
     print(f"Generated Title: {title}")
     print(f"Content Length: {len(content)} chars")
     
-    # Save to Local File
-    save_to_file(title, content, args.keyword)
+    # 3. Generate SEO Metadata
+    print("Generating SEO metadata...")
+    try:
+        from seo_optimizer import SEOOptimizer
+    except ImportError:
+        from automation.seo_optimizer import SEOOptimizer
     
     # 3. Classify Content
     print("Classifying content...")
@@ -146,7 +150,7 @@ def main():
         print(content[:500] + "...")
         return
 
-    # 3. Post to WordPress
+    # 5. Post to WordPress
     print("Posting to WordPress...")
     try:
         wp = WordPressClient()
@@ -199,6 +203,38 @@ def main():
             print("Failed to create post.")
     except Exception as e:
         print(f"Failed to post to WordPress: {e}")
+
+def save_to_file(title, content, keyword):
+    """Save the article to a local markdown file."""
+    import os
+    
+    # Create directory if not exists
+    output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    # Format filename: YYYY-MM-DD_keyword.md
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    safe_keyword = re.sub(r'[\\/*?:"<>| ]', '_', keyword)
+    filename = f"{date_str}_{safe_keyword}.md"
+    filepath = os.path.join(output_dir, filename)
+    
+    # Add frontmatter
+    file_content = f"""---
+title: {title}
+date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+keyword: {keyword}
+---
+
+{content}
+"""
+    
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+        print(f"Saved local copy to: {filepath}")
+    except Exception as e:
+        print(f"Warning: Failed to save local file: {e}")
 
 if __name__ == "__main__":
     main()

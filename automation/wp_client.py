@@ -18,7 +18,7 @@ class WordPressClient:
         # Use query param format for default permalink structure
         self.api_url = f"{self.wp_url}/?rest_route=/wp/v2"
 
-    def create_post(self, title, content, status="draft", categories=None, tags=None, date=None):
+    def create_post(self, title, content, status="draft", categories=None, tags=None, date=None, excerpt=None, meta=None):
         """
         Create a new post in WordPress.
         
@@ -30,6 +30,8 @@ class WordPressClient:
             tags: List of tag IDs
             date: Publication date in ISO 8601 format (e.g., "2025-11-27T10:00:00")
                   Required when status="future"
+            excerpt: Post excerpt (used for meta description)
+            meta: Dictionary of meta fields (e.g., {"_yoast_wpseo_metadesc": "..."})
         """
         url = f"{self.api_url}/posts"
         
@@ -45,6 +47,10 @@ class WordPressClient:
             data["tags"] = tags
         if date:
             data["date"] = date
+        if excerpt:
+            data["excerpt"] = excerpt
+        if meta:
+            data["meta"] = meta
 
         try:
             response = requests.post(url, json=data, auth=self.auth)

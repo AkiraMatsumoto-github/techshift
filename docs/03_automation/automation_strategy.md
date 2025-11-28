@@ -48,10 +48,13 @@ AIは以下のキャラクター設定に基づいて記事を生成する。
 *   **フロー**:
     1.  **URL Reader**: 高スコア記事の元URLから本文を抽出（Geminiのブラウジング機能またはBeautifulSoup）。
     2.  **Summarizer**: 元記事を要約し、LogiShift視点のコメントを付加。
-    3.  **Auto Publisher**: Phase 1の生成エンジンを呼び出し、WordPressに下書き保存。
+    3.  **Internal Link Suggester**: WordPress APIから既存記事を取得し、Geminiで関連性をスコアリング。高関連度の記事へのリンクを本文に自動挿入。
+    4.  **Auto Publisher**: Phase 1の生成エンジンを呼び出し、WordPressに下書き保存。
 *   **運用イメージ**: 
     - 毎朝8:00に自動実行（cron/GitHub Actions）
     - 高スコア記事（80点以上）を自動で下書き化
+    - 記事生成時に関連記事への内部リンクを自動挿入
+    - 既存記事にも逆リンクを追加（双方向リンク）
     - Slackに「○件の下書きを作成しました」と通知
     - 人間は最終チェック＆公開のみ
 
