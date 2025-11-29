@@ -1,5 +1,7 @@
 import os
-import google.generativeai as genai
+import base64
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,25 +11,26 @@ class GeminiClient:
         self.project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
         self.location = os.getenv("GOOGLE_CLOUD_LOCATION")
         self.api_key = os.getenv("GEMINI_API_KEY")
+        self.client = None
         self.use_vertex = False
 
-        if self.api_key:
-            print("Initializing Gemini with API Key")
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
-        elif self.project_id and self.location:
-            print(f"Initializing Gemini with Vertex AI (Project: {self.project_id}, Location: {self.location})")
+        # Prioritize Vertex AI initialization
+        if self.project_id and self.location:
             try:
-                import vertexai
-                from vertexai.generative_models import GenerativeModel
-                vertexai.init(project=self.project_id, location=self.location)
-                self.model = GenerativeModel("gemini-1.5-flash-001")
+                print(f"Initializing Gemini with Vertex AI (Project: {self.project_id}, Location: {self.location})")
+                self.client = genai.Client(vertexai=True, project=self.project_id, location=self.location)
                 self.use_vertex = True
-            except ImportError:
-                print("Error: google-cloud-aiplatform not installed or vertexai import failed.")
-                raise
-        else:
-            raise ValueError("Missing Gemini credentials. Set GEMINI_API_KEY or GOOGLE_CLOUD_PROJECT/LOCATION in .env")
+            except Exception as e:
+                print(f"Warning: Vertex AI initialization failed: {e}, falling back to API Key.")
+                self.use_vertex = False
+        
+        # Fallback to API Key if Vertex AI is not available
+        if not self.use_vertex:
+            if self.api_key:
+                print("Initializing Gemini with API Key (google-genai)")
+                self.client = genai.Client(api_key=self.api_key)
+            else:
+                raise ValueError("Missing Gemini credentials. Set GOOGLE_CLOUD_PROJECT/LOCATION or GEMINI_API_KEY in .env")
 
     def generate_article(self, keyword, article_type="know"):
         """
@@ -58,7 +61,11 @@ class GeminiClient:
             - Markdown形式（H2, H3を使用）
             - 2000文字程度
             - 専門用語は噛み砕いて解説
+            - **複雑な情報や一覧はMarkdownテーブルを使用して整理する**
+            - **Markdownテーブル内ではHTMLタグ（<br>など）を使用せず、シンプルなテキストのみを使用する**
             - タイトル: [魅力的な記事タイトル]
+            ## 注意点
+            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと 
             """,
             
             "buy": f"""
@@ -79,8 +86,13 @@ class GeminiClient:
             ## フォーマット
             - Markdown形式
             - 比較表を作成すること（Markdownテーブル）
+            - **各製品の比較やメリット・デメリットは必ずテーブルで整理する**
+            - **Markdownテーブル内ではHTMLタグ（<br>など）を使用せず、シンプルなテキストのみを使用する**
             - 2500文字程度
             - タイトル: [比較・選定ガイドのタイトル]
+            
+            ## 注意点
+            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと 
             """,
             
             "do": f"""
@@ -101,8 +113,13 @@ class GeminiClient:
             ## フォーマット
             - Markdown形式
             - 具体的な数字やステップを含める
+            - **手順やBefore/Afterの比較はMarkdownテーブルを使用する**
+            - **Markdownテーブル内ではHTMLタグ（<br>など）を使用せず、シンプルなテキストのみを使用する**
             - 2000文字程度
             - タイトル: [事例・ノウハウ記事タイトル]
+            
+            ## 注意点
+            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             """,
             
             "news": f"""
@@ -122,8 +139,12 @@ class GeminiClient:
             ## フォーマット
             - Markdown形式
             - 速報性を意識した簡潔な文体
+            - **要点や時系列はMarkdownテーブルを使用して整理する**
+            - **Markdownテーブル内ではHTMLタグ（<br>など）を使用せず、シンプルなテキストのみを使用する**
             - 1500文字程度
             - タイトル: [ニュース解説タイトル]
+            ## 注意点
+            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             """,
             
             "global": f"""
@@ -143,8 +164,12 @@ class GeminiClient:
             ## フォーマット
             - Markdown形式
             - 日本未上陸の概念や技術を分かりやすく
+            - **国別の比較や事例の一覧はMarkdownテーブルを使用する**
+            - **Markdownテーブル内ではHTMLタグ（<br>など）を使用せず、シンプルなテキストのみを使用する**
             - 2000文字程度
             - タイトル: [海外トレンド記事タイトル]
+            ## 注意点
+            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             """
         }
         
@@ -157,10 +182,82 @@ class GeminiClient:
         """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=prompt
+            )
             return response.text
         except Exception as e:
             print(f"Error generating content: {e}")
+            return None
+
+    def generate_image(self, prompt, output_path, aspect_ratio="16:9"):
+        """
+        Generate an image using Imagen 3.0.
+        """
+        try:
+            print(f"Generating image with Imagen 3.0 for prompt: {prompt}")
+            
+            # google-genai implementation
+            response = self.client.models.generate_images(
+                model='imagen-3.0-generate-001',
+                prompt=prompt,
+                config={
+                    'aspect_ratio': aspect_ratio
+                }
+            )
+            
+            # Extract image from response
+            if response.generated_images:
+                image_bytes = response.generated_images[0].image.image_bytes
+                
+                with open(output_path, 'wb') as f:
+                    f.write(image_bytes)
+                print(f"Image saved to: {output_path}")
+                return output_path
+            
+            print("No image generated in response.")
+            return None
+                
+        except Exception as e:
+            print(f"Failed to generate image: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def classify_content(self, content):
+        """
+        Classify the article content into categories and tags.
+        """
+        prompt = f"""
+        You are an expert content classifier for a logistics media site.
+        Analyze the following article content and classify it.
+
+        Content:
+        {content[:3000]}... (truncated)
+
+        Output JSON format:
+        {{
+            "category": "one of [warehouse-management, logistics-dx, material-handling, 2024-problem, cost-reduction, global-logistics]",
+            "industry_tags": ["list", "of", "relevant", "industries", "e.g.", "manufacturing", "retail", "ecommerce", "3pl-warehouse", "transportation"],
+            "theme_tags": ["list", "of", "relevant", "themes", "e.g.", "labor-shortage", "automation", "cost-reduction", "quality-improvement", "safety", "environment"]
+        }}
+        """
+        
+        try:
+            response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            import json
+            return json.loads(response.text)
+        except Exception as e:
+            print(f"Classification failed: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
 if __name__ == "__main__":

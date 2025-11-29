@@ -64,8 +64,15 @@ class ArticleClassifier:
         """
         
         try:
-            response_text = self.gemini.model.generate_content(prompt).text
-            # Clean up JSON markdown if present
+            response = self.gemini.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=prompt,
+                config={
+                    'response_mime_type': 'application/json'
+                }
+            )
+            response_text = response.text
+            # Clean up JSON markdown if present (though response_mime_type should handle it)
             response_text = re.sub(r'```json\n|\n```', '', response_text).strip()
             result = json.loads(response_text)
             return result

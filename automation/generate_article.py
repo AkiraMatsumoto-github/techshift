@@ -8,6 +8,7 @@ try:
     from automation.wp_client import WordPressClient
     from automation.classifier import ArticleClassifier
 except ImportError:
+    import gemini_client
     from gemini_client import GeminiClient
     from wp_client import WordPressClient
     from classifier import ArticleClassifier
@@ -85,18 +86,28 @@ keyword: {keyword}
 
 def main():
     parser = argparse.ArgumentParser(description="Generate and post an article to WordPress.")
-    parser.add_argument("--keyword", required=True, help="Keyword for the article")
-    parser.add_argument("--dry-run", action="store_true", help="Generate content but do not post to WordPress")
-    parser.add_argument("--schedule", help="Schedule post for future publication (format: 'YYYY-MM-DD HH:MM')")
-    parser.add_argument("--type", choices=['know', 'buy', 'do', 'news', 'global'], default='know', help="Content type (default: know)")
+    parser.add_argument('--keyword', type=str, required=True, help='Keyword for the article')
+    parser.add_argument('--type', type=str, default='know', choices=['know', 'buy', 'do', 'news', 'global'], help='Article type')
+    parser.add_argument('--dry-run', action='store_true', help='Generate content but do not post to WordPress')
+    parser.add_argument('--schedule', type=str, help='Schedule date (YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS)')
     
     args = parser.parse_args()
     
+    # Define output directory
+    import os
+    OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "generated_articles")
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+    
     print(f"Starting article generation for keyword: {args.keyword} (Type: {args.type})")
     
-    # 1. Initialize Gemini Client
+    # 1. Initialize Clients
     try:
         gemini = GeminiClient()
+        if not args.dry_run:
+            wp = WordPressClient()
+        else:
+            wp = None
     except Exception as e:
         print(f"Failed to initialize Gemini Client: {e}")
         sys.exit(1)
@@ -120,6 +131,28 @@ def main():
         from seo_optimizer import SEOOptimizer
     except ImportError:
         from automation.seo_optimizer import SEOOptimizer
+    
+    # 2.5 Generate Hero Image
+    # if gemini.use_vertex: # Allow for both Vertex and API Key
+    print("Generating hero image...")
+    image_prompt = f"Futuristic and professional visualization of {args.keyword} in a logistics warehouse context. High quality, photorealistic, 4k."
+    
+    import os
+    output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    safe_keyword = re.sub(r'[\\/*?:\"<>| ]', '_', args.keyword)
+    image_filename = f"{date_str}_{safe_keyword}_hero.png"
+    image_path = os.path.join(output_dir, image_filename)
+    
+    generated_image_path = gemini.generate_image(image_prompt, image_path, aspect_ratio="16:9")
+    
+    if generated_image_path:
+        # Insert image at the top of the content
+        image_markdown = f"![{args.keyword} Image]({image_filename})\n\n"
+        content = image_markdown + content
+        # Re-save the file with the image
+        save_to_file(title, content, args.keyword)
+        print(f"Article updated with hero image: {image_filename}")
     
     # 3. Classify Content
     print("Classifying content...")
@@ -171,8 +204,26 @@ def main():
                     tag_ids.append(t_id)
             print(f"Resolved Tags: {t_slugs} -> {tag_ids}")
 
+        # Upload hero image to WordPress if it exists
+        image_pattern = r'!\[([^\]]*)\]\(([^)]+)\)'
+        image_matches = re.findall(image_pattern, content)
+        
+        for alt_text, image_filename in image_matches:
+            # Check if it's a local file (not a URL)
+            if not image_filename.startswith('http'):
+                image_path = os.path.join(OUTPUT_DIR, image_filename)
+                if os.path.exists(image_path):
+                    print(f"Uploading image to WordPress: {image_filename}")
+                    media_result = wp.upload_media(image_path, alt_text=alt_text or keyword)
+                    if media_result and 'source_url' in media_result:
+                        # Replace local path with WordPress URL
+                        content = content.replace(f']({image_filename})', f']({media_result["source_url"]})')
+                        print(f"Image uploaded successfully: {media_result['source_url']}")
+                    else:
+                        print(f"Failed to upload image: {image_filename}")
+
         # Convert Markdown to HTML
-        html_content = markdown.markdown(content, extensions=['extra', 'nl2br'])
+        html_content = markdown.markdown(content, extensions=['extra', 'nl2br', 'tables'])
         
         # Determine status and date
         if args.schedule:
