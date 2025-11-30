@@ -139,12 +139,16 @@ def main():
     # 2.5 Generate Hero Image
     # if gemini.use_vertex: # Allow for both Vertex and API Key
     print("Generating hero image...")
-    image_prompt = f"Futuristic and professional visualization of {args.keyword} in a logistics warehouse context. High quality, photorealistic, 4k."
+    
+    # Generate contextual image prompt based on article content
+    content_summary = content[:1000]  # Use first 1000 chars as summary
+    image_prompt = gemini.generate_image_prompt(title, content_summary, args.type)
+    print(f"Image prompt: {image_prompt}")
     
     import os
     output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
     date_str = datetime.now().strftime("%Y-%m-%d")
-    safe_keyword = re.sub(r'[\\/*?:\"<>| ]', '_', args.keyword)
+    safe_keyword = re.sub(r'[\\/*?:"\<\>| ]', '_', args.keyword)
     image_filename = f"{date_str}_{safe_keyword}_hero.png"
     image_path = os.path.join(output_dir, image_filename)
     

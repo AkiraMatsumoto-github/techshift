@@ -63,7 +63,19 @@ class GeminiClient:
             - 専門用語は噛み砕いて解説
             - **複雑な情報や一覧はMarkdownテーブルを使用して整理する**
             - **【重要】Markdownテーブル内では<br>タグや他のHTMLタグを一切使用禁止。改行が必要な場合は、セル内で自然な文章として記述する**
-            - タイトル: [魅力的な記事タイトル]
+            
+            ## タイトル生成ルール
+            - **文字数**: 32文字前後（最大40文字以内）
+            - **キーワード配置**: ターゲットキーワード「{keyword}」を可能な限り冒頭に配置
+            - **独自性**: 数字、ターゲット層の明示、ベネフィットを含める
+            - **パワーワード**: 【徹底解説】【完全版】【図解あり】などを適宜使用
+            
+            ## タイトルテンプレート（以下のいずれかの形式で生成）
+            1. {keyword}とは？[メリット/仕組み]と[導入手順]を[ターゲット]向けに解説
+            2. 【徹底解説】{keyword}の基礎知識と導入メリット
+            3. {keyword}を[ターゲット]向けに分かりやすく解説
+            
+            例: WMS（倉庫管理システム）とは？導入メリットと選び方を物流担当者向けに徹底解説
             ## 注意点
             - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             - **HTMLタグ（<br>, <p>, <div>など）は絶対に使用しないこと** 
@@ -90,7 +102,19 @@ class GeminiClient:
             - **各製品の比較やメリット・デメリットは必ずテーブルで整理する**
             - **【重要】Markdownテーブル内では<br>タグや他のHTMLタグを一切使用禁止。改行が必要な場合は、セル内で自然な文章として記述する**
             - 2500文字程度
-            - タイトル: [比較・選定ガイドのタイトル]
+            
+            ## タイトル生成ルール
+            - **文字数**: 32文字前後（最大40文字以内）
+            - **キーワード配置**: ターゲットキーワード「{keyword}」を可能な限り冒頭に配置
+            - **独自性**: 数字、比較軸、ターゲット層を含める
+            - **パワーワード**: 【最新】【完全版】【徹底比較】などを適宜使用
+            
+            ## タイトルテンプレート（以下のいずれかの形式で生成）
+            1. 【2024年最新】{keyword}おすすめ[数字]選！[比較軸]で徹底比較
+            2. {keyword}の選び方完全ガイド｜[ターゲット]必見
+            3. 失敗しない{keyword}選び｜[比較軸]を徹底解説
+            
+            例: 【2024年最新】クラウド型WMSおすすめ10選！価格・機能を徹底比較
             
             ## 注意点
             - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
@@ -118,7 +142,19 @@ class GeminiClient:
             - **手順やBefore/Afterの比較はMarkdownテーブルを使用する**
             - **Markdownテーブル内ではHTMLタグ（<br>など）を絶対に使用せず、シンプルなテキストのみを使用する**
             - 2000文字程度
-            - タイトル: [事例・ノウハウ記事タイトル]
+            
+            ## タイトル生成ルール
+            - **文字数**: 32文字前後（最大40文字以内）
+            - **キーワード配置**: ターゲットキーワード「{keyword}」を可能な限り冒頭に配置
+            - **独自性**: 課題、ベネフィット、数字を含める
+            - **パワーワード**: 【事例あり】【実践ガイド】などを適宜使用
+            
+            ## タイトルテンプレート（以下のいずれかの形式で生成）
+            1. [悩み]を解決！{keyword}を活用した[解決策]とは？【事例あり】
+            2. {keyword}で[ベネフィット]を実現する方法
+            3. [課題]を[数字]削減！{keyword}活用事例
+            
+            例: 倉庫のピッキングミスをゼロに！バーコード管理を活用した誤出荷防止策【事例あり】
             
             ## 注意点   
             - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
@@ -144,7 +180,19 @@ class GeminiClient:
             - **要点や時系列はMarkdownテーブルを使用して整理する**
             - **Markdownテーブル内ではHTMLタグ（<br>など）を絶対に使用せず、シンプルなテキストのみを使用する**
             - 1500文字程度
-            - タイトル: [ニュース解説タイトル]
+            
+            ## タイトル生成ルール
+            - **文字数**: 32文字前後（最大40文字以内）
+            - **キーワード配置**: ターゲットキーワード「{keyword}」を可能な限り冒頭に配置
+            - **独自性**: 速報性、影響範囲を含める
+            - **パワーワード**: 【速報】【注目】【最新】などを適宜使用
+            
+            ## タイトルテンプレート（以下のいずれかの形式で生成）
+            1. 【速報】{keyword}｜物流業界への影響を解説
+            2. {keyword}が物流を変える？最新トレンドを分析
+            3. 注目の{keyword}｜[業界/企業]の動向まとめ
+            
+            例: 【速報】物流2024年問題｜運送業界への影響と対策を徹底解説
             ## 注意点
             - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             """,
@@ -169,7 +217,19 @@ class GeminiClient:
             - **国別の比較や事例の一覧はMarkdownテーブルを使用する**
             - **Markdownテーブル内ではHTMLタグ（<br>など）を絶対に使用せず、シンプルなテキストのみを使用する**
             - 2000文字程度
-            - タイトル: [海外トレンド記事タイトル]
+            
+            ## タイトル生成ルール
+            - **文字数**: 32文字前後（最大40文字以内）
+            - **キーワード配置**: ターゲットキーワード「{keyword}」を可能な限り冒頭に配置
+            - **独自性**: 国名、先進性、日本への示唆を含める
+            - **パワーワード**: 【海外事例】【最前線】【日本未上陸】などを適宜使用
+            
+            ## タイトルテンプレート（以下のいずれかの形式で生成）
+            1. 【海外事例】{keyword}｜[国名]の最新動向と日本への示唆
+            2. {keyword}の最前線｜米国・中国の先進事例
+            3. 日本未上陸の{keyword}｜海外トレンドを徹底解説
+            
+            例: 【海外事例】倉庫自動化ロボット｜米国の最新動向と日本への示唆
             ## 注意点
             - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
             """
@@ -180,7 +240,17 @@ class GeminiClient:
         # Add common formatting instruction
         prompt += """
         
-        [記事本文]
+        ## 出力形式
+        必ず以下の形式で出力してください：
+        
+        1行目: # [生成したタイトル]
+        2行目: 空行
+        3行目以降: 記事本文（導入から始める）
+        
+        例:
+        # WMS（倉庫管理システム）とは？導入メリットと選び方を物流担当者向けに徹底解説
+        
+        物流倉庫の現場で働く担当者や倉庫管理者の皆様なら...
         """
         
         try:
@@ -226,6 +296,47 @@ class GeminiClient:
             import traceback
             traceback.print_exc()
             return None
+
+    def generate_image_prompt(self, title, content_summary, article_type="know"):
+        """
+        Generate an optimized English image prompt based on article title and content.
+        
+        Args:
+            title: Article title
+            content_summary: Brief summary or first paragraph of the article
+            article_type: Type of article (know, buy, do, news, global)
+        
+        Returns:
+            English image prompt optimized for Imagen 3.0
+        """
+        prompt = f"""
+        You are an expert at creating image generation prompts for Imagen 3.0.
+        
+        Based on the following article information, create a detailed English image prompt that:
+        1. Captures the main theme and context of the article
+        2. Is specific and descriptive (not abstract)
+        3. Focuses on logistics/warehouse/supply chain context
+        4. Is photorealistic and professional
+        5. Avoids text, people's faces, or complex diagrams
+        
+        Article Title: {title}
+        Article Type: {article_type}
+        Content Summary: {content_summary[:500]}
+        
+        Generate a single, detailed English image prompt (max 100 words) that would create a compelling hero image for this article.
+        Output ONLY the prompt text, no explanations.
+        """
+        
+        try:
+            response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=prompt
+            )
+            return response.text.strip()
+        except Exception as e:
+            print(f"Error generating image prompt: {e}")
+            # Fallback to simple prompt
+            return f"Professional logistics warehouse scene related to {title}, photorealistic, high quality, 4k"
 
     def classify_content(self, content):
         """

@@ -24,6 +24,12 @@ if ( ! function_exists( 'logishift_setup' ) ) :
 		// Enable support for Post Thumbnails on posts and pages.
 		add_theme_support( 'post-thumbnails' );
 
+		// Add support for editor styles.
+		add_theme_support( 'editor-styles' );
+
+		// Enqueue editor styles.
+		add_editor_style( 'style.css' );
+
 		// Register navigation menus.
 		register_nav_menus(
 			array(
