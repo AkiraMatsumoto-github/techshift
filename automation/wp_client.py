@@ -18,7 +18,7 @@ class WordPressClient:
         # Use query param format for default permalink structure
         self.api_url = f"{self.wp_url}/?rest_route=/wp/v2"
 
-    def create_post(self, title, content, status="draft", categories=None, tags=None, date=None, excerpt=None, meta=None):
+    def create_post(self, title, content, status="draft", categories=None, tags=None, date=None, excerpt=None, meta=None, featured_media=None):
         """
         Create a new post in WordPress.
         
@@ -32,6 +32,7 @@ class WordPressClient:
                   Required when status="future"
             excerpt: Post excerpt (used for meta description)
             meta: Dictionary of meta fields (e.g., {"_yoast_wpseo_metadesc": "..."})
+            featured_media: ID of the featured image
         """
         url = f"{self.api_url}/posts"
         
@@ -51,6 +52,8 @@ class WordPressClient:
             data["excerpt"] = excerpt
         if meta:
             data["meta"] = meta
+        if featured_media:
+            data["featured_media"] = featured_media
 
         try:
             response = requests.post(url, json=data, auth=self.auth)
@@ -98,6 +101,58 @@ class WordPressClient:
             
         except Exception as e:
             print(f"Error fetching/creating tag {slug}: {e}")
+            return None
+
+    def upload_media(self, file_path, alt_text=""):
+        """
+        Upload a media file to WordPress.
+        
+        Args:
+            file_path: Path to the file to upload
+            alt_text: Alternative text for the image
+            
+        Returns:
+            dict with 'id' and 'source_url' if successful, None otherwise
+        """
+        try:
+            url = f"{self.api_url}/media"
+            
+            # Get filename
+            filename = os.path.basename(file_path)
+            
+            # Use multipart upload which is often more robust
+            with open(file_path, 'rb') as f:
+                files = {
+                    'file': (filename, f, 'image/png')
+                }
+                
+                # Upload file
+                response = requests.post(
+                    url,
+                    files=files,
+                    auth=self.auth
+                )
+            
+            response.raise_for_status()
+            
+            result = response.json()
+            
+            # Update alt text if provided
+            if alt_text and 'id' in result:
+                media_id = result['id']
+                update_url = f"{self.api_url}/media/{media_id}"
+                update_data = {"alt_text": alt_text}
+                requests.post(update_url, json=update_data, auth=self.auth)
+            
+            return {
+                'id': result.get('id'),
+                'source_url': result.get('source_url')
+            }
+            
+        except Exception as e:
+            print(f"Error uploading media {file_path}: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response content: {e.response.text}")
             return None
 
 if __name__ == "__main__":

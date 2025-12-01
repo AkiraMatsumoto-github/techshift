@@ -1,6 +1,7 @@
 import argparse
 import sys
 import re
+import json
 import markdown
 from datetime import datetime
 try:
@@ -94,6 +95,7 @@ def main():
     parser.add_argument('--type', type=str, default='know', choices=['know', 'buy', 'do', 'news', 'global'], help='Article type')
     parser.add_argument('--dry-run', action='store_true', help='Generate content but do not post to WordPress')
     parser.add_argument('--schedule', type=str, help='Schedule date (YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS)')
+    parser.add_argument('--context', type=str, help='Article context for News/Global articles (JSON string, optional)')
     
     args = parser.parse_args()
     
@@ -116,9 +118,22 @@ def main():
         print(f"Failed to initialize Gemini Client: {e}")
         sys.exit(1)
         
+    # Parse context if provided
+    context = None
+    if args.context:
+        try:
+            context = json.loads(args.context)
+            print("Context-based generation mode")
+            print(f"  Summary: {context['summary'][:100]}...")
+            print(f"  Key facts: {len(context['key_facts'])} items")
+        except json.JSONDecodeError as e:
+            print(f"Warning: Invalid context JSON ({e}), falling back to keyword-based generation")
+    else:
+        print("Keyword-based generation mode")
+    
     # 2. Generate Content
     print("Generating content with Gemini...")
-    generated_text = gemini.generate_article(args.keyword, article_type=args.type)
+    generated_text = gemini.generate_article(args.keyword, article_type=args.type, context=context)
     
     if not generated_text:
         print("Failed to generate content.")
@@ -223,7 +238,7 @@ def main():
                     category_id = [cat_id]
                     print(f"Resolved Category: {cat_slug} -> {cat_id}")
             
-            t_slugs = classification.get("industry_tags", []) + classification.get("theme_tags", [])
+            t_slugs = classification.get("industry_tags", []) + classification.get("theme_tags", []) + classification.get("region_tags", [])
             for t_slug in t_slugs:
                 t_id = wp.get_tag_id(t_slug)
                 if t_id:
@@ -234,7 +249,9 @@ def main():
         image_pattern = r'!\[([^\]]*)\]\(([^)]+)\)'
         image_matches = re.findall(image_pattern, content)
         
-        for alt_text, image_filename in image_matches:
+        featured_media_id = None
+        
+        for i, (alt_text, image_filename) in enumerate(image_matches):
             # Check if it's a local file (not a URL)
             if not image_filename.startswith('http'):
                 image_path = os.path.join(OUTPUT_DIR, image_filename)
@@ -245,6 +262,11 @@ def main():
                         # Replace local path with WordPress URL
                         content = content.replace(f']({image_filename})', f']({media_result["source_url"]})')
                         print(f"Image uploaded successfully: {media_result['source_url']}")
+                        
+                        # Set the first image (or explicitly hero image) as featured image
+                        if i == 0 or '_hero' in image_filename:
+                            featured_media_id = media_result.get('id')
+                            print(f"Set as featured media ID: {featured_media_id}")
                     else:
                         print(f"Failed to upload image: {image_filename}")
 
@@ -275,7 +297,8 @@ def main():
             status=status,
             date=schedule_date,
             categories=category_id,
-            tags=tag_ids
+            tags=tag_ids,
+            featured_media=featured_media_id
         )
         
         if result:
