@@ -70,8 +70,10 @@ get_header();
 							<div class="share-buttons">
 								<p>Share this article:</p>
 								<!-- TODO: Implement actual share links -->
-								<button class="button outline small">X (Twitter)</button>
-								<button class="button outline small">Facebook</button>
+								<div class="share-buttons-container">
+									<button class="button share-twitter">X (Twitter)</button>
+									<button class="button share-facebook">Facebook</button>
+								</div>
 							</div>
 						</footer>
 					</article>

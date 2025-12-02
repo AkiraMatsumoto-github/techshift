@@ -58,14 +58,15 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'menu-1',
-						'menu_id'        => 'primary-menu',
-					)
-				);
-				?>
+				<ul id="primary-menu" class="menu">
+					<li><a href="<?php echo esc_url( home_url( '/?cat=11' ) ); ?>"><?php esc_html_e( '物流DX・トレンド', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=12' ) ); ?>"><?php esc_html_e( '倉庫管理・WMS', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=13' ) ); ?>"><?php esc_html_e( '輸配送・TMS', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=14' ) ); ?>"><?php esc_html_e( 'マテハン・ロボット', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=15' ) ); ?>"><?php esc_html_e( 'サプライチェーン', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=17' ) ); ?>"><?php esc_html_e( '海外トレンド', 'logishift' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/?cat=16' ) ); ?>"><?php esc_html_e( '事例', 'logishift' ); ?></a></li>
+				</ul>
 			</nav><!-- #site-navigation -->
 		</div>
 	</header><!-- #masthead -->

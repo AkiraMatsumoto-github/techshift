@@ -7,7 +7,7 @@
 
 // Enqueue styles
 function logishift_scripts() {
-    wp_enqueue_style( 'logishift-style', get_stylesheet_uri(), array(), '1.0.10' );
+    wp_enqueue_style( 'logishift-style', get_stylesheet_uri(), array(), '1.0.15' );
 
     wp_enqueue_script( 'logishift-navigation', get_template_directory_uri() . '/assets/js/navigation.js', array(), '1.0.7', true );
 }
@@ -201,3 +201,91 @@ function logishift_seo_meta() {
     <?php
 }
 add_action( 'wp_head', 'logishift_seo_meta', 1 );
+
+/**
+ * Disable canonical redirects only for category URLs.
+ * This prevents ?cat=ID from being redirected to /category/slug/
+ * while keeping redirects working for other pages.
+ */
+function logishift_disable_category_redirect( $redirect_url ) {
+    if ( is_category() && strpos( $_SERVER['REQUEST_URI'], '?cat=' ) !== false ) {
+        return false;
+    }
+    return $redirect_url;
+}
+add_filter( 'redirect_canonical', 'logishift_disable_category_redirect' );
+
+/**
+ * Force enable pretty permalinks.
+ * This ensures post URLs work correctly.
+ */
+function logishift_enable_permalinks() {
+    $current_structure = get_option( 'permalink_structure' );
+    if ( empty( $current_structure ) ) {
+        global $wp_rewrite;
+        $wp_rewrite->set_permalink_structure( '/%postname%/' );
+        update_option( 'rewrite_rules', false );
+        $wp_rewrite->flush_rules( true );
+    }
+}
+add_action( 'init', 'logishift_enable_permalinks' );
+
+/**
+ * Automatically generate SEO-friendly English slugs from Japanese titles.
+ * Uses post ID (e.g., post-123) to ensure clean URLs.
+ * Hooked to save_post to ensure ID is available.
+ */
+function logishift_auto_generate_slug_on_save( $post_id, $post, $update ) {
+    // Only process posts
+    if ( $post->post_type !== 'post' ) {
+        return;
+    }
+
+    // Avoid infinite loops
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
+    }
+
+    // Check if slug is empty, contains Japanese, or is URL-encoded
+    $slug = $post->post_name;
+    if ( empty( $slug ) || preg_match( '/[ぁ-んァ-ヶー一-龠％]/u', $slug ) || strpos( $slug, '%' ) !== false ) {
+        
+        // Unhook to prevent infinite loop
+        remove_action( 'save_post', 'logishift_auto_generate_slug_on_save', 10, 3 );
+
+        // Update the post slug
+        wp_update_post( array(
+            'ID'        => $post_id,
+            'post_name' => 'post-' . $post_id,
+        ) );
+
+        // Re-hook
+        add_action( 'save_post', 'logishift_auto_generate_slug_on_save', 10, 3 );
+    }
+}
+add_action( 'save_post', 'logishift_auto_generate_slug_on_save', 10, 3 );
+
+/**
+ * Sanitize post slugs to prevent Japanese characters in URLs.
+ * Generates clean English slugs from Japanese titles.
+ */
+function logishift_sanitize_post_slug( $slug, $post_ID, $post_status, $post_type ) {
+    // Only process posts, not pages or other post types
+    if ( $post_type !== 'post' ) {
+        return $slug;
+    }
+
+    // If slug is empty or contains Japanese characters
+    if ( empty( $slug ) || preg_match( '/[ぁ-んァ-ヶー一-龠]/u', $slug ) ) {
+        // Get the post title
+        $post = get_post( $post_ID );
+        if ( $post ) {
+            // Generate slug from post ID and first few words of title
+            $title_words = explode( ' ', $post->post_title );
+            $slug = 'post-' . $post_ID;
+        }
+    }
+
+    return $slug;
+}
+add_filter( 'wp_unique_post_slug', 'logishift_sanitize_post_slug', 10, 4 );

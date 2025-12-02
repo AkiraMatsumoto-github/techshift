@@ -104,7 +104,7 @@ get_header();
 		),
 		array(
 			'slug'        => 'case-studies',
-			'name'        => '事例・インタビュー',
+			'name'        => '事例',
 			'description' => '企業の成功事例、現場インタビュー、導入効果の実績',
 		),
 	);
@@ -316,20 +316,6 @@ get_header();
 				<?php
 			endforeach;
 			?>
-		</div>
-	</section>
-
-	<!-- CTA Section -->
-	<section class="cta-section">
-		<div class="container">
-			<div class="cta-content">
-				<h2><?php esc_html_e( 'LogiShiftについて', 'logishift' ); ?></h2>
-				<p><?php esc_html_e( 'LogiShiftは、物流担当者と経営層のための課題解決メディアです。現場のノウハウから最新のDX事例まで、ビジネスを加速させる情報をお届けします。', 'logishift' ); ?></p>
-				<div class="cta-buttons">
-					<a href="<?php echo esc_url( home_url( '/about/' ) ); ?>" class="button outline"><?php esc_html_e( '運営者情報', 'logishift' ); ?></a>
-					<a href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ); ?>" class="button"><?php esc_html_e( '記事一覧', 'logishift' ); ?></a>
-				</div>
-			</div>
 		</div>
 	</section>
 

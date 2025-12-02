@@ -69,10 +69,6 @@ def save_to_file(title, content, keyword):
     filename = f"{date_str}_{safe_keyword}.md"
     filepath = os.path.join(output_dir, filename)
     
-    # Remove HTML tags from content before saving
-    content = re.sub(r'<br\s*/?>', '', content)  # Remove <br> tags  
-    content = re.sub(r'<[^>]+>', '', content)    # Remove other HTML tags
-    
     file_content = f"""---
 title: {title}
 date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -188,12 +184,9 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to resize image: {e}")
 
-        # Insert image at the top of the content
-        image_markdown = f"![{args.keyword} Image]({image_filename})\n\n"
-        content = image_markdown + content
-        # Re-save the file with the image
+        # Re-save the file (without inserting image into content)
         save_to_file(title, content, args.keyword)
-        print(f"Article updated with hero image: {image_filename}")
+        print(f"Hero image generated: {image_filename}")
     
     # 3. Classify Content
     print("Classifying content...")
@@ -245,37 +238,49 @@ def main():
                     tag_ids.append(t_id)
             print(f"Resolved Tags: {t_slugs} -> {tag_ids}")
 
-        # Upload hero image to WordPress if it exists
+        featured_media_id = None
+
+        # Upload generated hero image explicitly
+        if 'generated_image_path' in locals() and generated_image_path and os.path.exists(generated_image_path):
+            print(f"Uploading hero image to WordPress: {image_filename}")
+            media_result = wp.upload_media(generated_image_path, alt_text=args.keyword)
+            if media_result and 'id' in media_result:
+                featured_media_id = media_result['id']
+                print(f"Set as featured media ID: {featured_media_id}")
+            else:
+                print(f"Failed to upload hero image.")
+
+        # Upload other images found in content
         image_pattern = r'!\[([^\]]*)\]\(([^)]+)\)'
         image_matches = re.findall(image_pattern, content)
         
-        featured_media_id = None
-        
-        for i, (alt_text, image_filename) in enumerate(image_matches):
+        for i, (alt_text, match_filename) in enumerate(image_matches):
             # Check if it's a local file (not a URL)
-            if not image_filename.startswith('http'):
-                image_path = os.path.join(OUTPUT_DIR, image_filename)
+            if not match_filename.startswith('http'):
+                image_path = os.path.join(OUTPUT_DIR, match_filename)
                 if os.path.exists(image_path):
-                    print(f"Uploading image to WordPress: {image_filename}")
-                    media_result = wp.upload_media(image_path, alt_text=alt_text or keyword)
+                    print(f"Uploading image to WordPress: {match_filename}")
+                    media_result = wp.upload_media(image_path, alt_text=alt_text or args.keyword)
                     if media_result and 'source_url' in media_result:
                         # Replace local path with WordPress URL
-                        content = content.replace(f']({image_filename})', f']({media_result["source_url"]})')
+                        content = content.replace(f']({match_filename})', f']({media_result["source_url"]})')
                         print(f"Image uploaded successfully: {media_result['source_url']}")
                         
-                        # Set the first image (or explicitly hero image) as featured image
-                        if i == 0 or '_hero' in image_filename:
+                        # Set as featured image if not already set
+                        if featured_media_id is None and (i == 0 or '_hero' in match_filename):
                             featured_media_id = media_result.get('id')
                             print(f"Set as featured media ID: {featured_media_id}")
                     else:
-                        print(f"Failed to upload image: {image_filename}")
+                        print(f"Failed to upload image: {match_filename}")
 
 
-        # Convert Markdown to HTML
-        # Remove HTML tags (especially <br>) that interfere with Markdown table parsing
-        content = re.sub(r'<br\s*/?>', '', content)  # Remove <br> tags
-        content = re.sub(r'<[^>]+>', '', content)    # Remove other HTML tags
+        # Clean up HTML tags that Gemini might insert (especially <br> in tables)
+        # Replace <br> with space to avoid breaking table syntax
+        content = re.sub(r'<br\s*/?>\s*', ' ', content)
+        # Remove any other HTML tags (but keep the content)
+        content = re.sub(r'<([^>]+)>', '', content)
         
+        # Convert Markdown to HTML (tables will be properly converted)
         html_content = markdown.markdown(content, extensions=['extra', 'nl2br', 'tables'])
         
         # Determine status and date
