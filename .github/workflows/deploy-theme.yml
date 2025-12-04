@@ -20,15 +20,34 @@ jobs:
         sparse-checkout-cone-mode: false
     
     - name: Deploy to server via rsync
-      uses: burnett01/rsync-deployments@5.2
+      uses: appleboy/ssh-action@master
       with:
-        switches: -avz --delete
-        path: themes/logishift/
-        remote_path: ~/logishift.net/public_html/wp-content/themes/logishift/
-        remote_host: ${{ secrets.SERVER_HOST }}
-        remote_user: ${{ secrets.SERVER_USER }}
-        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-        remote_port: ${{ secrets.SSH_PORT }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          # Create target directory if it doesn't exist
+          mkdir -p ~/logishift.net/public_html/wp-content/themes/logishift
+    
+    - name: Sync files via rsync
+      run: |
+        # Setup SSH key
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        
+        # Add server to known_hosts
+        ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        
+        # Deploy via rsync
+        rsync -avz --delete \
+          -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
+          themes/logishift/ \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/logishift.net/public_html/wp-content/themes/logishift/
+        
+        # Cleanup
+        rm ~/.ssh/deploy_key
     
     - name: Set permissions
       uses: appleboy/ssh-action@master
@@ -40,3 +59,4 @@ jobs:
         script: |
           chmod -R 755 ~/logishift.net/public_html/wp-content/themes/logishift
           echo "✅ デプロイ完了！"
+
