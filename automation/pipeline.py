@@ -45,10 +45,10 @@ def run_command(command):
 
 def main():
     parser = argparse.ArgumentParser(description="LogiShift Automation Pipeline")
-    parser.add_argument("--days", type=int, default=1, help="Days to look back for collection")
-    parser.add_argument("--hours", type=int, help="Hours to look back for collection (overrides --days)")
+    parser.add_argument("--days", type=int, help="Days to look back for collection")
+    parser.add_argument("--hours", type=int, default=6, help="Hours to look back for collection (overrides --days)")
     parser.add_argument("--threshold", type=int, default=85, help="Score threshold for generation")
-    parser.add_argument("--limit", type=int, default=1, help="Max articles to generate per run")
+    parser.add_argument("--limit", type=int, default=3, help="Max articles to generate per run")
     parser.add_argument("--score-limit", type=int, default=0, help="Max articles to score (0 for all)")
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode (no posting)")
     
