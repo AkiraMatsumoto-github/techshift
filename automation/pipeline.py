@@ -46,6 +46,7 @@ def run_command(command):
 def main():
     parser = argparse.ArgumentParser(description="LogiShift Automation Pipeline")
     parser.add_argument("--days", type=int, default=1, help="Days to look back for collection")
+    parser.add_argument("--hours", type=int, help="Hours to look back for collection (overrides --days)")
     parser.add_argument("--threshold", type=int, default=85, help="Score threshold for generation")
     parser.add_argument("--limit", type=int, default=1, help="Max articles to generate per run")
     parser.add_argument("--score-limit", type=int, default=0, help="Max articles to score (0 for all)")
@@ -68,14 +69,17 @@ def main():
     from automation.summarizer import summarize_article
     
     collected_articles = []
-    print(f"Collecting articles from last {args.days} days...")
+    if args.hours:
+        print(f"Collecting articles from last {args.hours} hours...")
+    else:
+        print(f"Collecting articles from last {args.days} days...")
     for name, url in DEFAULT_SOURCES.items():
         # Note: fetch_rss in collector.py currently has hardcoded 2 days logic inside?
         # Let's check.
         # It has `if (now - published_parsed).days <= 2:`
         # We should probably update collector.py to accept days param in fetch_rss.
         # For now, let's assume 2 days is fine or just filter later.
-        fetched = fetch_rss(url, name)
+        fetched = fetch_rss(url, name, days=args.days, hours=args.hours)
         collected_articles.extend(fetched)
         
     print(f"Collected {len(collected_articles)} articles.")

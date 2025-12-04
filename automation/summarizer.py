@@ -10,17 +10,12 @@ import os
 import sys
 import json
 from dotenv import load_dotenv
-import google.generativeai as genai
-
-load_dotenv()
-
-# Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    print("Error: GEMINI_API_KEY not found in .env file")
-    sys.exit(1)
-
-genai.configure(api_key=GEMINI_API_KEY)
+try:
+    from automation.gemini_client import GeminiClient
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from automation.gemini_client import GeminiClient
 
 SUMMARIZATION_PROMPT = """あなたは物流業界のDXエバンジェリスト「LogiShift編集長」です。
 以下の記事を要約し、LogiShift読者（物流担当者・経営層）向けに重要な情報を抽出してください。
@@ -67,7 +62,15 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-2.5-fl
         print(f"Content too long ({len(content)} chars), truncating to 10000 chars")
         content = content[:10000] + "..."
     
-    model = genai.GenerativeModel(model_name)
+    try:
+        client = GeminiClient()
+    except Exception as e:
+        print(f"Error initializing GeminiClient: {e}")
+        return {
+            "summary": f"要約生成に失敗しました: {str(e)}",
+            "key_facts": [],
+            "logishift_angle": "分析できませんでした。"
+        }
     
     prompt = SUMMARIZATION_PROMPT.format(
         title=title,
@@ -75,7 +78,12 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-2.5-fl
     )
     
     try:
-        response = model.generate_content(prompt)
+        # Use GeminiClient's generate_content which has retry logic
+        response = client.generate_content(prompt, model=model_name)
+        
+        if not response:
+            raise Exception("No response from Gemini API")
+        
         result_text = response.text.strip()
         
         # Extract JSON from markdown code blocks if present

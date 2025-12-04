@@ -13,18 +13,12 @@ import json
 import os
 import sys
 from dotenv import load_dotenv
-import google.generativeai as genai
-
-# Load environment variables
-load_dotenv()
-
-# Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    print("Error: GEMINI_API_KEY not found in .env file")
-    sys.exit(1)
-
-genai.configure(api_key=GEMINI_API_KEY)
+try:
+    from automation.gemini_client import GeminiClient
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from automation.gemini_client import GeminiClient
 
 # Editorial Persona and Scoring Criteria
 SCORING_PROMPT = """あなたは物流業界のDXエバンジェリスト「LogiShift編集長」です。
@@ -74,7 +68,18 @@ SCORING_PROMPT = """あなたは物流業界のDXエバンジェリスト「Logi
 def score_article(article, model_name="gemini-2.5-flash"):
     """Score a single article using Gemini API."""
     
-    model = genai.GenerativeModel(model_name)
+    try:
+        client = GeminiClient()
+    except Exception as e:
+        print(f"Error initializing GeminiClient: {e}", file=sys.stderr)
+        return {
+            "title": article.get("title"),
+            "url": article.get("url"),
+            "source": article.get("source"),
+            "score": 0,
+            "reasoning": f"Initialization Error: {str(e)}",
+            "relevance": "error"
+        }
     
     prompt = SCORING_PROMPT.format(
         title=article.get("title", ""),
@@ -83,7 +88,12 @@ def score_article(article, model_name="gemini-2.5-flash"):
     )
     
     try:
-        response = model.generate_content(prompt)
+        # Use GeminiClient's generate_content which has retry logic
+        response = client.generate_content(prompt, model=model_name)
+        
+        if not response:
+            raise Exception("No response from Gemini API")
+
         result_text = response.text.strip()
         
         # Extract JSON from markdown code blocks if present

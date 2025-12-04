@@ -3,6 +3,8 @@ import base64
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+import time
+import random
 
 load_dotenv()
 
@@ -31,6 +33,46 @@ class GeminiClient:
                 self.client = genai.Client(api_key=self.api_key)
             else:
                 raise ValueError("Missing Gemini credentials. Set GOOGLE_CLOUD_PROJECT/LOCATION or GEMINI_API_KEY in .env")
+    def _retry_request(self, func, *args, **kwargs):
+        """
+        Retry a function call with exponential backoff if a quota error occurs.
+        """
+        max_retries = 5
+        base_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                error_str = str(e).lower()
+                # Check for rate limit/quota errors
+                if "429" in error_str or "quota" in error_str or "exhausted" in error_str:
+                    if attempt == max_retries - 1:
+                        print(f"Max retries ({max_retries}) exceeded for quota error.")
+                        raise e
+                    
+                    delay = (base_delay * (2 ** attempt)) + (random.random() * 1)
+                    print(f"Quota exceeded (429). Retrying in {delay:.2f}s... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(delay)
+                else:
+                    # Not a quota error, raise immediately
+                    raise e
+
+    def generate_content(self, prompt, model='gemini-2.5-flash', config=None):
+        """
+        Generic method to generate content with retry logic.
+        """
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model=model,
+                contents=prompt,
+                config=config
+            )
+            return response
+        except Exception as e:
+            print(f"Error generating content: {e}")
+            return None
 
     def generate_article(self, keyword, article_type="know", context=None):
         """
@@ -272,7 +314,8 @@ LogiShift視点: {context['logishift_angle']}
         """
         
         try:
-            response = self.client.models.generate_content(
+            response = self._retry_request(
+                self.client.models.generate_content,
                 model='gemini-2.5-pro',
                 contents=prompt
             )
@@ -289,7 +332,8 @@ LogiShift視点: {context['logishift_angle']}
             print(f"Generating image with Imagen 3.0 for prompt: {prompt}")
             
             # google-genai implementation
-            response = self.client.models.generate_images(
+            response = self._retry_request(
+                self.client.models.generate_images,
                 model='imagen-3.0-generate-001',
                 prompt=prompt,
                 config={
@@ -346,7 +390,8 @@ LogiShift視点: {context['logishift_angle']}
         """
         
         try:
-            response = self.client.models.generate_content(
+            response = self._retry_request(
+                self.client.models.generate_content,
                 model='gemini-2.5-pro',
                 contents=prompt
             )
@@ -376,7 +421,8 @@ LogiShift視点: {context['logishift_angle']}
         """
         
         try:
-            response = self.client.models.generate_content(
+            response = self._retry_request(
+                self.client.models.generate_content,
                 model='gemini-2.5-pro',
                 contents=prompt,
                 config=types.GenerateContentConfig(

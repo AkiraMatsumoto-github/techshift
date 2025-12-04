@@ -54,6 +54,13 @@ def create_tags(wp):
         {"name": "環境・SDGs", "slug": "environment-sdgs"},
         {"name": "安全・BCP", "slug": "safety-bcp"},
         {"name": "補助金・助成金", "slug": "subsidy"},
+        # Region/Country
+        {"name": "日本", "slug": "japan"},
+        {"name": "アメリカ", "slug": "usa"},
+        {"name": "ヨーロッパ", "slug": "europe"},
+        {"name": "中国", "slug": "china"},
+        {"name": "東南アジア", "slug": "southeast-asia"},
+        {"name": "グローバル", "slug": "global"},
     ]
     
     print("\nCreating tags...")

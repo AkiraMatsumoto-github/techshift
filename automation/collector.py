@@ -20,7 +20,7 @@ DEFAULT_SOURCES = {
     "logi_biz": "https://online.logi-biz.com/feed/",
 }
 
-def fetch_rss(url, source_name):
+def fetch_rss(url, source_name, days=None, hours=None):
     """Fetches and parses an RSS feed."""
     print(f"Fetching {source_name} from {url}...")
     feed = feedparser.parse(url)
@@ -56,7 +56,15 @@ def fetch_rss(url, source_name):
              else:
                  now = datetime.now()
                  
-             if (now - published_parsed).days <= 2:
+             # Determine cutoff
+             if hours:
+                 cutoff = timedelta(hours=hours)
+             elif days:
+                 cutoff = timedelta(days=days)
+             else:
+                 cutoff = timedelta(days=2) # Default to 2 days
+
+             if (now - published_parsed) <= cutoff:
                  is_recent = True
         else:
             # If no date, assume it's recent enough or skip? Let's include for now.
@@ -77,7 +85,8 @@ def main():
     parser = argparse.ArgumentParser(description="Collect articles from RSS feeds.")
     parser.add_argument("--source", type=str, help="Comma-separated list of source keys (e.g., techcrunch,wsj_logistics) or 'all'", default="all")
     parser.add_argument("--dry-run", action="store_true", help="Print results to stdout instead of saving (currently only prints)")
-    parser.add_argument("--days", type=int, default=2, help="Filter articles published within last N days")
+    parser.add_argument("--days", type=int, help="Filter articles published within last N days")
+    parser.add_argument("--hours", type=int, help="Filter articles published within last N hours")
 
     args = parser.parse_args()
 
@@ -95,7 +104,7 @@ def main():
 
     all_articles = []
     for name, url in target_sources.items():
-        articles = fetch_rss(url, name)
+        articles = fetch_rss(url, name, days=args.days, hours=args.hours)
         all_articles.extend(articles)
         time.sleep(1) # Be nice to servers
 
