@@ -189,3 +189,54 @@ automation/
 └── requirements.txt       # feedparser, python-dateutil追加
 ```
 
+---
+
+## 固定ページの生成
+
+### 概要
+
+Gemini APIを使用してプライバシーポリシー、運営者情報、お問い合わせページを自動生成し、WordPressに投稿します。
+
+### 使い方
+
+```bash
+# 仮想環境を有効化
+source automation/venv/bin/activate
+
+# すべての固定ページを生成
+python automation/generate_static_pages.py --all
+
+# 特定のページのみ生成
+python automation/generate_static_pages.py --page privacy
+python automation/generate_static_pages.py --page about
+python automation/generate_static_pages.py --page contact
+
+# プレビューのみ（投稿しない）
+python automation/generate_static_pages.py --all --dry-run
+```
+
+### 生成されるページ
+
+| ページ種類 | スラッグ | URL |
+|-----------|---------|-----|
+| プライバシーポリシー | `privacy-policy` | `/privacy-policy/` |
+| 運営者情報 | `about` | `/about/` |
+| お問い合わせ | `contact` | `/contact/` |
+
+### オプション
+
+| オプション | 説明 | 例 |
+|----------|------|-----|
+| `--page` | 特定のページのみ生成 | `--page privacy` |
+| `--all` | すべてのページを生成 | `--all` |
+| `--dry-run` | プレビューのみ（投稿しない） | `--dry-run` |
+
+### ファイル構成 (Phase 3追加分)
+
+```
+automation/
+├── generate_static_pages.py  # 固定ページ生成スクリプト
+├── gemini_client.py          # generate_static_page()メソッド追加
+└── wp_client.py              # create_page()メソッド追加
+```
+

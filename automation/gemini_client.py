@@ -471,6 +471,138 @@ LogiShift視点: {context['logishift_angle']}
             traceback.print_exc()
             return None
 
+    def generate_static_page(self, page_type):
+        """
+        Generate static page content (privacy policy, about, contact).
+        
+        Args:
+            page_type: "privacy", "about", or "contact"
+        
+        Returns:
+            Generated markdown content
+        """
+        prompts = {
+            "privacy": """
+            あなたは法務に詳しいコンテンツライターです。
+            以下の情報を基に、日本の個人情報保護法に準拠したプライバシーポリシーを作成してください。
+            
+            【サイト情報】
+            - サイト名: LogiShift（ロジシフト）
+            - 運営者: LogiShift編集部
+            - 設立: 2025年11月
+            - 目的: 物流業界のDX推進・課題解決に関する情報提供
+            - 使用技術: Googleアナリティクス、Cookie
+            - お問い合わせ: info@logishift.jp
+            
+            ## 含めるべき項目
+            1. 個人情報の取り扱いについて
+            2. 収集する情報の種類（アクセスログ、Cookie等）
+            3. 利用目的（サイト改善、統計分析等）
+            4. 第三者提供（Googleアナリティクス等）
+            5. Cookie・アクセス解析ツールについて
+            6. 個人情報の開示・訂正・削除について
+            7. お問い合わせ先
+            8. 制定日・改定日
+            
+            ## 出力形式
+            - Markdown形式で出力
+            - 見出しはH2（##）とH3（###）を使用
+            - 箇条書きや表を適宜使用
+            - 法的に正確で、かつ読みやすい文章
+            - 最後に「制定日: 2025年11月1日」を記載
+            
+            ## 注意点
+            - 専門用語は分かりやすく説明
+            - ユーザーの権利を明確に記載
+            - 連絡先を明記
+            """,
+            
+            "about": """
+            あなたはコーポレートコミュニケーションの専門家です。
+            以下の情報を基に、LogiShiftの運営者情報ページを作成してください。
+            
+            【サイト情報】
+            - サイト名: LogiShift（ロジシフト）
+            - 運営者: LogiShift編集部
+            - 設立: 2025年11月
+            - お問い合わせ: info@logishift.jp
+            
+            【ミッション】
+            物流業界の課題解決とDX推進に貢献し、業界No.1のSEOメディアを目指す
+            
+            【主なコンテンツ】
+            - 物流コスト削減のノウハウ
+            - 最新テクノロジー（WMS, RFID, マテハンなど）の解説
+            - 2024年問題などの業界トレンド解説
+            - 物流DXの成功事例紹介
+            
+            【ターゲット読者】
+            企業の物流担当者、倉庫管理者、経営層
+            
+            ## 含めるべき項目
+            1. LogiShiftについて（サイトの目的・ビジョン）
+            2. 基本情報（サイト名、運営者、設立年、お問い合わせ先）をテーブル形式で
+            3. ミッション・ビジョン
+            4. 主なコンテンツカテゴリの紹介
+            5. 想定読者
+            6. お問い合わせ先
+            
+            ## 出力形式
+            - Markdown形式で出力
+            - 見出しはH2（##）とH3（###）を使用
+            - 基本情報はMarkdownテーブルで整理
+            - 親しみやすく、信頼感のある文章
+            - 物流業界への熱意が伝わる内容
+            """,
+            
+            "contact": """
+            あなたはカスタマーサポートの専門家です。
+            以下の情報を基に、LogiShiftのお問い合わせページを作成してください。
+            
+            【サイト情報】
+            - サイト名: LogiShift（ロジシフト）
+            - 運営者: LogiShift編集部
+            - お問い合わせ: info@logishift.jp
+            - 対応時間: 平日 10:00-18:00（土日祝日を除く）
+            
+            ## 含めるべき項目
+            1. お問い合わせについて（導入文）
+            2. お問い合わせ方法（メールアドレス）
+            3. 対応時間
+            4. お問い合わせ内容の例（記事の内容、広告掲載、取材依頼など）
+            5. 返信までの目安時間
+            6. 注意事項（個人情報の取り扱い、営業目的の問い合わせなど）
+            
+            ## 出力形式
+            - Markdown形式で出力
+            - 見出しはH2（##）とH3（###）を使用
+            - 箇条書きを適宜使用
+            - 丁寧で分かりやすい文章
+            - お問い合わせしやすい雰囲気
+            
+            ## 注意点
+            - メールアドレスは必ず記載
+            - 対応時間を明記
+            - プライバシーポリシーへのリンクを案内（「詳しくは[プライバシーポリシー](/privacy-policy/)をご覧ください」）
+            """
+        }
+        
+        prompt = prompts.get(page_type)
+        if not prompt:
+            raise ValueError(f"Invalid page_type: {page_type}. Must be 'privacy', 'about', or 'contact'")
+        
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-2.5-pro',
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            print(f"Error generating static page: {e}")
+            return None
+
+
 if __name__ == "__main__":
     # Test generation
     try:

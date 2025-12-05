@@ -66,6 +66,43 @@ class WordPressClient:
             return None
             return None
 
+    def create_page(self, title, content, status="publish", slug=None, parent=None):
+        """
+        Create a new page in WordPress.
+        
+        Args:
+            title: Page title
+            content: Page content (HTML)
+            status: Page status ("draft", "publish")
+            slug: URL slug (e.g., "privacy-policy")
+            parent: Parent page ID (for hierarchical pages)
+        
+        Returns:
+            Response JSON or None
+        """
+        url = f"{self.api_url}/pages"
+        
+        data = {
+            "title": title,
+            "content": content,
+            "status": status
+        }
+        
+        if slug:
+            data["slug"] = slug
+        if parent:
+            data["parent"] = parent
+
+        try:
+            response = requests.post(url, json=data, auth=self.auth)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error creating page: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response content: {e.response.text}")
+            return None
+
     def get_category_id(self, slug):
         """Get category ID by slug."""
         try:
