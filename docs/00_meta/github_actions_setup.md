@@ -37,11 +37,11 @@ GitHubリポジトリの設定で以下のシークレットを追加する必�
 | シークレット名 | 説明 | 例 |
 |--------------|------|-----|
 | `GEMINI_API_KEY` | Gemini APIキー | `AIza...` |
-| `GOOGLE_CLOUD_PROJECT` | Google CloudプロジェクトID | `231503280916` |
-| `GOOGLE_CLOUD_LOCATION` | Google Cloudリージョン | `us-central1` |
 | `WP_URL` | WordPress サイトURL | `https://logishift.net` |
 | `WP_USER` | WordPress ユーザー名 | `admin` |
 | `WP_APP_PASSWORD` | WordPress アプリケーションパスワード | `xxxx xxxx xxxx xxxx` |
+
+> **注意**: GitHub ActionsではVertex AIではなくGemini API Keyを使用します。
 
 ### シークレット取得方法
 
