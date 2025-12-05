@@ -1004,6 +1004,8 @@ section {
     width: 100%;
     height: auto;
     border-radius: 4px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
 }
 
 .entry-content {

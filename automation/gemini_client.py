@@ -327,11 +327,46 @@ LogiShift視点: {context['logishift_angle']}
 
     def generate_image(self, prompt, output_path, aspect_ratio="16:9"):
         """
-        Generate an image using Imagen 3.0 (Vertex AI) or Gemini 2.5 Flash Image (API Key fallback).
+        Generate an image using Gemini 2.5 Flash Image (Primary) or Imagen 3.0 (Fallback).
         """
+        # 1. Try Gemini 2.5 Flash Image (API Key supported)
         try:
-            # Try Imagen 3.0 first (Vertex AI only)
-            print(f"Generating image with Imagen 3.0 for prompt: {prompt}")
+            print(f"Generating image with Gemini 2.5 Flash Image for prompt: {prompt}")
+            
+            # Use google-genai SDK (v1beta) for API Key support and aspect ratio control
+            # We need a dedicated client for v1beta to ensure aspect_ratio works
+            client_v1beta = genai.Client(api_key=self.api_key, vertexai=False, http_options={'api_version': 'v1beta'})
+            
+            response = client_v1beta.models.generate_content(
+                model='gemini-2.5-flash-image',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_modalities=["IMAGE"],
+                    image_config=types.ImageConfig(
+                        aspect_ratio=aspect_ratio,
+                    )
+                )
+            )
+            
+            # Extract image from response (Gemini 2.5 Flash)
+            if response.parts:
+                for part in response.parts:
+                    # Check if part has inline_data (image)
+                    if part.inline_data is not None:
+                        image_bytes = part.inline_data.data
+                        with open(output_path, 'wb') as f:
+                            f.write(image_bytes)
+                        print(f"Image saved to: {output_path}")
+                        return output_path
+            
+            print("No image found in Gemini 2.5 response, trying fallback...")
+            
+        except Exception as e:
+            print(f"Gemini 2.5 Flash Image failed ({e}), falling back to Imagen 3.0...")
+
+        # 2. Fallback to Imagen 3.0 (Vertex AI only)
+        try:
+            print(f"Generating image with Imagen 3.0 (Fallback) for prompt: {prompt}")
             
             response = self._retry_request(
                 self.client.models.generate_images,
@@ -350,53 +385,12 @@ LogiShift視点: {context['logishift_angle']}
                 print(f"Image saved to: {output_path}")
                 return output_path
             
-        except Exception as e:
-            error_str = str(e).lower()
-            # If Imagen 3.0 is not available, fallback to Gemini 2.5 Flash Image
-            if '404' in error_str or 'not found' in error_str or 'unauthenticated' in error_str:
-                print(f"Imagen 3.0 not available ({e}), falling back to Gemini 2.5 Flash Image...")
+            print("No image generated in Imagen 3.0 response.")
+            return None
                 
-                try:
-                    # Use google-generativeai SDK for API Key support
-                    import google.generativeai as genai_v1
-                    genai_v1.configure(api_key=self.api_key)
-                    
-                    model = genai_v1.GenerativeModel('gemini-2.5-flash-image')
-                    
-                    # Explicitly ask for image in prompt
-                    content_prompt = f"Generate a photorealistic image of: {prompt}"
-                    
-                    print(f"Generating image with Gemini 2.5 Flash Image...")
-                    response = model.generate_content(content_prompt)
-                    
-                    # Extract image from response (Gemini 2.5 Flash)
-                    if response.parts:
-                        for part in response.parts:
-                            # Check if part has inline_data (image)
-                            # Note: The attribute might be different depending on SDK version
-                            # Usually it's inline_data or similar
-                            if hasattr(part, 'inline_data') and part.inline_data:
-                                image_bytes = part.inline_data.data
-                                with open(output_path, 'wb') as f:
-                                    f.write(image_bytes)
-                                print(f"Image saved to: {output_path}")
-                                return output_path
-                            
-                            # Also check candidates[0].content.parts if response.parts is empty or text
-                            # But usually response.parts iterates over candidates[0].content.parts
-                    
-                    # If we reached here, no image found in parts
-                    print("No image found in Gemini 2.5 response.")
-                    # print(response.text) # Debug
-                    
-                except Exception as e2:
-                    print(f"Failed to generate image with Gemini 2.5 Flash Image: {e2}")
-                    return None
-            else:
-                print(f"Failed to generate image: {e}")
-                return None
-        
-        return None
+        except Exception as e:
+            print(f"Failed to generate image with Imagen 3.0: {e}")
+            return None
 
 
     def generate_image_prompt(self, title, content_summary, article_type="know"):
