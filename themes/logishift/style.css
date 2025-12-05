@@ -61,6 +61,15 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Media Reset */
+img,
+iframe,
+video,
+object {
+    max-width: 100%;
+    height: auto;
+}
+
 h1,
 h2,
 h3,
@@ -737,7 +746,7 @@ section {
 
 @media (max-width: 768px) {
     .content-sidebar-wrap {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -1597,4 +1606,60 @@ section {
     .entry-content h3 {
         font-size: 1.25rem;
     }
+}
+
+/* Mobile Optimization Updates */
+@media (max-width: 768px) {
+
+    /* Fix Section Header Spacing */
+    .section-header {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Fix Tag List "Card in Card" Look */
+    .theme-tag-block {
+        background-color: transparent;
+        padding: 0;
+        margin-bottom: var(--spacing-xl);
+        box-shadow: none;
+    }
+
+    .theme-tag-block .theme-tag-title {
+        padding-left: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Improve Horizontal Scrolling Cards */
+    .theme-articles-scroll {
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+        gap: var(--spacing-md);
+    }
+
+    .theme-article-card {
+        flex: 0 0 85vw;
+        /* 85% of viewport width */
+        max-width: 300px;
+        background-color: var(--color-white);
+        border: 1px solid var(--color-border-gray);
+        box-shadow: var(--shadow-sm);
+    }
+}
+
+/* SVG Icon Styling */
+.theme-icon-svg {
+    width: 1.5em;
+    height: 1.5em;
+    stroke: var(--color-tech-blue);
+    /* Default color */
+    stroke-width: 2;
+    vertical-align: middle;
+    margin-right: var(--spacing-xs);
+    display: inline-block;
+}
+
+.theme-tag-title {
+    display: flex;
+    align-items: center;
 }
