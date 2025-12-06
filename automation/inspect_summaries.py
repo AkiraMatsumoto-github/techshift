@@ -26,7 +26,7 @@ def main():
     url = f"{wp.api_url}/posts"
     params = {
         "per_page": 20,
-        "status": "publish",
+        "status": "publish,draft,future",
         "context": "edit" 
         # 'edit' context returns all fields including registered meta.
         # Note: Basic Auth is required for 'edit' context, which wp.auth provides.
