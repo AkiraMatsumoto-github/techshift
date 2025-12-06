@@ -1,218 +1,200 @@
 # LogiShift - 物流業界特化型SEOメディア
 
 物流業界の課題解決（コスト削減、DX推進、2024年問題など）に貢献する高品質な情報を提供するSEOメディアです。
+Gemini APIを活用した高度な記事自動生成システムを搭載し、最新の業界トレンドやノウハウを迅速に配信します。
 
 ## プロジェクト構成
 
 ```
 .
-├── themes/logishift/          # WordPressテーマ
-├── automation/                # 記事自動生成システム
-├── docs/                      # ドキュメント
-└── .github/workflows/         # GitHub Actions
+├── themes/logishift/          # WordPressテーマ（独自開発）
+├── automation/                # 記事自動生成・収集システム
+│   ├── collector.py           # RSS/Sitemap収集
+│   ├── scorer.py              # 記事スコアリング
+│   ├── pipeline.py            # 自動化パイプライン（収集→生成）
+│   ├── generate_article.py    # 記事生成メインスクリプト
+│   ├── seo_optimizer.py       # SEO最適化（メタディスクリプション・タイトル）
+│   └── ...
+├── docs/                      # プロジェクトドキュメント
+└── .github/workflows/         # GitHub Actions (CI/CD)
 ```
 
-## サーバー接続
+---
 
-### SSH接続
+## 1. サーバー接続 & インフラ
+
+本番環境は Xserver で運用されています。
+
+### SSH接続情報
+
+| 項目 | 値 |
+|---|---|
+| **ホスト** | `sv16718.xserver.jp` |
+| **ポート** | `10022` (標準の22ではありません) |
+| **ユーザー** | `xs937213` |
+| **サイトURL** | `https://logishift.net` |
+
+### 接続コマンド
 
 ```bash
-# Xserverに接続
-ssh xserver-logishift
-
-# または直接指定
+# 基本的な接続
 ssh -p 10022 xs937213@sv16718.xserver.jp
+
+# または ~/.ssh/config 設定済みの場合
+ssh xserver-logishift
 ```
 
-### サーバー情報
+---
 
-- **ホスト:** sv16718.xserver.jp
-- **ポート:** 10022
-- **ユーザー:** xs937213
-- **サイトURL:** https://logishift.net
+## 2. デプロイ運用
 
-## デプロイ方法
+GitHub Actions により、`main` ブランチへのプッシュで自動デプロイされます。
 
-### 1. テーマのデプロイ
+### A. WordPressテーマ (`themes/logishift/`)
+- **自動デプロイ**: `themes/logishift/` 配下の変更を検知して実行。
+- **手動デプロイ (緊急時)**:
+  ```bash
+  scp -P 10022 -r themes/logishift/ xs937213@sv16718.xserver.jp:~/logishift.net/public_html/wp-content/themes/
+  ```
 
-GitHub Actions で自動デプロイされます。
+### B. Automationシステム (`automation/`)
+- **自動デプロイ**: `automation/` 配下の変更を検知して実行。Pythonパッケージの更新も行います。
+- **手動デプロイ (緊急時)**:
+  ```bash
+  scp -P 10022 -r automation/ xs937213@sv16718.xserver.jp:~/logishift-automation/
+  ```
 
-**自動デプロイ:**
+---
+
+## 3. Automation System (記事自動生成)
+
+### システム概要
+1.  **Collector**: RSS/Sitemapから記事を収集（国内メディア、TechCrunch、WSJ等）。
+2.  **Scorer**: Geminiで「物流への関連度」「有益性」をスコアリング。
+3.  **Generator**: 高スコア記事からMarkdown記事・SEOメタデータ・画像を生成。
+4.  **Poster**: WordPressへ投稿。
+
+### 環境構築 (ローカル)
+
+#### 必須要件
+- Python 3.10+
+- Docker (WordPressローカル環境用)
+
+#### セットアップ手順
+
+1.  **Python環境の準備**
+    ```bash
+    cd automation
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+2.  **環境変数の設定**
+    `automation/.env` を作成:
+    ```bash
+    GEMINI_API_KEY=your_apiKey
+    WORDPRESS_URL=http://localhost:8000
+    WORDPRESS_USERNAME=admin
+    WORDPRESS_APP_PASSWORD=your_appPassword
+    ```
+
+3.  **WordPress Basic Auth プラグイン (ローカル開発用)**
+    ローカルのWordPressでREST API認証を行うために必要です。
+    ```bash
+    # プラグインのDLとインストール
+    curl -L https://github.com/WP-API/Basic-Auth/archive/master.zip -o /tmp/basic-auth.zip
+    unzip -q /tmp/basic-auth.zip -d /tmp/
+    docker cp /tmp/Basic-Auth-master logishift-wp:/var/www/html/wp-content/plugins/basic-auth
+    ```
+    ※ 管理画面でプラグインを有効化してください。
+
+### 実行コマンド詳細
+
+#### 全自動パイプライン (`pipeline.py`)
+収集から生成までを一貫して実行します。cron等での定期実行用です。
+
 ```bash
-# themes/logishift/ 配下を編集してコミット
-git add themes/logishift/
-git commit -m "feat: Update theme"
-git push origin main
-```
-
-GitHub Actions が自動的に：
-1. `themes/logishift/` をサーバーにデプロイ
-2. パーミッションを設定
-
-**手動デプロイ（緊急時）:**
-```bash
-# ローカルから実行
-scp -P 10022 -r themes/logishift/ xs937213@sv16718.xserver.jp:~/logishift.net/public_html/wp-content/themes/
-```
-
-### 2. Automation スクリプトのデプロイ
-
-GitHub Actions で自動デプロイされます。
-
-**自動デプロイ:**
-```bash
-# automation/ 配下を編集してコミット
-git add automation/
-git commit -m "feat: Update automation scripts"
-git push origin main
-```
-
-GitHub Actions が自動的に：
-1. `automation/` ディレクトリをサーバーにデプロイ
-2. Python 依存パッケージをインストール
-
-**手動デプロイ（緊急時）:**
-```bash
-# ローカルから実行
-scp -P 10022 -r automation/ xs937213@sv16718.xserver.jp:~/logishift-automation/
-```
-
-## 記事自動生成
-
-### ローカル（Mac）での実行
-
-```bash
-# プロジェクトディレクトリに移動
-cd /Users/matsumotoakira/Documents/Private_development/media
-
-# 仮想環境を作成（初回のみ）
-python3 -m venv automation/venv
-
-# 仮想環境を有効化
-source automation/venv/bin/activate
-
-# 依存パッケージをインストール（初回のみ）
-pip install -r automation/requirements.txt
-
-# 記事生成を実行
+# 通常実行
 python automation/pipeline.py
 
-# オプション指定
-python automation/pipeline.py --hours 6 --limit 3 --threshold 85
+# データ収集範囲や生成数を調整
+python automation/pipeline.py --days 2 --limit 3 --threshold 80
 
-# ドライラン（記事を投稿せずに確認）
-python automation/pipeline.py --dry-run --limit 1
-
-# 仮想環境を無効化
-deactivate
+# ドライラン (AWS/WPへの書き込みなしで動作確認)
+python automation/pipeline.py --dry-run
 ```
 
-### サーバーでの実行
+#### 個別モジュール実行
 
+**Phase 1: 記事生成 (`generate_article.py`)**
 ```bash
-# サーバーに接続
-ssh xserver-logishift
+# キーワード指定
+python automation/generate_article.py --keyword "物流DX"
 
-# automation ディレクトリに移動
-cd ~/logishift-automation/automation
+# 記事タイプ指定 (know/buy/do/news/global)
+python automation/generate_article.py --keyword "AGV" --type buy
 
-# Miniconda 環境を有効化（自動的に有効化されます）
-# (base) プロンプトが表示されていることを確認
-
-# 記事生成を実行
-python pipeline.py
-
-# オプション指定
-python pipeline.py --hours 6 --limit 3 --threshold 85
-
-# ドライラン（記事を投稿せずに確認）
-python pipeline.py --dry-run --limit 1
+# スケジュール予約
+python automation/generate_article.py --keyword "2024年問題" --schedule "2025-12-10 10:00"
 ```
 
-**注意:** サーバーでは Vertex AI の認証情報が設定されていないため、`.env` ファイルで `GEMINI_API_KEY` を使用してください。`GOOGLE_CLOUD_PROJECT` と `GOOGLE_CLOUD_LOCATION` の行をコメントアウトするか削除してください。
-
-
-### GitHub Actions での定期実行（予定）
-
-`.github/workflows/generate-articles.yml` を作成して、cron で定期実行する予定です。
-
-例: 毎日12時に実行
-```yaml
-on:
-  schedule:
-    - cron: '0 3 * * *'  # UTC 3:00 = JST 12:00
-  workflow_dispatch:
-```
-
-## 環境変数
-
-サーバー上の `.env` ファイル（`~/logishift-automation/automation/.env`）に以下を設定：
-
+**Phase 2: 収集 (`collector.py`)**
 ```bash
-# Gemini API
-GOOGLE_CLOUD_PROJECT=your_project_id
-GOOGLE_CLOUD_LOCATION=us-central1
-GEMINI_API_KEY=your_api_key
+# 全ソースから収集
+python automation/collector.py --source all > articles.json
 
-# WordPress
-WORDPRESS_URL=https://logishift.net
-WORDPRESS_USERNAME=your_username
-WORDPRESS_APP_PASSWORD=your_app_password
+# 特定ソースのみ (例: TechCrunch)
+python automation/collector.py --source techcrunch --days 3
 ```
 
-**重要:** `.env` ファイルは Git にコミットしないでください（`.gitignore` に含まれています）。
-
-## Python 環境
-
-サーバーでは **Miniconda** を使用しています。
-
+**Phase 2: スコアリング (`scorer.py`)**
 ```bash
-# Python バージョン確認
-python --version  # Python 3.13.9
-
-# conda 環境確認
-conda --version   # conda 25.9.1
-
-# インストール済みパッケージ確認
-pip list
+# ファイル入力でスコアリング
+python automation/scorer.py --input articles.json --threshold 80 --output scored.json
 ```
 
-## トラブルシューティング
-
-### テーマが反映されない
-
+**Phase 3: 固定ページ生成 (`generate_static_pages.py`)**
 ```bash
-# サーバーでパーミッションを確認
-ssh xserver-logishift
+python automation/generate_static_pages.py --all
+```
+
+---
+
+## 4. トラブルシューティング
+
+### サーバー運用
+
+#### パーミッションエラーでテーマが反映されない
+```bash
+ssh -p 10022 xs937213@sv16718.xserver.jp
 chmod -R 755 ~/logishift.net/public_html/wp-content/themes/logishift
 ```
 
-### Automation スクリプトが動かない
-
+#### Automationスクリプトが動かない (依存関係)
+Miniconda環境の再構築が必要な場合があります。
 ```bash
-# サーバーで依存パッケージを再インストール
-ssh xserver-logishift
+ssh -p 10022 xs937213@sv16718.xserver.jp
 cd ~/logishift-automation/automation
 conda install -c conda-forge lxml -y
 pip install -r requirements.txt
 ```
 
-### GitHub Actions が失敗する
+#### GitHub Actions のデプロイ失敗
+GitHub Secrets (`Settings > Secrets`) を確認してください：
+- `SERVER_HOST`: sv16718.xserver.jp
+- `SERVER_USER`: xs937213
+- `SSH_PORT`: 10022
+- `SSH_PRIVATE_KEY`: (正しい秘密鍵か)
 
-1. GitHub リポジトリの Settings → Secrets and variables → Actions
-2. 以下の Secrets が正しく設定されているか確認：
-   - `SERVER_HOST`: sv16718.xserver.jp
-   - `SERVER_USER`: xs937213
-   - `SSH_PRIVATE_KEY`: SSH秘密鍵
-   - `SSH_PORT`: 10022
+### ローカル開発
+
+#### Gemini API エラー (`GeminiClient` object has no attribute 'model')
+`seo_optimizer.py` で発生していましたが、修正済みです。現在は `self.gemini.generate_content()` を使用しています。
+
+#### 記事が生成されない (スコア不足)
+`pipeline.py` の `--threshold` デフォルト値(85)が高すぎる可能性があります。`--threshold 60` 程度に下げてお試しください。
 
 ## 関連ドキュメント
-
 - [テーマデプロイガイド](docs/00_meta/theme_deployment_guide.md)
 - [本番環境デプロイガイド](docs/00_meta/production_deployment_guide.md)
-- [Automation 戦略](docs/03_automation/automation_strategy.md)
-- [コンテンツ戦略](docs/03_automation/content_strategy.md)
-
-## ライセンス
-
-プライベートプロジェクト
