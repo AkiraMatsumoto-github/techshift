@@ -518,7 +518,7 @@ a:hover {
 }
 
 .article-title {
-    font-size: 1.25rem;
+    font-size: 1.0rem;
     margin-bottom: var(--spacing-sm);
     font-weight: 700;
     line-height: 1.5;
@@ -1234,7 +1234,7 @@ section {
 }
 
 .featured-title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     margin-bottom: var(--spacing-md);
     line-height: 1.4;
 }
@@ -1587,11 +1587,15 @@ section {
 
     /* Single Page Mobile Adjustments */
     .single-article {
-        padding: var(--spacing-lg);
+        padding: 0;
+        background-color: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        margin-bottom: var(--spacing-lg);
     }
 
     .entry-title {
-        font-size: 1.75rem;
+        font-size: 1.4rem;
     }
 
     .entry-content {
@@ -1615,6 +1619,11 @@ section {
     .section-header {
         padding-left: 0;
         padding-right: 0;
+    }
+
+    /* Reduce container padding on single post pages for better readability */
+    .single .container {
+        padding: 0 var(--spacing-sm);
     }
 
     /* Fix Tag List "Card in Card" Look */
@@ -1662,4 +1671,10 @@ section {
 .theme-tag-title {
     display: flex;
     align-items: center;
+}
+
+/* Hide Recent Comments Widget */
+#block-4.widget_block,
+.wp-block-latest-comments {
+    display: none !important;
 }

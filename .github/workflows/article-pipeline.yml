@@ -34,7 +34,7 @@ jobs:
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
           cd automation
-          python pipeline.py --hours 6 --threshold 85 --limit 3
+          python pipeline.py --hours 6 --threshold 75 --limit 3
       
       - name: Upload artifacts on failure
         if: failure()
