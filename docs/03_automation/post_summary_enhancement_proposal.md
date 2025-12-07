@@ -18,10 +18,9 @@
 - **内容例**:
   ```json
   {
-    "summary": "記事の詳細な要約（300-500文字）。具体的な手法A、B、Cや、導入企業X社について言及している...",
-    "key_topics": ["倉庫自動化/WMS", "ロボティクス/AGV", "コスト削減"],
-    "target_audience": ["倉庫管理者", "3PL事業者"],
-    "entities": ["Amazon Robotics", "AutoStore"]
+    "summary": "要約テキスト（300-500文字）",
+    "key_topics": ["トピックA", "トピックB"],
+    "entities": ["会社名", "製品名", "技術名"]
   }
   ```
 

@@ -67,7 +67,6 @@ def main():
                 
                 print(f"  Summary: {display_summary}")
                 print(f"  Topics: {', '.join(data.get('key_topics', []))}")
-                print(f"  Audience: {', '.join(data.get('target_audience', []))}")
                 print(f"  Entities: {', '.join(data.get('entities', []))}")
                 print("-" * 60)
             except json.JSONDecodeError:

@@ -165,9 +165,35 @@ def main():
                 if relevant_links:
                     print(f"Found {len(relevant_links)} relevant articles for linking.")
                     
+                    # Sort by score descending and take top 5 for context inclusion
+                    top_relevant = sorted(relevant_links, key=lambda x: x.get('score', 0), reverse=True)[:5]
+                    
                     # Build instructions
-                    links_text = "\n".join([f"- ID: {l['id']} | Title: {l['title']} | URL: {l['url']}" for l in relevant_links])
+                    links_text = ""
+                    for l in relevant_links: # Link suggestions still include all relevant ones (up to 5 or more)
+                         links_text += f"- ID: {l['id']} | Title: {l['title']} | URL: {l['url']}\n"
+
+                    # Build Context from summaries
+                    context_summaries = ""
+                    for i, l in enumerate(top_relevant):
+                        summary_data = l.get('summary_data')
+                        if summary_data and isinstance(summary_data, dict):
+                            summary_text = summary_data.get('summary', 'No summary available.')
+                            context_summaries += f"Article {i+1}: {l['title']}\nSummary: {summary_text}\n\n"
+                        elif l.get('excerpt'):
+                            context_summaries += f"Article {i+1}: {l['title']}\nSummary: {l['excerpt']}\n\n"
+
                     extra_instructions = f"""
+## Context from Existing Articles
+The following are summaries of existing related articles on the blog. 
+Use this information to:
+1. maintain consistency in tone and facts.
+2. avoid unnecessary repetition of basic concepts if they are already covered (briefly recap instead).
+3. explicitly reference them where appropriate (e.g., "As discussed in our previous article on [Topic]...").
+
+[Related Article Summaries]
+{context_summaries}
+
 ## Internal Linking Instructions
 You have access to the following existing articles on the blog. 
 Select the most relevant ones (if any) and include them in the article using standard Markdown link syntax: [Title](URL).

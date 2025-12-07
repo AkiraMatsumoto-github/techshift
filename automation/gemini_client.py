@@ -625,7 +625,6 @@ class GeminiClient:
         {{
             "summary": "Detailed summary of the article content (300-500 chars). Mention specific methods, technologies, or case studies discussed.",
             "key_topics": ["list", "of", "specific", "sub-topics", "covered"],
-            "target_audience": ["primary", "target", "audience"],
             "entities": ["list", "of", "companies", "products", "or", "tools", "mentioned"]
         }}
         """
