@@ -38,7 +38,7 @@ class InternalLinkSuggester:
             
             summary_text = ""
             if ai_summary_json:
-                summary_text = f"Title: {post['title']['rendered']}\nSummary: {ai_summary_json.get('summary', '')}\nTopics: {', '.join(ai_summary_json.get('key_topics', []))}"
+                summary_text = f"Title: {post['title']['rendered']}\nSummary: {ai_summary_json.get('summary', '')}\nTopics: {', '.join(ai_summary_json.get('key_topics', []))}\nEntities: {', '.join(ai_summary_json.get('entities', []))}"
             else:
                 summary_text = f"Title: {post['title']['rendered']}\nExcerpt: {self._clean_excerpt(post['excerpt']['rendered'])}"
 

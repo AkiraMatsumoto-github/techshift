@@ -159,7 +159,8 @@ class WordPressClient:
                 "per_page": limit,
                 "status": status,
                 "orderby": "date",
-                "order": "desc"
+                "order": "desc",
+                "context": "edit"
             }
             
             if category:

@@ -617,15 +617,16 @@ class GeminiClient:
         prompt = f"""
         You are an expert content analyst. Analyze the following article and generate a structured summary in JSON format.
         This summary will be used by an AI system to identify relevant internal links.
+        IMPORTANT: The content is Japanese, so the 'summary' and 'key_topics' MUST be written in Japanese.
 
         Article Content:
         {content[:4000]}... (truncated)
 
         Output JSON format (Strictly JSON only):
         {{
-            "summary": "Detailed summary of the article content (300-500 chars). Mention specific methods, technologies, or case studies discussed.",
-            "key_topics": ["list", "of", "specific", "sub-topics", "covered"],
-            "entities": ["list", "of", "companies", "products", "or", "tools", "mentioned"]
+            "summary": "Detailed summary of the article content (300-500 chars) in Japanese. Mention specific methods, technologies, or case studies discussed.",
+            "key_topics": ["list", "of", "specific", "sub-topics", "covered", "(in Japanese)"],
+            "entities": ["list", "of", "companies", "products", "or", "tools", "mentioned", "(preserve original names)"]
         }}
         """
         

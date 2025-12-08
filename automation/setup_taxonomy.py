@@ -87,45 +87,141 @@ def create_categories(wp):
             print(f"✗ Error processing {cat['name']}: {e}")
 
 def create_tags(wp):
-    """Create all tags defined in content strategy."""
+    """Create all tags defined in content strategy with SEO descriptions."""
     tags = [
         # Industry
-        {"name": "製造業", "slug": "manufacturing"},
-        {"name": "小売・流通", "slug": "retail"},
-        {"name": "EC・通販", "slug": "ecommerce"},
-        {"name": "3PL・倉庫", "slug": "3pl-warehouse"},
-        {"name": "食品・飲料", "slug": "food-beverage"},
-        {"name": "アパレル", "slug": "apparel"},
-        {"name": "医薬品・医療", "slug": "medical"},
+        {
+            "name": "製造業", 
+            "slug": "manufacturing",
+            "description": "工場内物流から調達、出荷まで。製造業のサプライチェーン最適化、スマートファクトリー化、IoT活用に関する最新事例とソリューションを解説。"
+        },
+        {
+            "name": "小売・流通", 
+            "slug": "retail",
+            "description": "オムニチャネル対応、店舗配送、在庫適正化など、変化の激しい小売・流通業界の物流戦略と店舗DX、効率化手法を紹介。"
+        },
+        {
+            "name": "EC・通販", 
+            "slug": "ecommerce",
+            "description": "EC物流の自動化、フルフィルメント戦略、翌日配送の実現など、急成長するEC市場を勝ち抜くためのロジスティクス戦略とツール。"
+        },
+        {
+            "name": "3PL・倉庫", 
+            "slug": "3pl-warehouse",
+            "description": "3PL事業者のための差別化戦略、WMS活用、荷主への提案力強化など、競争力ある倉庫運営と収益化のための実践ノウハウ。"
+        },
+        {
+            "name": "食品・飲料", 
+            "slug": "food-beverage",
+            "description": "コールドチェーン（低温物流）、HACCP対応、鮮度管理など、食の安全と品質を守るための高度な物流技術と規制対応。"
+        },
+        {
+            "name": "アパレル", 
+            "slug": "apparel",
+            "description": "SKU管理の効率化、返品物流（リバースロジスティクス）、RFID活用など、アパレル・ファッション業界特有の物流課題を解決。"
+        },
+        {
+            "name": "医薬品・医療", 
+            "slug": "medical",
+            "description": "GDP（適正流通基準）対応、トレーサビリティ確保、厳格な温度管理など、生命を守る医薬品物流の専門知識と管理手法。"
+        },
         # Theme
-        {"name": "コスト削減", "slug": "cost-reduction"},
-        {"name": "人手不足対策", "slug": "labor-shortage"},
-        {"name": "品質向上・誤出荷防止", "slug": "quality-improvement"},
-        {"name": "環境・SDGs", "slug": "environment-sdgs"},
-        {"name": "安全・BCP", "slug": "safety-bcp"},
-        {"name": "補助金・助成金", "slug": "subsidy"},
+        {
+            "name": "コスト削減", 
+            "slug": "cost-reduction",
+            "description": "運送費、保管費、人件費など、物流コストの構造を可視化し、ムリ・ムダ・ムラを省いて利益を最大化するための具体的施策。"
+        },
+        {
+            "name": "人手不足対策", 
+            "slug": "labor-shortage",
+            "description": "採用難時代の省人化ソリューション。自動化機器の導入からワークシェアリング、外国人材活用まで、持続可能な現場作り。"
+        },
+        {
+            "name": "品質向上・誤出荷防止", 
+            "slug": "quality-improvement",
+            "description": "誤出荷ゼロへの挑戦。バーコード管理、検品システムの導入、作業標準化など、物流品質を高めて顧客信頼を獲得する方法。"
+        },
+        {
+            "name": "環境・SDGs", 
+            "slug": "environment-sdgs",
+            "description": "グリーンロジスティクス、脱炭素（カーボンニュートラル）、モーダルシフトなど、環境配慮型物流への取り組みと企業の社会的責任。"
+        },
+        {
+            "name": "安全・BCP", 
+            "slug": "safety-bcp",
+            "description": "物流現場の事故防止、安全教育、そして災害時の事業継続計画（BCP）策定など、リスクマネジメントの重要ポイント。"
+        },
+        {
+            "name": "補助金・助成金", 
+            "slug": "subsidy",
+            "description": "物流効率化法や省エネ補助金など、設備投資やDX推進に活用できる最新の補助金・助成金情報と申請のポイント。"
+        },
         # Region/Country
-        {"name": "日本", "slug": "japan"},
-        {"name": "アメリカ", "slug": "usa"},
-        {"name": "ヨーロッパ", "slug": "europe"},
-        {"name": "中国", "slug": "china"},
-        {"name": "東南アジア", "slug": "southeast-asia"},
-        {"name": "グローバル", "slug": "global"},
+        {
+            "name": "日本", 
+            "slug": "japan",
+            "description": "国内物流の市況、2024年問題などの法改正、行政の動きなど、日本の物流ビジネスを取り巻く最新ニュースとトレンド。"
+        },
+        {
+            "name": "アメリカ", 
+            "slug": "usa",
+            "description": "物流テックの震源地・アメリカの最新事例。AmazonやWalmartの戦略、シリコンバレー発のスタートアップ動向を現地視点で解説。"
+        },
+        {
+            "name": "ヨーロッパ", 
+            "slug": "europe",
+            "description": "環境先進国・欧州のサステナブルな物流事例。フィジカルインターネット、都市内物流（シティロジスティクス）の先端モデル。"
+        },
+        {
+            "name": "中国", 
+            "slug": "china",
+            "description": "世界の工場から巨大消費市場へ。アリババ、JD.comなどが牽引する圧倒的なスピードと規模の中国スマート物流と無人化技術。"
+        },
+        {
+            "name": "東南アジア", 
+            "slug": "southeast-asia",
+            "description": "急成長するASEAN市場の物流事情。コールドチェーン需要や越境EC、ラストワンマイルの課題と日本企業の進出チャンス。"
+        },
+        {
+            "name": "グローバル", 
+            "slug": "global",
+            "description": "国境を越えるサプライチェーン。国際輸送、地政学リスク、グローバル企業のロジスティクス戦略など、世界視点の物流情報。"
+        },
     ]
     
-    print("\nCreating tags...")
+    print("\nCreating/Updating tags...")
     for tag in tags:
         try:
+            # 1. Try to create
             url = f"{wp.api_url}/tags"
             response = requests.post(url, json=tag, auth=wp.auth)
+            
             if response.status_code == 201:
                 print(f"✓ Created tag: {tag['name']}")
             elif response.status_code == 400 and "term_exists" in response.text:
-                print(f"- Tag already exists: {tag['name']}")
+                # 2. If exists, update
+                print(f"- Tag already exists: {tag['name']}. Updating...")
+                
+                # Get existing tag ID
+                get_url = f"{wp.api_url}/tags&slug={tag['slug']}" # tags endpoint usually accepts ?slug parameter
+                get_res = requests.get(get_url, auth=wp.auth)
+                
+                if get_res.status_code == 200 and len(get_res.json()) > 0:
+                    tag_id = get_res.json()[0]['id']
+                    update_url = f"{wp.api_url}/tags/{tag_id}"
+                    # Update description
+                    update_res = requests.post(update_url, json={'description': tag['description']}, auth=wp.auth)
+                    
+                    if update_res.status_code == 200:
+                         print(f"  ✓ Updated description for: {tag['name']}")
+                    else:
+                         print(f"  ✗ Failed to update description: {update_res.text}")
+                else:
+                    print(f"  ✗ Could not find existing tag ID for slug: {tag['slug']}")
             else:
                 print(f"✗ Failed to create {tag['name']}: {response.text}")
         except Exception as e:
-            print(f"✗ Error creating {tag['name']}: {e}")
+            print(f"✗ Error processing {tag['name']}: {e}")
 
 def main():
     print("=== WordPress Taxonomy Setup ===\n")

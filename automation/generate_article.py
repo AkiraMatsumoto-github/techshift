@@ -318,6 +318,21 @@ Select the most relevant ones (if any) and include them in the article using sta
         print(f"Classification failed: {e}")
         classification = {}
 
+    # 4. Generate AI Structured Summary (New)
+    print("Generating AI Structured Summary...")
+    # Strip HTML for efficient token usage
+    text_content_for_summary = re.sub('<[^<]+?>', '', content)
+    structured_summary = gemini.generate_structured_summary(text_content_for_summary)
+    
+    if structured_summary:
+        print("  - Structured summary generated.")
+        if args.dry_run:
+            print(f"  [Dry Run Preview] Summary: {structured_summary.get('summary')}")
+            print(f"  [Dry Run Preview] Topics: {structured_summary.get('key_topics')}")
+    else:
+        print("  - Warning: Failed to generate structured summary.")
+        structured_summary = None
+
     if args.dry_run:
         print("Dry run mode. Skipping WordPress posting.")
         print("--- Preview ---")
@@ -411,18 +426,8 @@ Select the most relevant ones (if any) and include them in the article using sta
             meta_fields["_yoast_wpseo_metadesc"] = meta_desc
             # meta_fields["_aioseop_description"] = meta_desc # Uncomment if using AIOSEO
 
-        # 4. Generate AI Structured Summary (New)
-        print("Generating AI Structured Summary...")
-        # Strip HTML for efficient token usage
-        text_content_for_summary = re.sub('<[^<]+?>', '', content)
-        structured_summary = gemini.generate_structured_summary(text_content_for_summary)
-        
-        if structured_summary:
-
+        if 'structured_summary' in locals() and structured_summary:
             meta_fields["ai_structured_summary"] = json.dumps(structured_summary, ensure_ascii=False)
-            print("  - Structured summary generated and added to meta.")
-        else:
-            print("  - Warning: Failed to generate structured summary.")
 
         result = wp.create_post(
             title=optimized_title, 
@@ -441,8 +446,11 @@ Select the most relevant ones (if any) and include them in the article using sta
             print(f"Link: {result.get('link')}")
         else:
             print("Failed to create post.")
+
     except Exception as e:
         print(f"Failed to post to WordPress: {e}")
+
+
 
 def save_to_file(title, content, keyword):
     """Save the article to a local markdown file."""

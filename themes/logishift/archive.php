@@ -15,11 +15,11 @@ get_header();
 	<section class="archive-hero">
 		<div class="container">
 			<?php
-			$category = get_queried_object();
+			$object = get_queried_object();
 			?>
-			<h1 class="archive-title"><?php single_cat_title(); ?></h1>
-			<?php if ( category_description() ) : ?>
-				<p class="archive-description"><?php echo category_description(); ?></p>
+			<h1 class="archive-title"><?php the_archive_title(); ?></h1>
+			<?php if ( get_the_archive_description() ) : ?>
+				<div class="archive-description"><?php the_archive_description(); ?></div>
 			<?php endif; ?>
 		</div>
 	</section>
