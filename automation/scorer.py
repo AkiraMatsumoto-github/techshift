@@ -76,6 +76,7 @@ def score_article(article, model_name="gemini-2.5-flash"):
             "title": article.get("title"),
             "url": article.get("url"),
             "source": article.get("source"),
+            "summary": article.get("summary", ""),
             "score": 0,
             "reasoning": f"Initialization Error: {str(e)}",
             "relevance": "error"
@@ -108,6 +109,7 @@ def score_article(article, model_name="gemini-2.5-flash"):
             "title": article.get("title"),
             "url": article.get("url"),
             "source": article.get("source"),
+            "summary": article.get("summary", ""),
             "score": result.get("score", 0),
             "reasoning": result.get("reasoning", ""),
             "relevance": result.get("relevance", "low")
@@ -119,6 +121,7 @@ def score_article(article, model_name="gemini-2.5-flash"):
             "title": article.get("title"),
             "url": article.get("url"),
             "source": article.get("source"),
+            "summary": article.get("summary", ""),
             "score": 0,
             "reasoning": f"Error: {str(e)}",
             "relevance": "error"

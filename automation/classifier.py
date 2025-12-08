@@ -94,6 +94,74 @@ class ArticleClassifier:
                 "region_tags": []
             }
 
+            
+    def classify_type(self, title, summary, source=""):
+        """
+        Classify the article type based on title and summary.
+        
+        Args:
+            title: Article title
+            summary: Article summary
+            source: Source identifier (optional)
+            
+        Returns:
+            str: One of [know, buy, do, news, global]
+        """
+        
+        # 1. Check for Global/News based on source/content first (Low cost)
+        if source in ["techcrunch", "wsj_logistics", "supply_chain_dive", "freightwaves", "36kr_japan", "pandaily"]:
+            return "global"
+            
+        # 2. Use Gemini for semantic classification (High accuracy)
+        prompt = f"""
+        あなたは物流メディアの編集長です。
+        以下の記事企画を、読者にとって最も価値のある5つの記事タイプ（フォーマット）のいずれかに分類してください。
+
+        記事タイトル: {title}
+        記事概要: {summary}
+
+        ## 選択肢 (以下のいずれか1つを選んでください)
+        1. know  (解説記事: 「WMSとは」「物流DXの仕組み」など、基礎知識や定義を解説)
+        2. buy   (比較記事: 「WMS比較」「おすすめ10選」「選び方」など、製品選定を支援)
+        3. do    (実践/事例: 「導入事例」「成功ノウハウ」「誤出荷ゼロへの道」など、具体的なハウツー)
+        4. news  (国内ニュース: 最新の行政動向、企業のプレスリリース、人事情報など速報値・時事性があるもの)
+        5. global (海外情報: 海外のトレンド、海外企業の事例、日本未上陸の技術)
+
+        ## 判定ルール
+        - 海外の国名や海外企業の話であれば「global」
+        - 「比較」「選定」「おすすめ」なら「buy」
+        - 「事例」「成功」「実践」なら「do」
+        - 「とは」「仕組み」「メリット」などの基礎解説なら「know」
+        - 特定の日付や「速報」などの時事性が強ければ「news」
+        
+        出力はタイプ名（know, buy, do, news, global）のみを小文字で返してください。
+        """
+
+        try:
+            response = self.gemini.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+                config={
+                    'response_mime_type': 'text/plain'
+                }
+            )
+            result = response.text.strip().lower()
+            
+            # Validation
+            valid_types = ["know", "buy", "do", "news", "global"]
+            found_type = "news" # default
+            
+            for t in valid_types:
+                if t in result:
+                    found_type = t
+                    break
+            
+            print(f"  > Classification result: {found_type} (Raw: {result})")
+            return found_type
+
+        except Exception as e:
+            print(f"Type classification failed: {e}")
+            return "news" # Safe fallback
 if __name__ == "__main__":
     # Test
     classifier = ArticleClassifier()

@@ -71,6 +71,7 @@ def main():
     from automation.scorer import score_article
     from automation.url_reader import extract_content
     from automation.summarizer import summarize_article
+    from automation.classifier import ArticleClassifier
     
     collected_articles = []
     if args.hours:
@@ -117,6 +118,9 @@ def main():
     schedule_times = ["10:00", "14:00", "18:00"]
     next_day = datetime.now() + timedelta(days=1)
     
+    # Initialize Classifier
+    classifier = ArticleClassifier()
+    
     for article in high_score_articles:
         if count >= args.limit:
             break
@@ -127,7 +131,8 @@ def main():
         
         # Determine Type
         source = article.get("source", "")
-        article_type = SOURCE_TYPE_MAPPING.get(source, "news")
+        # Use dynamic classification
+        article_type = classifier.classify_type(article['title'], article['summary'], source)
         print(f"Type: {article_type}")
         
         # Generate keyword
