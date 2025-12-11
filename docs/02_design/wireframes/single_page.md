@@ -3,9 +3,11 @@
 ## 概要
 - **ファイル名**: `single.php`
 - **役割**: 記事コンテンツを読みやすく提供し、読者の課題解決とコンバージョン（回遊、CTA）につなげる。
+- **デザイン方針**: Mobile-First, Flat Design (No Shadows/Gradients).
 
-## レイアウト
+## レイアウト (Desktop / Mobile)
 
+### Desktop (> 768px)
 ```text
 +-----------------------------------------------------------------------+
 | [Header]                                                              |
@@ -14,42 +16,71 @@
 +-----------------------------------------------------------------------+
 | [Main Content] (Left/Center)        | [Sidebar] (Right)               |
 |                                     |                                 |
-|  [Article Header]                   | [Search Widget]                 |
-|  [Category Label]                   |                                 |
+|  [Article Header]                   | [Search Widget] (Flat Input)    |
+|  [Category Label] (Flat Badge)      |                                 |
 |  <h1>記事タイトル:                  | [Table of Contents] (Sticky)    |
-|      物流コスト削減の5つの手順</h1> | - 1. 現状把握                   |
-|  Date: 2025.11.23  Update: ...      | - 2. 無駄の排除                 |
-|  Author: LogiShift編集部            | - 3. ...                        |
-|                                     |                                 |
-|  [Eye Catch Image]                  | [Popular Posts]                 |
-|                                     |                                 |
-|  [Lead Text]                        | [CTA Banner]                    |
-|  この記事では...について解説します  |                                 |
+|      物流コスト削減の5つの手順</h1> | (Border-left style)             |
+|  Date: ...  Update: ...             |                                 |
+|                                     | [Popular Posts]                 |
+|  [Eye Catch Image] (No Shadow)      |                                 |
+|                                     | [CTA Banner]                    |
+|  [Lead Text]                        |                                 |
 |                                     |                                 |
 |  [Table of Contents] (In-article)   |                                 |
+|  (Background: #F8F9FA, Flat)        |                                 |
 |                                     |                                 |
-|  <h2>1. 現状把握</h2>               |                                 |
+|  <h2>1. 見出し</h2>                 |                                 |
 |  本文テキスト...                    |                                 |
-|  <img src="..." alt="...">          |                                 |
 |                                     |                                 |
-|  <h2>2. 無駄の排除</h2>             |                                 |
-|  本文テキスト...                    |                                 |
-|  <blockquote>引用...</blockquote>   |                                 |
+|  [CTA Box] (Border only)            |                                 |
 |                                     |                                 |
-|  [CTA Box] (記事途中/文末)          |                                 |
-|  "物流改善のチェックリスト配布中"   |                                 |
+|  [Share Buttons] (Flat, No gap)     |                                 |
 |                                     |                                 |
-|  [Share Buttons] (Twitter, FB...)   |                                 |
-|                                     |                                 |
-|  [Author Box]                       |                                 |
-|  [Icon] 名前: プロフィール...       |                                 |
-|                                     |                                 |
-|  [Related Posts] (関連記事)         |                                 |
-|  +-------+ +-------+ +-------+      |                                 |
-|  | Thumb | | Thumb | | Thumb |      |                                 |
-|  +-------+ +-------+ +-------+      |                                 |
-|                                     |                                 |
+|  [Related Posts] (Grid Layout)      |                                 |
 +-----------------------------------------------------------------------+
 | [Footer]                                                              |
 +-----------------------------------------------------------------------+
+```
+
+### Mobile (< 768px)
+- **特徴**: サイドバーなし、メインコンテンツ100%幅。
+```text
++---------------------------------------+
+| [Header] Logo      [Hamburger Menu =] |
++---------------------------------------+
+| [Breadcrumb] (Scrollable or Short)    |
++---------------------------------------+
+| [Main Content] (Full Width)           |
+|                                       |
+|  [Category Label]                     |
+|  <h1>記事タイトル (24px)</h1>         |
+|  Date: ...                            |
+|                                       |
+|  [Eye Catch Image]                    |
+|                                       |
+|  [Lead Text]                          |
+|                                       |
+|  [Table of Contents] (Accordion?)     |
+|                                       |
+|  <h2>1. 見出し</h2>                   |
+|  本文テキスト...                      |
+|                                       |
+|  [CTA Box] (Stack Layout)             |
+|                                       |
+|  [Share Buttons] (Fixed Bottom?)      |
+|  or (Inline Bottom)                   |
+|                                       |
+|  [Author Box]                         |
+|                                       |
+|  [Related Posts] (Stack Layout)       |
+|  +--------------------------------+   |
+|  | [Thumb] Title...               |   |
+|  +--------------------------------+   |
+|  +--------------------------------+   |
+|  | [Thumb] Title...               |   |
+|  +--------------------------------+   |
+|                                       |
++---------------------------------------+
+| [Footer]                              |
++---------------------------------------+
 ```

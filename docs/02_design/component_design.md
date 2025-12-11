@@ -5,10 +5,12 @@
 ### Primary Button (CTA)
 - **用途**: 「記事を読む」「お問い合わせ」など、主要なアクション。
 - **スタイル**:
-    - 背景: `Tech Blue (#00B4D8)`
+    - 背景: `Tech Blue (#00B4D8)` (Solid)
     - 文字: `White (#FFFFFF)`
     - 角丸: `4px`
-    - ホバー: 明度を少し下げる or オパシティを下げる。
+    - ボーダー: なし (Shadowなし)
+    - ホバー: 背景色を少し濃くする (`#0096B4`)。
+
 - **サイズ**:
     - パディング: `12px 32px`
 
@@ -16,9 +18,10 @@
 - **用途**: 「もっと見る」「キャンセル」など、副次的なアクション。
 - **スタイル**:
     - 背景: 透明
-    - ボーダー: `2px solid Tech Blue`
+    - ボーダー: `1px solid Tech Blue`
+    - 角丸: `4px`
     - 文字: `Tech Blue`
-    - ホバー: 背景を `Tech Blue` に、文字を `White` に反転。
+    - ホバー: 背景を `Tech Blue` (opacity 10%) に、文字はそのまま。 or 背景 `Tech Blue` + 文字 `White`。
 
 ### Text Link
 - **用途**: 文中のリンク、控えめな誘導。
@@ -36,8 +39,10 @@
     - メタ情報 (日付)
 - **スタイル**:
     - 背景: `White`
-    - 影 (Shadow): `0 4px 6px rgba(0,0,0,0.05)` (通常時) -> `0 8px 12px rgba(0,0,0,0.1)` (ホバー時)
-    - トランジション: ホバー時に少し浮き上がる (`transform: translateY(-4px)`)。
+    - ボーダー: `1px solid Border Gray`
+    - 影 (Shadow): なし (`none`)
+    - 角丸: `8px`
+    - トランジション: ホバー時にボーダー色を `Tech Blue` に変化、または背景色をわずかに `Light Gray` へ。浮き上がり(Lift)は廃止。
 
 ## 3. ラベル・バッジ (Labels & Badges)
 
@@ -55,9 +60,10 @@
 - **Input / Textarea**:
     - 背景: `White`
     - ボーダー: `1px solid Border Gray`
+    - 影 (Shadow): なし (`none`)
     - 角丸: `4px`
     - パディング: `12px`
-    - フォーカス時: `Tech Blue` のボーダーと淡いグロー効果。
+    - フォーカス時: `Tech Blue` の太めのボーダー (`2px`)。Glow効果は廃止。
 
 ## 5. ナビゲーション (Navigation)
 
