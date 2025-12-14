@@ -12,13 +12,64 @@ get_header();
 <main id="primary" class="site-main">
 
 	<!-- Hero Section -->
-	<section class="hero-section">
-		<div class="container">
-			<div class="hero-content">
-				<h1 class="hero-title"><?php esc_html_e( '物流DXで未来を創る LogiShift', 'logishift' ); ?></h1>
-				<p class="hero-description"><?php esc_html_e( '倉庫管理・コスト削減・2024年問題対策まで。物流担当者と経営層のための実践的な課題解決メディア。', 'logishift' ); ?></p>
-				<a href="#latest-articles" class="button hero-cta"><?php esc_html_e( '最新記事を読む', 'logishift' ); ?></a>
+	<!-- Hero Section (Slider) -->
+	<section class="hero-slider-section">
+		<div class="swiper hero-slider-container">
+			<div class="swiper-wrapper">
+				<?php
+				// Arguments for the Query
+				// First, try to get posts with tag 'pickup'
+				$hero_args = array(
+					'tag'            => 'pickup',
+					'posts_per_page' => 5,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+				);
+				$hero_query = new WP_Query( $hero_args );
+
+				// Fallback: If no pickup posts, get latest 5 posts
+				if ( ! $hero_query->have_posts() ) {
+					$hero_args = array(
+						'post_type'      => 'post',
+						'posts_per_page' => 5,
+						'orderby'        => 'date',
+						'order'          => 'DESC',
+					);
+					$hero_query = new WP_Query( $hero_args );
+				}
+
+				if ( $hero_query->have_posts() ) :
+					while ( $hero_query->have_posts() ) :
+						$hero_query->the_post();
+						$thumb_url = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : get_template_directory_uri() . '/assets/images/hero-bg.png';
+						$categories = get_the_category();
+						$cat_name = ! empty( $categories ) ? $categories[0]->name : 'LOGISHIFT';
+						?>
+						<div class="swiper-slide" style="background-image: url('<?php echo esc_url( $thumb_url ); ?>');">
+							<a href="<?php the_permalink(); ?>" class="hero-full-link"><span class="screen-reader-text"><?php the_title(); ?></span></a>
+							<div class="hero-slide-overlay"></div>
+							<div class="hero-slide-content">
+								<div class="hero-meta-line">
+									<span class="hero-cat-label"><?php echo esc_html( $cat_name ); ?></span>
+									<span class="hero-slide-date"><?php echo get_the_date(); ?></span>
+								</div>
+								<h2 class="hero-slide-title">
+									<?php the_title(); ?>
+								</h2>
+							</div>
+						</div>
+						<?php
+					endwhile;
+					wp_reset_postdata();
+				endif;
+				?>
 			</div>
+			<!-- If we need pagination -->
+			<div class="swiper-pagination"></div>
+
+			<!-- If we need navigation buttons -->
+			<div class="swiper-button-prev"></div>
+			<div class="swiper-button-next"></div>
 		</div>
 	</section>
 

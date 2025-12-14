@@ -9,6 +9,13 @@
 function logishift_scripts() {
     wp_enqueue_style( 'logishift-style', get_stylesheet_uri(), array(), '1.0.15' );
 
+    // Swiper
+    if ( is_front_page() ) {
+        wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.0' );
+        wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.0', true );
+        wp_enqueue_script( 'logishift-front-page', get_template_directory_uri() . '/assets/js/front-page.js', array( 'swiper-js', 'jquery' ), '1.0.0', true );
+    }
+
     wp_enqueue_script( 'logishift-navigation', get_template_directory_uri() . '/assets/js/navigation.js', array(), '1.0.7', true );
 }
 add_action( 'wp_enqueue_scripts', 'logishift_scripts' );

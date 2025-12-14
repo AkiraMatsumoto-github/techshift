@@ -561,55 +561,196 @@ a:hover {
 }
 
 /* Hero Section */
-.hero-section {
-    background-color: var(--color-navy);
-    color: var(--color-white);
-    padding: 100px 0 120px;
-    text-align: center;
+/* Hero Section (Slider) */
+.hero-slider-section {
     position: relative;
+    width: 100%;
+    height: 480px;
+    /* or 80vh depending on preference */
+    background-color: var(--color-navy);
     overflow: hidden;
-    background-image: linear-gradient(rgba(10, 25, 47, 0.75), rgba(10, 25, 47, 0.75)), url('assets/images/hero-bg.png');
-    background-size: cover;
-    background-position: center;
+    padding: 0;
+    /* Override global section padding */
 }
 
-/* Subtle pattern overlay */
-.hero-section::before {
-    content: '';
+.hero-slider-container {
+    width: 100%;
+    height: 100%;
+}
+
+.hero-full-link {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
-    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    /* Above overlay (1) and content (2)? No, content needs to be clickable? Actually full link covers everything. If content has links, z-index needs care. But here content is just text. */
+    cursor: pointer;
 }
 
-.hero-content {
+/* Ensure hover effect works via the link hover */
+.hero-full-link:hover~.hero-slide-overlay {
+    background: linear-gradient(to bottom, transparent 0%, rgba(10, 25, 47, 0) 60%, rgba(10, 25, 47, 1) 100%);
+}
+
+.swiper-slide:has(.hero-full-link:hover) {
+    transform: scale(1.02);
+    /* Use :has if supported, or just rely on JS scale? Simple CSS hover on parent might trigger transform but swiper transition works best on slide */
+}
+
+/* Better approach for hover scale: separate bg element? 
+   For now, remove complex scale to ensure stability first. 
+   Or just scale the background-size? No, transition background-size is jerky.
+   Let's just keep the overlay darkening/lightening.
+*/
+
+.swiper-slide {
     position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+}
+
+/* Gradient Overlay for Text Readability */
+.hero-slide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Only darken bottom 33% */
+    background: linear-gradient(to bottom, transparent 0%, transparent 67%, rgba(10, 25, 47, 0.8) 100%);
     z-index: 1;
-    max-width: 800px;
+}
+
+/* Content Positioning */
+.hero-slide-content {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    z-index: 2;
+    text-align: left;
+    width: 100%;
+    padding: 0 var(--spacing-image-side, 5%);
+    max-width: 1200px;
     margin: 0 auto;
+    right: 0;
 }
 
-.hero-title {
-    font-size: 3.5rem;
-    margin-bottom: var(--spacing-md);
+/* Meta Line (Cat + Date) */
+.hero-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.hero-cat-label {
+    background-color: var(--color-tech-blue);
     color: var(--color-white);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    /* More sophisticated than full pill */
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
-.hero-description {
-    font-size: 1.25rem;
-    margin-bottom: var(--spacing-xl);
-    opacity: 0.9;
-    font-weight: 400;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+.hero-slide-date {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-family: var(--font-base);
+}
+
+/* Slide Typography */
+.hero-slide-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0;
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: var(--color-white);
+}
+
+/* Swiper Controls Customization */
+.swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: var(--color-white);
+    opacity: 0.4;
+    transition: all 0.3s;
+    margin: 0 6px !important;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1;
+    background: var(--color-white);
+    transform: scale(1.5);
+}
+
+/* Custom Arrows */
+.swiper-button-next,
+.swiper-button-prev {
+    color: var(--color-white) !important;
+    /* Force white color over default blue */
+    background: rgba(255, 255, 255, 0.1);
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    /* Prevent squashing */
+    box-sizing: border-box;
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Flex centering might fight with Swiper defaults, use carefully or rely on line-height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 12px !important;
+    /* Smaller icon */
+    font-weight: bold;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    background: var(--color-tech-blue);
+    border-color: var(--color-tech-blue);
+    color: var(--color-white) !important;
+    transform: scale(1.1);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .hero-slider-section {
+        height: 360px;
+    }
+
+    .hero-slide-title {
+        font-size: 1.2rem;
+    }
+
+    .hero-slide-content {
+        bottom: 40px;
+        /* Make room for pagination which might overlap */
+        padding: 0 24px;
+    }
+
+    /* Hide arrows on mobile */
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none;
+    }
 }
 
 /* Sections */
@@ -629,7 +770,7 @@ section {
 }
 
 .section-title {
-    font-size: 2rem;
+    font-size: 2.0rem;
     position: relative;
     padding-left: var(--spacing-md);
 }
@@ -1541,8 +1682,7 @@ section {
 }
 
 
-}
-}
+
 
 /* CTA Section */
 .cta-section {
