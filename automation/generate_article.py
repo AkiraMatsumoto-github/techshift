@@ -273,24 +273,6 @@ Select the most relevant ones (if any) and include them in the article using sta
     generated_image_path = gemini.generate_image(image_prompt, image_path, aspect_ratio="16:9")
     
     if generated_image_path:
-        # Resize Image to 800px width
-        try:
-            from PIL import Image
-            with Image.open(generated_image_path) as img:
-                target_width = 800
-                # Calculate height to maintain aspect ratio
-                w_percent = (target_width / float(img.size[0]))
-                h_size = int((float(img.size[1]) * float(w_percent)))
-                
-                # Resize using LANCZOS filter for high quality
-                img = img.resize((target_width, h_size), Image.Resampling.LANCZOS)
-                
-                # Save resized image
-                img.save(generated_image_path)
-                print(f"Resized image to {target_width}x{h_size}")
-        except Exception as e:
-            print(f"Warning: Failed to resize image: {e}")
-
         # Re-save the file (without inserting image into content)
         save_to_file(title, content, args.keyword)
         print(f"Hero image generated: {image_filename}")
