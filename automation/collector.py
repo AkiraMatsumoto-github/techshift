@@ -21,6 +21,9 @@ DEFAULT_SOURCES = {
     "lnews": "https://www.lnews.jp/feed/",
     "logistics_today": "https://www.logi-today.com/feed",
     "logi_biz": "https://online.logi-biz.com/feed/",
+    "the_loadstar": "https://theloadstar.com/feed/",
+    "logistics_manager_uk": "https://www.logisticsmanager.com/feed/",
+    "supply_chain_asia": "https://supplychainasia.org/feed/",
 }
 
 def fetch_rss(url, source_name, days=None, hours=None):
