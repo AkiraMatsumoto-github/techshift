@@ -30,6 +30,17 @@
     - `--keyword`: ターゲットキーワード
     - `--type`: 記事タイプ (`know`, `buy`, `do`, `news`, `global`)
 
+### `generate_weekly_summary.py`
+- **役割**: 週間サマリー記事の自動生成
+- **機能**:
+    - 直近1週間の記事をWordPressから全文取得
+    - 業界動向を構造化・抽象化してサマリー記事を生成
+    - 内部リンクを豊富に含んだ「インデックス記事」として機能
+    - ローカルへのMDファイル保存およびWordPressへの投稿
+- **引数**:
+    - `--days`: 遡る日数（デフォルト: 7）
+    - `--dry-run`: 投稿せずにローカル生成のみ行う
+
 ### `batch_generate_2025.py`
 - **役割**: 2025年のSEOターゲットキーワードリストに基づいた一括生成
 - **機能**: Defines markdown list (`seo_target_keywords_2025.md`) からキーワードを読み込み、順次 `generate_article.py` を実行します。

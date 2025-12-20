@@ -140,7 +140,7 @@ class WordPressClient:
             print(f"Error fetching/creating tag {slug}: {e}")
             return None
 
-    def get_posts(self, limit=10, category=None, tag=None, status="publish"):
+    def get_posts(self, limit=10, category=None, tag=None, status="publish", after=None):
         """
         Retrieve recent posts from WordPress.
         
@@ -149,6 +149,7 @@ class WordPressClient:
             category: Filter by category ID (int)
             tag: Filter by tag ID (int)
             status: Filter by post status (default: "publish")
+            after: ISO 8601 date string to filter posts published after this date
             
         Returns:
             List of posts (dict) or None if error
@@ -167,6 +168,8 @@ class WordPressClient:
                 params["categories"] = category
             if tag:
                 params["tags"] = tag
+            if after:
+                params["after"] = after
                 
             response = requests.get(url, params=params, auth=self.auth)
             response.raise_for_status()
