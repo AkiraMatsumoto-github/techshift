@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import base64
+import json
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -811,6 +812,72 @@ class GeminiClient:
                 "summary": "最新の物流トレンドを解説しました。詳細はこちらをチェック！",
                 "hashtags": ["#LogiShift", "#物流"]
             }
+
+    def check_duplication(self, new_title, new_summary, existing_titles):
+        """
+        Check if a new article title semantically matches any existing titles.
+        
+        Args:
+            new_title: The title of the potential new article
+            new_summary: The summary of the potential new article
+            existing_titles: List of existing article titles (WP posts + currently generated)
+            
+        Returns:
+            The matching existing title if duplicate found, or None.
+        """
+        if not existing_titles:
+            return None
+            
+        # Optimization: Don't check against massive lists if unnecessary.
+        # But for now, we assume existing_titles is reasonably sized (e.g., < 50).
+        
+        prompt = f"""
+        You are a duplicate content detector for a logistics news site.
+        Determine if the "New Article" covers the **same specific news topic** as any of the "Existing Articles".
+        
+        Rule:
+        - Return the EXACT title of the existing article ONLY if they are about the same specific news event or announcement.
+        - If the new article is just a general topic match (e.g. both are about "RFID") but different specific news, return "None".
+        - If the new article is a "Summary" or "Compilation" and the existing one is a single news, they are different -> return "None".
+        - Different companies doing similar things are DIFFERENT -> return "None".
+        - Same company doing the same thing (reported by different sources) are DUPLICATES -> return the existing title.
+        
+        New Article:
+        Title: "{new_title}"
+        Summary: "{new_summary}"
+        
+        Existing Articles:
+        {json.dumps(existing_titles, ensure_ascii=False, indent=2)}
+        
+        Output JSON format:
+        {{
+            "is_duplicate": true/false,
+            "duplicate_of": "Exact Title of Existing Article" (or null if false),
+            "reason": "Brief explanation"
+        }}
+        """
+        
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-2.0-flash-exp',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            result = json.loads(response.text)
+            
+            if result.get("is_duplicate"):
+                print(f"Duplicate detected! '{new_title}' is duplicate of '{result.get('duplicate_of')}'")
+                print(f"Reason: {result.get('reason')}")
+                return result.get("duplicate_of")
+            
+            return None
+            
+        except Exception as e:
+            print(f"Duplication check failed: {e}")
+            return None
 
 if __name__ == "__main__":
     # Test generation

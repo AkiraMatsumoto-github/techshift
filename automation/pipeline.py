@@ -72,6 +72,8 @@ def main():
     from automation.url_reader import extract_content
     from automation.summarizer import summarize_article
     from automation.classifier import ArticleClassifier
+    from automation.wp_client import WordPressClient
+    from automation.gemini_client import GeminiClient
     
     collected_articles = []
     if args.hours:
@@ -115,9 +117,27 @@ def main():
     
     # Schedule logic removed - defaulting to immediate publish
     
-    # Initialize Classifier
+    # Initialize Classifier & Clients
     classifier = ArticleClassifier()
-    
+    gemini_client = GeminiClient()
+    wp_client = WordPressClient()
+
+    # Fetch existing posts for deduplication
+    print("Fetching recent posts for deduplication check...")
+    existing_titles = []
+    try:
+        # Fetch more posts to be safe, e.g., last 30
+        recent_posts = wp_client.get_posts(limit=30, status="publish")
+        if recent_posts:
+            existing_titles = [p['title']['rendered'] for p in recent_posts]
+            print(f"Loaded {len(existing_titles)} existing post titles.")
+        else:
+            print("No existing posts found or failed to fetch.")
+    except Exception as e:
+        print(f"Warning: Failed to fetch existing posts: {e}")
+
+    generated_titles_this_run = []
+
     for article in high_score_articles:
         if count >= args.limit:
             break
@@ -125,6 +145,21 @@ def main():
         print(f"Generating article for: {article['title']}")
         print(f"Score: {article['score']}")
         print(f"Reason: {article['reasoning']}")
+        
+        # --- Deduplication Check ---
+        print("Checking for duplicates...")
+        # Combine existing WP titles and locally processed titles
+        comparison_pool = existing_titles + generated_titles_this_run
+        
+        duplicate_of = gemini_client.check_duplication(article['title'], article.get('summary', ''), comparison_pool)
+        
+        if duplicate_of:
+            print(f"SKIP: Duplicate detected! '{article['title']}' is a duplicate of '{duplicate_of}'")
+            continue
+            
+        print("No duplicate found. Proceeding...")
+        generated_titles_this_run.append(article['title'])
+        # ---------------------------
         
         # Determine Type
         source = article.get("source", "")
