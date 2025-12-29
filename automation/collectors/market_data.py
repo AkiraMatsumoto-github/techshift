@@ -20,6 +20,7 @@ ASSETS = {
         {"symbol": "^NSEI", "name": "Nifty 50", "region": "IN"},
         {"symbol": "000001.SS", "name": "Shanghai Comp", "region": "CN"},
         {"symbol": "^JKSE", "name": "IDX Composite", "region": "ID"}, # Indonesia
+        {"symbol": "^VIX", "name": "VIX", "region": "Global"}, # Volatility Index
     ],
     "commodities": [
         {"symbol": "GC=F", "name": "Gold", "region": "Global"},

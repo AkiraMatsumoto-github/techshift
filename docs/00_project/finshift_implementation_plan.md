@@ -8,7 +8,8 @@ Logishiftの既存資産をベースに、金融メディア特有の機能を�
 - **System Architecture**: [system_architecture.md](../01_architecture/system_architecture.md) - 詳細なシステム構成図とデータフロー
 - **Site Map**: [sitemap.md](../01_architecture/sitemap.md) - URL設計とカテゴリ構造
 - **Wireframes**: [docs/02_design/wireframes/](../02_design/wireframes/) - モバイルファースト画面設計一式
-- **Weekly Summary Spec**: [weekly_summary_feature.md](../02_design/weekly_summary_feature.md) - 週次集計機能の仕様
+- **Weeky Summary Spec**: [weekly_summary_feature.md](../03_automation/weekly_summary_feature.md) - 週次集計機能の仕様
+- **Automation Scripts**: [python_scripts_overview.md](python_scripts_overview.md) - 自動化スクリプト詳細
 - **Component Design**: [component_design.md](../02_design/component_design.md) - UIコンポーネント詳細
 
 ## 1. 決定・確認事項 (User Review Required)
@@ -65,11 +66,14 @@ finshift/ (Current Dir)
 - [x] **`market_data.py`**: 株価・指数データ (`yfinance`) および Risk Monitor用データ (1D/1W/1M変化率) の取得・保存 (JSON出力) 実装済み。
 
 #### [NEW] `analysis/` (AI分析)
-- **`scenario_generator.py`**: Gemini API用プロンプト。「ニュース事実」を入力し、「強気/弱気シナリオ」と「発生確率」を出力。
-- **`sentiment_analyzer.py`**: Fear & Greed Index等の数値化ロジック。
-
-#### [NEW] `tools/` (運用ツール)
+- [x] **`scenario_generator.py`**: Gemini API用プロンプト。「Main/Risk」の2軸シナリオと「アクションプラン」をJSON出力するロジック実装済み。
+    設計書：- **AI Scenario Logic**: [ai_scenario_logic.md](../02_design/ai_scenario_logic.md) - シナリオ生成ロジック設計
+- [x] **`sentiment_analyzer.py`**: VIX, S&P500 Momentum (from market_data) とニュースヘッドライン（AI分析）を組み合わせた「FinShift Sentiment Index」算出ロジック実装済み。
+    設計書：- **Sentiment Analysis Logic**: [sentiment_analysis_logic.md](../02_design/sentiment_analysis_logic.md) - 独自指標の設計意図とユーザー価値
+### 2.3. Phase 3: Operation Tools (Next Step)
+#### [PLANNED] `tools/` (運用ツール)
 - **`batch_generate_2025.py`**: SEOキーワードリストに基づく記事一括生成スクリプト（手動実行用）。
+- **`keyword_list.csv`**: ストック記事用キーワード定義。
 
 
 #### [MODIFY] `pipeline.py` (実行管理)
