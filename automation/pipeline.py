@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LogiShift Automation Pipeline
+FinShift Automation Pipeline
 
 Orchestrates the flow:
 1. Collection (collector.py)
@@ -67,11 +67,11 @@ def main():
     
     # Import modules directly
     sys.path.append(os.path.dirname(base_dir))
-    from automation.collector import fetch_rss, DEFAULT_SOURCES
-    from automation.scorer import score_article, score_articles_batch
-    from automation.url_reader import extract_content
+    from automation.collectors.collector import fetch_rss, DEFAULT_SOURCES
+    from automation.analysis.scorer import score_article, score_articles_batch
+    from automation.collectors.url_reader import extract_content
     from automation.summarizer import summarize_article
-    from automation.classifier import ArticleClassifier
+    from automation.analysis.classifier import ArticleClassifier
     from automation.wp_client import WordPressClient
     from automation.gemini_client import GeminiClient
     
@@ -222,11 +222,15 @@ def main():
         generated_titles_this_run.append(article['title'])
         # ---------------------------
         
-        # Determine Type
-        source = article.get("source", "")
-        # Use dynamic classification
-        article_type = classifier.classify_type(article['title'], article['summary'], source)
-        print(f"Type: {article_type}")
+        # Determine Category & Type
+        classification = classifier.classify_article(article['title'], article['summary'])
+        category_slug = classification.get('category', 'market-analysis')
+        
+        # Map Category to Type
+        # Direct mapping for FinShift
+        article_type = category_slug
+            
+        print(f"Category: {category_slug} -> Type: {article_type}")
         
         # Generate keyword
         keyword = article['title']
@@ -235,11 +239,13 @@ def main():
         cmd = [
             sys.executable, os.path.join(base_dir, "generate_article.py"),
             "--keyword", keyword,
-            "--type", article_type
+            "--type", article_type,
+            "--category", category_slug
         ]
         
         # News/Global articles: Context-based generation (URL reading + summarization)
-        if article_type in ["news", "global"]:
+        # All FinShift news-based types should use context
+        if article_type in ["news", "global", "market-analysis", "featured-news", "strategic-assets"]:
             print("\n--- Context-based generation (URL reading + summarization) ---")
             
             try:

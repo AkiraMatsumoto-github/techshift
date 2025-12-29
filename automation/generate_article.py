@@ -7,13 +7,13 @@ from datetime import datetime
 try:
     from automation.gemini_client import GeminiClient
     from automation.wp_client import WordPressClient
-    from automation.classifier import ArticleClassifier
+    from automation.analysis.classifier import ArticleClassifier
     from automation.internal_linker import InternalLinkSuggester
 except ImportError:
     import gemini_client
     from gemini_client import GeminiClient
     from wp_client import WordPressClient
-    from classifier import ArticleClassifier
+    from analysis.classifier import ArticleClassifier
     from internal_linker import InternalLinkSuggester
 
 def parse_article_content(text):
@@ -90,10 +90,11 @@ keyword: {keyword}
 def main():
     parser = argparse.ArgumentParser(description="Generate and post an article to WordPress.")
     parser.add_argument('--keyword', type=str, required=True, help='Keyword for the article')
-    parser.add_argument('--type', type=str, default='know', choices=['know', 'buy', 'do', 'news', 'global'], help='Article type')
+    parser.add_argument('--type', type=str, default='market-analysis', choices=['market-analysis', 'featured-news', 'strategic-assets', 'investment-guide', 'news', 'global'], help='Article type')
     parser.add_argument('--dry-run', action='store_true', help='Generate content but do not post to WordPress')
     parser.add_argument('--schedule', type=str, help='Schedule date (YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS)')
     parser.add_argument('--context', type=str, help='Article context for News/Global articles (JSON string, optional)')
+    parser.add_argument('--category', type=str, help='Article category slug (e.g., market-analysis, featured-news)')
     
     args = parser.parse_args()
     
@@ -218,7 +219,7 @@ Select the most relevant ones (if any) and include them in the article using sta
 
     # 2. Generate Content
     print("Generating content with Gemini...")
-    generated_text = gemini.generate_article(args.keyword, article_type=args.type, context=context, extra_instructions=extra_instructions)
+    generated_text = gemini.generate_article(args.keyword, article_type=args.type, context=context, extra_instructions=extra_instructions, category=args.category)
     
     if not generated_text:
         print("Failed to generate content.")
@@ -337,7 +338,10 @@ Select the most relevant ones (if any) and include them in the article using sta
                     category_id = [cat_id]
                     print(f"Resolved Category: {cat_slug} -> {cat_id}")
             
-            t_slugs = classification.get("industry_tags", []) + classification.get("theme_tags", []) + classification.get("region_tags", [])
+            t_slugs = classification.get("tags", [])
+            # Fallback for legacy classifier if needed, but we are switching to new one
+            if not t_slugs:
+                 t_slugs = classification.get("industry_tags", []) + classification.get("theme_tags", []) + classification.get("region_tags", [])
             for t_slug in t_slugs:
                 t_id = wp.get_tag_id(t_slug)
                 if t_id:
@@ -447,11 +451,12 @@ Select the most relevant ones (if any) and include them in the article using sta
                             post_text = f"【新着記事】\n{sns_content_data.get('hook', optimized_title)}\n\n"
                             post_text += f"{sns_content_data.get('summary', '')}\n\n"
                             
+                            # Add Link BEFORE hashtags
+                            post_text += f"👇詳細はこちら\n{result.get('link')}\n\n"
+                            
                             tags = sns_content_data.get('hashtags', [])
                             if tags:
-                                post_text += " ".join(tags) + "\n\n"
-                                
-                            post_text += result.get('link')
+                                post_text += " ".join(tags)
                             
                             print("--------------------------------------------------")
                             print(f"Posting to X:\n{post_text}")
@@ -474,37 +479,7 @@ Select the most relevant ones (if any) and include them in the article using sta
 
 
 
-def save_to_file(title, content, keyword):
-    """Save the article to a local markdown file."""
-    import os
-    
-    # Create directory if not exists
-    output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        
-    # Format filename: YYYY-MM-DD_keyword.md
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    safe_keyword = re.sub(r'[\\/*?:"<>| ]', '_', keyword)
-    filename = f"{date_str}_{safe_keyword}.md"
-    filepath = os.path.join(output_dir, filename)
-    
-    # Add frontmatter
-    file_content = f"""---
-title: {title}
-date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-keyword: {keyword}
----
 
-{content}
-"""
-    
-    try:
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(file_content)
-        print(f"Saved local copy to: {filepath}")
-    except Exception as e:
-        print(f"Warning: Failed to save local file: {e}")
 
 if __name__ == "__main__":
     main()

@@ -60,29 +60,30 @@ finshift/ (Current Dir)
 ### 2.2. Python Automation 環境 (`/automation`)
 金融メディア用のデータ収集・分析モジュールを追加します。
 
-#### [NEW] `collectors/` (データ収集)
-- [x] **`collector.py`**: RSSフィードからのヘッドライン収集（旧名維持）。Yahoo Finance (Global/JP), CNBC, SCMP, Mint, Jakarta Post, Crypto等のフィード定義実装済み。
-- [x] **`url_reader.py`**: 特定サイトの本文抽出・スクレイピング（旧名維持）。金融サイト (Yahoo, CNBC, 36Kr, Economic Times等) の構造に対応。RSS Summaryによるフォールバック実装済み。
-- [x] **`market_data.py`**: 株価・指数データ (`yfinance`) および Risk Monitor用データ (1D/1W/1M変化率) の取得・保存 (JSON出力) 実装済み。
+#### [COMPLETED] `collectors/` (データ収集)
+- [x] **`collector.py`**: RSSフィードからのヘッドライン収集。Yahoo Finance (Global/JP), CNBC, 36Kr等を追加済み。
+- [x] **`url_reader.py`**: 特定サイトの本文抽出・スクレイピング。RSS Summaryフォールバック実装済み。
+- [x] **`market_data.py`**: 株価・指数データ (`yfinance`) および Risk Monitor用データ取得実装済み。
 
-#### [NEW] `analysis/` (AI分析)
-- [x] **`scenario_generator.py`**: Gemini API用プロンプト。「Main/Risk」の2軸シナリオと「アクションプラン」をJSON出力するロジック実装済み。
-    設計書：- **AI Scenario Logic**: [ai_scenario_logic.md](../02_design/ai_scenario_logic.md) - シナリオ生成ロジック設計
-- [x] **`sentiment_analyzer.py`**: VIX, S&P500 Momentum (from market_data) とニュースヘッドライン（AI分析）を組み合わせた「FinShift Sentiment Index」算出ロジック実装済み。
-    設計書：- **Sentiment Analysis Logic**: [sentiment_analysis_logic.md](../02_design/sentiment_analysis_logic.md) - 独自指標の設計意図とユーザー価値
+#### [COMPLETED] `analysis/` (AI分析)
+- [x] **`scenario_generator.py`**: Gemini API用プロンプト。「Main/Risk」2軸シナリオ生成ロジック実装済み。
+- [x] **`sentiment_analyzer.py`**: VIX, S&P500 Momentum + ニュース感情分析による「FinShift Sentiment Index」実装済み。
+- [x] **`scorer.py`**: FinShift専用スコアリングロジック（スイングトレード適合性）実装済み。
+- [x] **`classifier.py`**: FinShiftタクソノミーへの自動分類＆記事タイプ自動判定ロジック実装済み。
 ### 2.3. Phase 3: Operation Tools (Next Step)
 #### [PLANNED] `tools/` (運用ツール)
 - **`batch_generate_2025.py`**: SEOキーワードリストに基づく記事一括生成スクリプト（手動実行用）。
 - **`keyword_list.csv`**: ストック記事用キーワード定義。
 
 
-#### [MODIFY] `pipeline.py` (実行管理)
-- **ハイブリッド投稿戦略 (SEO対策)**:
-    1. **Daily Briefing (Daily Flow)**:
+#### [COMPLETED] `pipeline.py` (実行管理)
+- [x] **Orchestration**: Collection -> Scoring -> Classification -> Generation -> WordPress Posting 実装済み。
+- [x] **ハイブリッド投稿戦略 (SEO対策)**:
+    1. **Daily Briefing (Daily Flow)**: [x] Implemented
         - 地域ごとの市況まとめ記事。1日1回生成。
         - ターゲット: リピーター、日々の市況確認。「日付 + インド株」等の検索狙い。
-    2. **Featured News (Stock Content)**:
-        - スコアリングで **閾値（例: 80点）を超えた重要ニュース** は、別途「個別記事」としても生成。
+    2. **Featured News (Stock Content)**: [x] Implemented
+        - スコアリングで **閾値（例: 80点）を超えた重要ニュース** は、別途「個別記事」としても生成（`featured-news` カテゴリ）。
         - ターゲット: 特定銘柄指名買い検索（例: "Tata Motors 業績", "中国 不動産対策"）。
         - デイリー記事内に個別記事への内部リンクを自動生成し、回遊性を高める。
     3. **Long-tail SEO (Manual Asset)**:
@@ -94,53 +95,76 @@ finshift/ (Current Dir)
         - 直近1週間の「地域別デイリー記事」やニュース記事の内容を集計し、翌週の市場展望をまとめる。
         - 「先週の振り返り」+「翌週の注目イベント/シナリオ」の構成。
 
-- 実行コマンド例: `python pipeline.py --region india --mode daily` (まとめ) / `--mode news` (個別)
+- [x] **Context-based Generation**: `news` タイプの記事に対し、URL本文を読み込んで要約・コンテキスト化する処理を実装済み。
+- [x] **Optimization**: カテゴリに基づく記事タイプ自動判定ロジックの実装（`classifier.py`連携）。
 
-#### [NEW] Workflows (地域別実行)
-- RSS一括取得・スコアリング方式（Logishift型）ではなく、**国ごとのデイリー・ブリーフィング**を目指します。
-- **Phase 1 対象地域**: 米国、中国、インド、**日本、インドネシア**（これら5地域を初期実装）。
-- 将来的には欧州、ベトナムなども同様の仕組みで追加可能。
-- **`workflows/us_daily.yml`**: 米国市場 (NY Close後)
-- **`workflows/china_daily.yml`**: 中国市場 (CST 終了後)
-- **`workflows/india_daily.yml`**: インド市場 (IST 終了後)
-- **`workflows/japan_daily.yml`**: 日本市場 (大引け後)
-- **`workflows/indonesia_daily.yml`**: インドネシア市場 (JKT 終了後)
-- **`workflows/market_ticker.yml`**: **[NEW] Risk Monitor更新用**
-    - 実行頻度: 20分おき (毎時 00, 20, 40分)。
-    - 動作: `market_data.py` を実行し、主要資産の1D/1W/1M騰落率をWordPressにPush。
+---
 
-### 2.3. WordPress テーマ開発 (`/themes`)
+## 3. 残タスク・開発計画 (Phase 3: Refinement & Optimization)
+
+### 3.1. Prompt Engineering & Quality Improvement
+現状のプロンプトで記事生成は可能ですが、より高品質な「金融アナリスト」記事にするための改善が必要です。
+特に「Daily Briefing（市況まとめ）」と「Featured News（個別深掘り）」で構成を明確に分けます。
+
+- [x] **プロンプト詳細化 & 分離 (4カテゴリ制)**:
+    - **Daily Briefing用 (market-analysis)**: 複数のニュースを統合し、その日の市場全体の流れ（Trend）を解説。
+    - **Featured News用 (featured-news)**: 1つの重要ニュースを深掘りし、特定銘柄への影響（Impact）を分析。
+    - **Strategic Assets用 (strategic-assets)**: 仮想通貨・コモディティ特有の「テクニカル分析」「半減期・需給」等の要素を重視した分析構成。
+    - **Investment Guide用 (investment-guide)**: 初心者向け。「〜とは」「〜の買い方」等の教育的（Educational）な構成。
+    - 共通: 「専門用語の適切な使用」「煽りすぎない冷静なトーン」の徹底。
+- [ ] **JSON Output Stability**: `classifier.py` 等の戻り値をより堅牢にする。
+
+### 3.2. Pipeline Optimization
+- [ ] **Parallel Processing**: 記事のスコアリング（`scorer.py`）やスクレイピング（`url_reader.py`）の並列化（`ThreadPoolExecutor`導入）。
+- [ ] **Error Handling**: スクレイピング失敗時の再試行ロジックやレート制限対策。
+
+### 3.3. Frontend Integration (Theme Collaboration)
+Automation側で生成したデータを、WordPressテーマ側でどう表示するか（連携部分）。
+- [ ] **Sentiment Widget**: `sentiment_analyzer.py` の結果を WP Options API に POST する機能の実装。
+- [ ] **Scenario Summary**: 記事生成時に「3行まとめ」を作成し、カスタムフィールドに保存する処理の確認。
+- [ ] **Market Ticker Workflow**: `market_data.py` を20分おきに回すワークフローの設定。
+
+
+### 3.4. Workflow Setup (GitHub Actions)
+- [ ] **Daily Workflows**: 国ごとのデイリー・ブリーフィングの定期実行設定。
+    - `workflows/us_daily.yml`: 米国市場 (NY Close後)
+    - `workflows/china_daily.yml`: 中国市場 (CST 終了後)
+    - `workflows/india_daily.yml`: インド市場 (IST 終了後)
+    - `workflows/japan_daily.yml`: 日本市場 (大引け後)
+    - `workflows/indonesia_daily.yml`: インドネシア市場 (JKT 終了後)
+- [ ] **Weekly Summary**: `workflows/weekly_summary.yml` (毎週日曜夜) の設定。
+- [ ] **Market Ticker**: `workflows/market_ticker.yml` (Risk Monitor更新用, 20分毎) の設定。
+
+### 3.5. WordPress Theme Integration (`/themes`)
+Automationと密接に連携するテーマ側の実装要件です。
+Phase 4での実装を予定していますが、Automation側のデータ出力仕様に関わるため記載します。
+
 #### [NEW] `themes/finshift/`
-- **デザインコンセプト**: "Financial Terminal" (Bloomberg/Reuters風)。ダークモード基調、情報密度高め。
+- **デザインコンセプト**: "Financial Terminal" (Bloomberg/Reuters風)。ダークモード基調、情報密度高め（High Data Density）。
 
 #### **A. フロントページ (`front-page.php`)**
-- **First View (Market Dashboard)**:
+- [ ] **First View (Market Dashboard)**:
     - **Global Ticker**: 主要指数（S&P500, Nasdaq, Nikkei, Nifty50, Shanghai Comp）のリアルタイムレート (TradingView Widget利用)。
     - **Market Sentiment**: Automationが集計した「本日の市場センチメント(Fear & Greed)」を表示。
-        - *Automation要件*: `wp_options` または専用CPTにセンチメント数値を保存する処理が必要。
-- **Daily Briefing Section**:
+        - *Automation要件*: `wp_options` または専用CPTにセンチメント数値を保存する処理。
+- [ ] **Daily Briefing Section**:
     - 各国（US, CN, IN, JP, ID）の「最新のデイリー記事」をカード表示。
     - 「今日のシナリオ」を要約表示（カスタムフィールド `scenario_summary` を利用）。
-- **Latest News Feed**:
+- [ ] **Latest News Feed**:
     - タブ切り替え（All / Stocks / Crypto / FX）。
 
 #### **B. 市場別ランディングページ (`page-market.php`)**
-- **Template Hierarchy**: `page-india.php`, `page-usa.php` 等、スラッグで分岐または共通テンプレートでクエリ制御。
-- **Components**:
+- [ ] **Template Hierarchy**: `page-india.php`, `page-usa.php` 等、スラッグで分岐または共通テンプレートでクエリ制御。
+- [ ] **Components**:
     - **Regional Chart**: その国の代表指数のTradingViewチャート (Large size)。
     - **Key Metrics**: PER, PBR, 配当利回りなどの国別平均指標（手動更新またはAutomationで取得）。
     - **Related Articles**: その地域タグ (`India`) が付いた記事のみを表示。
 
 #### **C. 記事詳細ページ (`single.php`)**
-- **Sidebar**:
+- [ ] **Sidebar**:
     - 関連銘柄のミニチャート表示（記事内の銘柄コード `TATA.NS` 等を自動検出してWidget化）。
     - *Automation要件*: 記事生成時に銘柄コードを抽出・タグ保存するロジック (`tags` or `custom_field`)。
 
-### 2.4. Automationへの追加要件 (Feedback from Theme Specs)
-テーマ側のリッチな表示を実現するために、以下のデータ保持ロジックが必要です：
-1.  **センチメント保存**: `automation/analysis/sentiment_analyzer.py` の結果を WP Options API に POST する機能。
-2.  **シナリオ要約**: 記事本文とは別に、トップページ表示用の「3行まとめ」を生成し、カスタムフィールド `scenario_summary` に保存。
-3.  **銘柄コード抽出**: 記事生成時に登場するティッカーシンボル（例: $NVDA, $TSLA）を抽出し、メタデータとして保存。
 
 ## 3. 検証計画 (Verification Plan)
 

@@ -389,3 +389,6 @@ function logishift_get_popular_posts_api( $request ) {
 
     return $data;
 }
+
+// Force enable Application Passwords for Local HTTP dev
+add_filter( 'wp_is_application_passwords_available', '__return_true' );

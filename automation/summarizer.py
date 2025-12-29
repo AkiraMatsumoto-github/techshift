@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Article Summarizer for LogiShift
+Article Summarizer for FinShift
 
-Summarizes article content and extracts key facts using Gemini API.
-Adds LogiShift perspective (DX Evangelist viewpoint).
+[USAGE ROLE]: Input Processing
+This script is used to summarize **EXTERNAL** source articles (from Web, RSS, etc.) *BEFORE* generation.
+The output (summary + key facts) is fed into the GeminiClient.generate_article() as 'context'.
 """
 
 import os
@@ -17,8 +18,8 @@ except ImportError:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from automation.gemini_client import GeminiClient
 
-SUMMARIZATION_PROMPT = """あなたは物流業界のDXエバンジェリスト「LogiShift編集長」です。
-以下の記事を要約し、LogiShift読者（物流担当者・経営層）向けに重要な情報を抽出してください。
+SUMMARIZATION_PROMPT = """あなたは金融メディア「FinShift」のシニア・マーケットアナリストです。
+以下の記事（外部ソース）を要約し、投資家にとって重要な「市場へのインパクト」を抽出してください。
 
 【元記事】
 タイトル: {title}
@@ -27,25 +28,24 @@ SUMMARIZATION_PROMPT = """あなたは物流業界のDXエバンジェリスト�
 【出力形式】
 以下のJSON形式で出力してください:
 {{
-  "summary": "記事の要約（300文字程度）。読者が「何が起きたか」「なぜ重要か」を理解できるように。",
+  "summary": "記事の要約（300文字程度）。事実関係（5W1H）を正確に。",
   "key_facts": [
-    "重要な数値（例: コスト削減率、導入企業数など）",
-    "固有名詞（企業名、製品名、技術名など）",
-    "主要な主張や結論"
+    "重要な数値（株価、決算数値、金利、騰落率など）",
+    "具体的な企業名・銘柄コード",
+    "市場の反応（織り込み済みか、サプライズか）"
   ],
-  "logishift_angle": "LogiShift視点のコメント（150文字程度）。DXエバンジェリストとして、この情報が日本の物流業界にどう影響するか、どう活かすべきかを語る。"
+  "finshift_view": "アナリストとしての見解（150文字程度）。この記事が「買い材料」なのか「売り材料」なのか、どのセクターに影響があるかを投資家目線でコメントする。"
 }}
 
 【注意事項】
-- key_factsは3〜5個程度に絞る
-- 数値は正確に記載する
-- logishift_angleは「ふーん」で終わらず、「やってみたい」と思わせる視点を
+- key_factsは投資判断に直結する数値を優先する
+- finshift_viewは「様子見」だけでなく、具体的なシナリオ（〜なら買い、など）を提示する
 """
 
 
 def summarize_article(content: str, title: str, model_name: str = "gemini-3-pro-preview") -> dict:
     """
-    Summarize article content and extract key facts.
+    Summarize article content and extract key facts for Context.
     
     Args:
         content: Article content
@@ -53,7 +53,7 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-pro-
         model_name: Gemini model to use
     
     Returns:
-        Dictionary with keys: summary, key_facts, logishift_angle
+        Dictionary with keys: summary, key_facts, finshift_view
     """
     print(f"Summarizing article: {title[:50]}...")
     
@@ -65,7 +65,7 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-pro-
         return {
             "summary": f"要約生成に失敗しました: {str(e)}",
             "key_facts": [],
-            "logishift_angle": "分析できませんでした。"
+            "finshift_view": "分析できませんでした。"
         }
     
     prompt = SUMMARIZATION_PROMPT.format(
@@ -101,14 +101,14 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-pro-
         return {
             "summary": f"要約生成に失敗しました: {str(e)}",
             "key_facts": [],
-            "logishift_angle": "分析できませんでした。"
+            "finshift_view": "分析できませんでした。"
         }
     except Exception as e:
         print(f"Error summarizing article: {e}")
         return {
             "summary": f"要約生成に失敗しました: {str(e)}",
             "key_facts": [],
-            "logishift_angle": "分析できませんでした。"
+            "finshift_view": "分析できませんでした。"
         }
 
 

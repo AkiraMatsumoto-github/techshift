@@ -79,11 +79,11 @@ class GeminiClient:
             print(f"Error generating content: {e}")
             return None
 
-    def generate_article(self, keyword, article_type="know", context=None, extra_instructions=None):
+    def generate_article(self, keyword, article_type="know", context=None, extra_instructions=None, category=None):
         """
-        Generate a full blog article in Markdown format based on the keyword and type.
+        Generate a full blog article in Markdown format based on the keyword and type (or category).
         """
-        print(f"Generating article for keyword: {keyword} (Type: {article_type})")
+        print(f"Generating article for keyword: {keyword} (Type: {article_type}, Category: {category})")
         
         context_section = ""
         if context:
@@ -92,299 +92,218 @@ class GeminiClient:
             The following external information is relevant to the topic. Use it to ensure accuracy and freshness.
             Summary: {context.get('summary', '')}
             Key Facts: {', '.join(context.get('key_facts', []))}
+            Analyst View: {context.get('finshift_view', '')}
             """
             
         prompts = {
-            "know": textwrap.dedent(f"""
-            {context_section}あなたは物流業界の専門家（SEOコンテンツライター）です。
-            以下のキーワードについて、読者の検索意図（インサイト）を深く満たす解説記事を執筆してください。
+            # --- FinShift Specific Prompts ---
             
-            キーワード: {keyword}
+            "market-analysis": textwrap.dedent(f"""
+            {context_section}あなたは金融市場のシニア・ストラテジスト（元ヘッジファンド運用者）です。
+            本日の市場ニュースを統合し、投資家向けの「市況分析（Daily Briefing）」を執筆してください。
             
-            ## ターゲット
-            - 物流業界の初心者〜中級者
-            - 業務効率化やコスト削減に課題を持つ現場リーダー、経営層
-            
-            ## 構成案
-            1. **導入**:
-               - 【共感】読者が抱える具体的な悩み（例: 「残業が減らない」「誤出荷が多い」）を提示
-               - 【解決】この記事を読むことでどう解決するかを明示
-            2. **基礎知識**: {keyword}とは何か？（図解を意識した分かりやすい説明）
-            3. **なぜ今重要なのか**: 2024年問題やDXの潮流など、業界背景と絡めて解説
-            4. **メリット・効果**: 導入/実施による具体的な変化（定量・定性）
-            5. **実践/導入のポイント**: 失敗しないための注意点やステップ
-            6. **まとめ**: 次のアクション（社内検討、資料収集など）
-            
-            ## 執筆ルール（SEO・品質）
-            - **共起語・関連語**: {keyword}に関連する専門用語や業界用語を自然に文中に盛り込むこと。
-            - **信頼性**: 可能であれば公的なデータ（国交省、業界団体など）や一般的な統計値に言及し、信頼性を高めること（架空のデータは禁止）。
-            - **可読性**:
-                - 一文は60文字以内を目安に短くする。
-                - 3行以上の長文は避け、適宜改行を入れる。
-                - 詳細な説明は箇条書きを活用する。
-            
-            ## フォーマット
-            - Markdown形式（適切な階層構造を使用）
-            - 3500文字程度
-            - **複雑な情報はMarkdownテーブルで整理する（スマホ表示崩れ防止のため、列数は最大3列、セル内は簡潔に）**
-            - **【厳守】テーブル内ではHTMLタグ禁止。改行は句読点で対応。**
-            
-            ## タイトル生成ルール
-            - **目的**: 検索結果でのクリック率（CTR）最大化とターゲット読者への訴求
-            - **文字数**: 32文字前後（スマホでの視認性考慮。最大40文字）
-            - **必須要素**:
-                1. **キーワード**: ターゲットキーワード「{keyword}」を可能な限り冒頭（左側）に配置する。
-                2. **ベネフィット**: 読者が得られるメリット（「基礎知識」「導入手順」「コスト削減」など）を明示する。
-                3. **ターゲット**: 誰に向けた記事か（「担当者向け」「初心者必見」）を含める。
-            
-            ## タイトル構成のヒント（あくまで例です。柔軟に発想してください）
-            - **疑問解決型**: {keyword}とは？物流担当者が知っておくべき導入メリットと選び方
-            - **完全ガイド型**: 【徹底解説】{keyword}の仕組みから導入手順までを完全網羅
-            - **ターゲット特化型**: 中小企業の倉庫担当者へ｜{keyword}で実現する業務効率化
-            
-            これらの要素を組み合わせ、検索意図（インサイト）に最も合致した魅力的なタイトルを作成してください。「〜について解説」という表現はなるべく避け、具体性を持たせてください。
-            ## 注意点
-            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
-            - **HTMLタグ（<br>, <p>, <div>など）は絶対に使用しないこと** 
-            """),
-            
-            "buy": textwrap.dedent(f"""
-            あなたは物流業界のDXコンサルタントです。
-            以下のキーワードに関連するソリューションの「失敗しない選び方」と比較記事を執筆してください。
-            
-            キーワード: {keyword}
+            キーワード/テーマ: {keyword}
             
             ## ターゲット
-            - システム導入や機器購入を検討中の決裁者、担当者
+            - 日々の市場動向をチェックし、短期〜中期の売買判断を行うスイングトレーダー
+            - 「なぜ動いたか」だけでなく「明日どうなるか」を知りたい個人投資家
             
             ## 構成案
-            1. **導入**: 選定の難しさに寄り添い、間違った選び方をした際のリスクを提示
-            2. **比較・選定の重要ポイント**: 
-               - 「価格」だけでなく「サポート体制」「拡張性」「現場の使いやすさ」など、プロ視点の選定軸を3〜4つ提示
-            3. **主要なタイプ分類**: 市場にある製品をタイプ別（例: クラウド型vsオンプレ型、大企業向vs中小向）に分類して解説
-            4. **メリット・デメリット比較**: それぞれのタイプの長所と短所を公平に比較
-            5. **自社に合った選び方**: 会社の規模や課題別のおすすめパターン
+            1. **Market Pulse (本日の結論)**:
+               - 本日の市場全体のムード（Risk-on / Risk-off）を一言で定義。
+               - 最も影響力のあったドライバー（材料）を端的に提示。
+            2. **Deep Dive (主要ニュースの深掘り)**:
+               - {keyword} に関するニュースの詳細分析。
+               - 単なる事実の羅列ではなく、「市場参加者がこれをどう解釈したか（織り込み度合い）」を分析。
+            3. **Key Levels (テクニカル視点)**:
+               - 関連指数（S&P500, 日経平均など）や銘柄の重要な価格帯（サポート/レジスタンス）に言及。
+            4. **Scenario (シナリオ)**:
+               - **Bull Case (強気)**: 上昇が続くための条件。
+               - **Bear Case (弱気)**: 下落リスクへの警戒点。
+            5. **Actionable Insights (投資家の行動)**:
+               - 「様子見」「押し目買い」「利益確定」など、具体的なスタンスの提案。
             
             ## 執筆ルール
-            - **比較表の質**: 単なる機能の有無だけでなく、「どんな企業に向いているか」が一目で分かるようにする。
-            - **中立性**: 特定の製品を過度に持ち上げず、デメリットも正直に伝えることで記事の信頼性を担保する。
+            - **トーン**: 冷静、客観的、プロフェッショナル。「〜だ。」「〜である。」の常体、または信頼感のある「です・ます」調（一貫性を保つこと）。
+            - **専門性**: 金融用語（タカ派/ハト派、ショートカバー、織り込み済み、RSIなど）を適切に使用し、玄人好みの内容にする。
+            - **データ重視**: 数値（株価、騰落率、金利、指数値）なしの曖昧な表現は禁止。
             
             ## フォーマット
             - Markdown形式
-            - 比較表（Markdownテーブル）必須
-            - **各製品の比較やメリット・デメリットは必ずテーブルで整理する**
-            - **テーブル作成時の注意: モバイルでの閲覧を考慮し、説明文は極力短く体言止め等を使用する。**
-            - **【重要】Markdownテーブル内では<br>タグや他のHTMLタグを一切使用禁止。改行が必要な場合は、セル内で自然な文章として記述する**
-            - 3500文字程度
-            
-            ## タイトル生成ルール
-            - **目的**: 比較検討層（Buyクエリ）の検索意図を満たし、記事への信頼感を醸成する
-            - **文字数**: 32文字前後（最大40文字）
-            - **必須要素**:
-                1. **キーワード**: 「{keyword}」を冒頭に配置。
-                2. **数字**: 「10選」「3つのポイント」など、具体的な数字を入れる。
-                3. **最新性**: 「2025年最新」「決定版」など、情報の鮮度をアピールする。
-            
-            ## タイトル構成のヒント（柔軟に組み合わせてください）
-            - **ランキング/選定型**: 【2025年最新】{keyword}おすすめ10選！価格・機能を徹底比較
-            - **失敗回避型**: 失敗しない{keyword}の選び方｜プロが教える3つの重要ポイント
-            - **目的特化型**: 小規模倉庫に最適なのは？{keyword}のタイプ別比較ガイド
-            
-            「〜について解説」などの弱い表現は避け、「〜選」「〜ガイド」「〜比較」など、情報を探している読者に刺さる言葉を選んでください。
-            ## 注意点
-            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
-            - **HTMLタグ（<br>, <p>, <div>など）は絶対に使用しないこと** 
-            """),
-            
-            "do": textwrap.dedent(f"""
-            あなたは物流業界のDXエバンジェリストです。以下のキーワードに関連する具体的な事例やノウハウ記事を執筆してください。
-            
-            キーワード: {keyword}
-            
-            ## ターゲット
-            - 現場改善を目指す倉庫管理者、実務担当者
-            
-            ## 構成案
-            1. **導入**: よくある現場の悩み（Before）
-            2. **解決策の提示**: {keyword}を活用した具体的な手法（What）
-            3. **実践プロセス**: どのように導入・実践するか（How）
-            4. **期待される効果**: 導入後の変化（After、定量・定性）
-            5. **まとめ**: 成功の秘訣
-            
-            ## フォーマット
-            - Markdown形式
-            - 具体的な数字やステップを含める
-            - **手順やBefore/Afterの比較はMarkdownテーブルを使用する**
-            - **Markdownテーブル内ではHTMLタグ（<br>など）を絶対に使用せず、シンプルなテキストのみを使用する**
-            - 3500文字程度
-            
-            ## タイトル生成ルール
-            - **目的**: 現場の課題解決（Doクエリ）を求めている読者に、解決策があることを提示する
-            - **文字数**: 32文字前後（最大40文字）
-            - **必須要素**:
-                1. **キーワード**: 「{keyword}」を含める。
-                2. **課題解決**: 「誤出荷防止」「コスト削減」など、具体的な効果をアピール。
-                3. **実践性**: 「事例あり」「手順公開」など、ノウハウが得られることを示す。
-            
-            ## タイトル構成のヒント（柔軟に発想してください）
-            - **Before/After型**: 誤出荷がゼロに！{keyword}を活用した検品フロー改善事例
-            - **ノウハウ型**: {keyword}で物流コストを20%削減した「3つの秘策」とは？
-            - **実践ガイド型**: 明日から使える！{keyword}の導入手順と運用マニュアル
-            
-            単なる解説ではなく、「どうすれば解決できるか」が伝わるアクティブな言葉を選んでください。
-            
-            ## 注意点   
-            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
-            """),
-            
-            "news": textwrap.dedent(f"""
-            {context_section}あなたは物流業界のニュースコメンテーターであり、SEOコンテンツライターです。
-            以下のキーワードに関するニュースやトレンドを、読者（物流関係者）の関心に強く訴求するように解説してください。
-            
-            キーワード: {keyword}
-            
-            ## ターゲット
-            - 業界動向をキャッチアップしたい経営層、現場リーダー
-            
-            ## 構成案
-            1. **導入**: 
-               - 【速報・インパクト】「今なぜ話題なのか」「業界にどんな衝撃があるか」を冒頭で端的に伝える（LEAD文）
-            2. **ニュースの背景・詳細**: 
-               - 事実関係を整理（5W1H）
-            3. **業界への具体的な影響**: 
-               - 運送、倉庫、メーカーなど、各プレイヤーへの影響
-            4. **LogiShiftの視点（独自考察）**: 
-               - 単なる事実の羅列ではなく、「今後どうなるか」「企業はどう動くべきか」の予測と提言
-            5. **まとめ**: 明日から意識すべきこと
-            
-            ## 執筆ルール
-            - **独自性**: 一般的なニュースサイトと差別化するため、「LogiShiftの視点」セクションでは独自の考察や予測を必ず入れること。
-            - **SEO**: トレンドキーワードに関連する複合語を自然に盛り込む。
-            - **信頼性**: 公式発表やデータがある場合は積極的に引用する。
-            
-            ## フォーマット
-            - Markdown形式
-            - **要点や時系列はMarkdownテーブルを使用して整理する（スマホで見やすいよう列数を絞る）**
-            - **【厳守】テーブル内ではHTMLタグ禁止。改行は句読点で対応。**
-            - 2500〜3000文字程度
-            
-            ## タイトル生成ルール
-            - **目的**: 検索結果（SERP）でのクリック率（CTR）最大化とSEO順位向上
-            - **文字数**: 32文字前後（スマホでの視認性考慮。最大40文字）
-            - **必須要素**:
-                1. **キーワード**: 「{keyword}」の主要な要素（英語の場合は日本語意訳）を必ず含める。可能な限り左側（冒頭）に配置する。
-                2. **ベネフィット/インサイト**: 読者がその記事を読むメリット（「3つの対策」「影響まとめ」など）や、興味を惹く要素（「なぜ〜なのか？」）を入れる。
-            - **禁止事項**: 
-                - 「{keyword}について解説」のような単調な直訳調タイトル。
-                - 記事内容と乖離した釣りタイトル。
-            
-            ## タイトル構成のヒント（あくまで例です。これに縛られず最適なタイトルを考案してください）
-            - **疑問提起型**: 物流2024年問題｜なぜ運送会社の倒産が急増しているのか？
-            - **網羅・まとめ型**: 【徹底解説】トラックGメンとは？荷主が知っておくべき3つの対策
-            - **速報・トレンド型**: Amazonの物流戦略に異変｜自動化の次に来る「新たな波」とは
-            - **ターゲット明示型**: 中小運送会社の経営者へ｜今すぐ始めるべきDXの第一歩
-            
-            これらの要素を組み合わせ、そのニュースやトピックに最も適した、クリックしたくなるタイトルを生成してください。
-            ## 注意点
-            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
-            """),
-            
-            "global": textwrap.dedent(f"""
-            {context_section}あなたは物流業界の海外トレンドウォッチャー（SEOライター）です。
-            以下のキーワードに関連する海外の最新事例やトレンドを、日本の物流企業が参考にできる形で解説してください。
-            
-            キーワード: {keyword}
-            
-            ## ターゲット
-            - イノベーションを求める経営層、新規事業担当者
-            - 海外の先進事例からヒントを得たいDX推進担当者
-            
-            ## 構成案
-            1. **導入**: 
-               - 【Why Japan?】なぜ今、日本企業がこの海外トレンドを知る必要があるのかを提示
-            2. **海外の最新動向**: 米国・中国・欧州などで何が起きているか（具体的な市場データなど）
-            3. **先進事例（ケーススタディ）**: 
-               - 特定の企業やプロジェクトを取り上げ、成功要因を深掘り
-            4. **日本への示唆**: 
-               - 海外の事例を日本国内に適用する場合のポイントや障壁
-               - 日本企業が今すぐ真似できること
-            5. **まとめ**: 将来の展望
-            
-            ## 執筆ルール
-            - **具体性**: 国名、企業名、具体的な数字（ドル/元など）を出してリアリティを持たせる。
-            - **日本ローカライズ**: 単なる翻訳記事にせず、「日本だとどうなるか」という視点を必ず入れる（例: 「日本の商習慣とは異なるが...」）。
-            - **SEO**: 「海外物流」「物流DX 事例」などのキーワードで検索されることを意識。
-            
-            ## フォーマット
-            - Markdown形式
-            - **国別の比較や事例の一覧はMarkdownテーブルを使用する（スマホ最適化: 列数を絞る）**
-            - **【厳守】テーブル内ではHTMLタグ禁止。改行は句読点で対応。**
-            - 3500文字程度
-            
-            ## タイトル生成ルール
-            - **目的**: 日本の読者が「自分ごと」として捉え、クリックしたくなるタイトルの作成
-            - **文字数**: 32文字前後（最大40文字）
-            - **翻訳方針**: キーワード「{keyword}」が英語の場合は、直訳せず、その本質を表す日本語（意訳）をタイトルに組み込むこと。
-            - **視点**: 「海外の話」で終わらせず、「日本企業にとっての学び」「次に来るトレンド」という視点を盛り込む。
-            
-            ## タイトル構成のヒント（これらを参考に柔軟に発想してください）
-            - **権威性・実績**: 米国Walmartが採用！最新[技術名]の効果と導入事例
-            - **先進性・未来**: 「物流版Uber」の次はこれだ。中国で急拡大する[サービス名]の全貌
-            - **日本への示唆**: 日本未上陸の[キーワード]とは？2025年の物流トレンドを先取り
-            - **課題解決**: 誤出荷ゼロへ。欧州の物流現場で進む「人を使わない検品」の実態
-            
-            上記のヒントを参考に、ターゲット読者の好奇心を刺激するタイトルを作成してください。「〜について解説」という表現は避け、具体的で魅力的な言葉を選んでください。
-            ## 注意点
-            - 信頼感を与えるため自分から物流エバンジェリストですと名乗らないこと
+            - 3000文字程度
+            - **重要な数値データはMarkdownテーブルで整理する**
+            - HTMLタグ使用禁止
             """),
 
-            "weekly_summary": textwrap.dedent(f"""
-            {context_section}あなたは物流業界の専門メディア「LogiShift」の編集長です。
-            今週公開された以下の記事（タイトルと要約）をもとに、業界の動きを構造化・抽象化し、深い示唆（インサイト）を提供する「週間サマリー」を作成してください。
+            "featured-news": textwrap.dedent(f"""
+            {context_section}あなたは株式市場の専門アナリスト（Equity Analyst）です。
+            特定の重要ニュース（{keyword}）について、個別銘柄やセクターへの「インパクト」を深掘り分析する記事を執筆してください。
             
-            ## 対象期間
-            - 直近1週間
+            キーワード/対象銘柄: {keyword}
             
-            ## ターゲット読者
-            - 経営層、物流部門長、DX推進リーダー
-            - 単なるニュースの羅列ではなく、「その事象が業界にとって何を意味するのか」という深い解釈を求めている人
+            ## ターゲット
+            - その銘柄/セクターを既に保有している、または購入を検討している投資家
+            - ニュースの表面的な内容ではなく、「株価への具体的な影響」を知りたい層
             
             ## 構成案
-            1. **今週の潮流（The Weekly Macro View）**:
-               - 個別のニュースを俯瞰し、今週の物流業界が「どのようなフェーズにあったか」を抽象化して一言で定義する。（例：「AIの実装が『実験』から『実利』へシフトした1週間」など）
-               - その背景にある業界構造の変化について簡潔に触れる。
-            
-            2. **業界構造の変化と示唆（Key Movements & Insights）**:
-               - 記事を単にトピックごとに分類するのではなく、「業界のどのような構造的変化・動きか」という観点で2〜3つのまとまり（H2）を作る。
-               - **構成要素**:
-                 - **現象（What）**: 具体的にどのようなニュースがあったか（記事リンク必須）。
-                 - **深層（Why/So What）**: なぜその動きが起きているのか？そこから読み取れる業界の課題やチャンスは何か？読者はどう捉えるべきか？という「独自の示唆」を必ず加える。
-               - **記事リンク**: 関連する記事へのリンク（`[記事タイトル](URL)`）を文脈の中で自然に、かつ必ず埋め込むこと。
-            
-            3. **来週以降の視点（Strategic Outlook）**:
-               - 今週の動きを踏まえ、来週以降、読者が注目すべき具体的なポイントを提言する。
-               - 抽象的な話で終わらせず、「どの技術の進展を見るべきか」「どのプレイヤー（企業群）の動きを注視すべきか」「規制や市場環境はどう動くか」など、具体的な「ウォッチポイント」を提示する。
+            1. **Impact Summary (インパクト要約)**:
+               - このニュースが「買い材料」なのか「売り材料」なのか、短期/中長期の視点で結論を提示（例: 短期はポジティブだが長期的には懸念あり）。
+            2. **News Breakdown (ニュースの核心)**:
+               - 何が起きたか（What）、なぜ重要か（Why）。
+               - 決算数値、M&A、新製品発表などの事実関係を正確に記述。
+            3. **Valuation & Fundamentals (企業価値への影響)**:
+               - 業績（EPS、売上高）への貢献度予測。
+               - 競合他社との比較優位性の変化。
+            4. **Chart Analysis (テクニカル)**:
+               - 現在の株価位置（高値圏/安値圏）と、ニュースによるトレンド変化の可能性。
+            5. **Conclusion (投資判断)**:
+               - ターゲットプライスやエントリーのタイミングについての示唆。
+               - 具体的な「買い」推奨は避けつつ、判断材料を提供。
             
             ## 執筆ルール
-            - **思考の深さ**: 記事の要約で終わらせない。「つまり、これは〇〇という大きな流れの一部である」という構造化・抽象化を行うこと。
-            - **トーン＆マナー**: 知的で洞察に満ちたトーン。評論家にならず、実務家に寄り添った視点を持つ。
-            - **リンク（最重要）**: 
-                - **可能な限り多くの記事を紹介すること。** 少なくとも10記事以上への言及・リンクを目指す。
-                - 単にリスト化するのではなく、文脈の中で自然に複数の記事を引用する。（例：「A社（リンク）やB社（リンク）の事例に見られるように...」）
-                - すべての主張の根拠として、提供された記事へのリンクを使用すること。
+            - **客観性重視**: エモーショナルな煽りは厳禁。ロジックと数字で語る。
+            - **比較視点**: 同業他社（Peers）や過去の類似事例との比較を含めると良い。
             
             ## フォーマット
             - Markdown形式
-            - 記事リンク必須
-            - 記事量はしっかり語るため **4000〜5000文字程度** を目指す。
+            - 3000文字程度
+            - 財務データ等はテーブルを活用
+            - HTMLタグ使用禁止
+            """),
+
+            "strategic-assets": textwrap.dedent(f"""
+            {context_section}あなたは暗号資産（Crypto）およびコモディティ（Gold/Oil）の市場ストラテジストです。
+            以下のキーワードについて、テクニカル分析とマクロ経済環境を重視した分析記事を執筆してください。
             
-            ## タイトル生成ルール
-            - **フォーマット**: 【週間サマリー】MM/DD〜MM/DD｜[今週の最大の潮流・抽象化したテーマ]
-            - **例**: 【週間サマリー】12/13〜12/20｜「点」のDXから「線」の連携へ、物流構造改革の胎動
-            """)
+            キーワード/資産: {keyword}
+            
+            ## ターゲット
+            - ビットコイン、イーサリアム、ゴールド等をトレードするアクティブ投資家
+            - ボラティリティ（変動）を利益に変えたいスペキュレーター
+            
+            ## 構成案
+            1. **Asset Status (現在の局面)**:
+               - トレンド定義（上昇トレンド、レンジ、調整局面）。
+            2. **Macro Correlation (マクロ環境との相関)**:
+               - 米金利（Fed政策）、ドル指数（DXY）、株価指数との連動性を分析。
+               - 「デジタルゴールドとしてのBTC」や「インフレヘッジとしてのGold」などのナラティブ分析。
+            3. **On-chain / Supply Data (需給データ)**:
+               - ※仮想通貨の場合：ハッシュレート、ETFフロー、クジラ（大口）の動向。
+               - ※コモディティの場合：在庫統計、地政学リスク、生産コスト。
+            4. **Technical Setup (チャート分析)**:
+               - 重要な水平線、移動平均線、RSI/MACDなどのオシレーター分析。
+               - 具体的なアップサイド/ダウンサイドの目処。
+            5. **Strategy (トレード戦略)**:
+               - 短期的なエントリーポイントと損切り（Stop Loss）の目安。
+            
+            ## 執筆ルール
+            - **専門用語**: オンチェーンデータ、半減期、OI（建玉）、ファンディングレート等の専門用語を適切に使用。
+            - **リスク警告**: ボラティリティが高い資産であることを前提に、リスク管理の重要性を必ず添える。
+            
+            ## フォーマット
+            - Markdown形式
+            - 3000文字程度
+            - HTMLタグ使用禁止
+            """),
+
+            "investment-guide": textwrap.dedent(f"""
+            あなたは金融教育のプロフェッショナル（フィナンシャル・アドバイザー）です。
+            以下のキーワードについて、初心者〜中級者の投資家が正しく理解し、実践できるような「ガイド記事（Educational）」を執筆してください。
+            
+            キーワード: {keyword}
+            
+            ## ターゲット
+            - 投資を始めたばかりの初心者、または知識を体系化したい中級者
+            - 新しい手法（CFD、オプション、特定ツール）を学びたい人
+            
+            ## 構成案
+            1. **Introduction (導入)**:
+               - なぜ今、この知識（ツール/手法）を知っておく必要があるのか？
+               - 読者のメリット（利益向上、リスク低減）を提示。
+            2. **Basic Concept (基礎知識)**:
+               - {keyword} の定義。専門用語を使わず、例え話などを用いて平易に解説。
+            3. **How-to / Mechanism (仕組みとやり方)**:
+               - 具体的な手順、操作方法、計算式など。ステップバイステップで説明。
+            4. **Pros & Cons (メリット・デメリット)**:
+               - 良い面だけでなく、リスクや注意点（手数料、税金、損失リスク）を公平に解説。
+            5. **Best Practice (活用事例)**:
+               - 「こういう時に使うと効果的」という実践的なケーススタディ。
+            6. **Summary (まとめ)**:
+               - 復習と次のステップ。
+            
+            ## 執筆ルール
+            - **平易さ**: 難解な言い回しは避け、親しみやすい「ですので」「ましょう」調（です・ます）を使用。
+            - **図解意識**: 「以下の図のように〜」といった、図解を挿入しやすい構成にする（実際の画像生成は別プロセスだが、意識した文章にする）。
+            - **教育的価値**: 単なる情報羅列ではなく、「読者が自力で判断できるようになること」をゴールにする。
+            
+            ## フォーマット
+            - Markdown形式
+            - 3500文字程度
+            - 手順や比較はMarkdownテーブルで整理
+            - HTMLタグ使用禁止
+            """),
+
+            # --- Future / Weekly Summary (To be refined) ---
+            # "weekly_summary": textwrap.dedent(f"""
+            # {context_section}あなたは物流業界の専門メディア「LogiShift」の編集長です。
+            # 今週公開された以下の記事（タイトルと要約）をもとに、業界の動きを構造化・抽象化し、深い示唆（インサイト）を提供する「週間サマリー」を作成してください。
+            # 
+            # ## 対象期間
+            # - 直近1週間
+            # 
+            # ## ターゲット読者
+            # - 経営層、物流部門長、DX推進リーダー
+            # - 単なるニュースの羅列ではなく、「その事象が業界にとって何を意味するのか」という深い解釈を求めている人
+            # 
+            # ## 構成案
+            # 1. **今週の潮流（The Weekly Macro View）**:
+            #    - 個別のニュースを俯瞰し、今週の物流業界が「どのようなフェーズにあったか」を抽象化して一言で定義する。（例：「AIの実装が『実験』から『実利』へシフトした1週間」など）
+            #    - その背景にある業界構造の変化について簡潔に触れる。
+            # 
+            # 2. **業界構造の変化と示唆（Key Movements & Insights）**:
+            #    - 記事を単にトピックごとに分類するのではなく、「業界のどのような構造的変化・動きか」という観点で2〜3つのまとまり（H2）を作る。
+            #    - **構成要素**:
+            #      - **現象（What）**: 具体的にどのようなニュースがあったか（記事リンク必須）。
+            #      - **深層（Why/So What）**: なぜその動きが起きているのか？そこから読み取れる業界の課題やチャンスは何か？読者はどう捉えるべきか？という「独自の示唆」を必ず加える。
+            #    - **記事リンク**: 関連する記事へのリンク（`[記事タイトル](URL)`）を文脈の中で自然に、かつ必ず埋め込むこと。
+            # 
+            # 3. **来週以降の視点（Strategic Outlook）**:
+            #    - 今週の動きを踏まえ、来週以降、読者が注目すべき具体的なポイントを提言する。
+            #    - 抽象的な話で終わらせず、「どの技術の進展を見るべきか」「どのプレイヤー（企業群）の動きを注視すべきか」「規制や市場環境はどう動くか」など、具体的な「ウォッチポイント」を提示する。
+            # 
+            # ## 執筆ルール
+            # - **思考の深さ**: 記事の要約で終わらせない。「つまり、これは〇〇という大きな流れの一部である」という構造化・抽象化を行うこと。
+            # - **トーン＆マナー**: 知的で洞察に満ちたトーン。評論家にならず、実務家に寄り添った視点を持つ。
+            # - **リンク（最重要）**: 
+            #     - **可能な限り多くの記事を紹介すること。** 少なくとも10記事以上への言及・リンクを目指す。
+            #     - 単にリスト化するのではなく、文脈の中で自然に複数の記事を引用する。（例：「A社（リンク）やB社（リンク）の事例に見られるように...」）
+            #     - すべての主張の根拠として、提供された記事へのリンクを使用すること。
+            # 
+            # ## フォーマット
+            # - Markdown形式
+            # - 記事リンク必須
+            # - 記事量はしっかり語るため **4000〜5000文字程度** を目指す。
+            # 
+            # ## タイトル生成ルール
+            # - **フォーマット**: 【週間サマリー】MM/DD〜MM/DD｜[今週の最大の潮流・抽象化したテーマ]
+            # - **例**: 【週間サマリー】12/13〜12/20｜「点」のDXから「線」の連携へ、物流構造改革の胎動
+            # """)
         }
         
-        prompt = prompts.get(article_type, prompts["know"])
+        # Priority: Category -> Type -> Default
+        if category and category in prompts:
+            prompt = prompts[category]
+        else:
+            # Fallback for legacy types or missing category
+            type_map = {
+                "know": "investment-guide", 
+                "do": "investment-guide",
+                "buy": "investment-guide",
+                "news": "featured-news",
+                "global": "market-analysis"
+            }
+            mapped_cat = type_map.get(article_type, "market-analysis")
+            prompt = prompts[mapped_cat]
         
         if extra_instructions:
             prompt += f"\n\n{extra_instructions}\n"
@@ -417,15 +336,30 @@ class GeminiClient:
         - 目次を見ただけで内容が伝わる具体的な見出しにすること。
         
         例:
-        # WMS（倉庫管理システム）とは？導入メリットと選び方を物流担当者向けに徹底解説
-        
-        物流倉庫の現場で働く担当者や倉庫管理者の皆様なら...
-        
-        ## WMSとは何か？
-        
-        倉庫管理システム（WMS）は...
-        
-        ### WMSの主な機能
+        # 【決算速報】NVIDIA (NVDA) 3Q決算：AIブームは終わらない？市場予想を凌駕する「データセンター」の爆発的成長
+
+        ## 1. Executive Summary
+        11月20日に発表されたNVIDIAの第3四半期決算は、売上高・EPSともに市場コンセンサスを大幅に上回った。
+        特に注目すべきは、データセンター部門の売上が前年同期比+279%という驚異的な伸びを見せた点だ。これは、生成AIへの設備投資（CAPEX）が依然として加速傾向にあることを示唆している。
+
+        投資家にとっての結論はシンプルだ。**「AI半導体相場は第2章に入った」**。
+
+        ## 2. Key Metrics（主要数値）
+        今回の決算におけるハイライトは以下の通りである。
+
+        | 項目 | 結果 | 市場予想 | 前年同期比 |
+        | :--- | :--- | :--- | :--- |
+        | 売上高 | $18.12B | $16.18B | +206% |
+        | EPS (Non-GAAP) | $4.02 | $3.37 | +593% |
+        | データセンター売上 | $14.51B | $12.97B | +279% |
+
+        ## 3. シナリオ分析
+        ### Bull Case (強気シナリオ)
+        *   **新製品への期待:** 次世代GPU「H200」および「Blackwell」アーキテクチャへの移行がスムーズに進み、ASP（平均販売単価）が上昇する。
+        *   **中国規制の回避:** 中国向け特化チップの投入により、輸出規制の影響を最小限に留める。
+
+        ### Bear Case (弱気シナリオ)
+        *   **供給制約:** CoWoSパッケージング工程のボトルネックが解消されず、バックログ（受注残）の消化が遅れる。
         
         ...
         """)
@@ -509,14 +443,14 @@ class GeminiClient:
             return None
 
 
-    def generate_image_prompt(self, title, content_summary, article_type="know"):
+    def generate_image_prompt(self, title, content_summary, article_type="market-analysis"):
         """
         Generate an optimized English image prompt based on article title and content.
         
         Args:
             title: Article title
             content_summary: Brief summary or first paragraph of the article
-            article_type: Type of article (know, buy, do, news, global)
+            article_type: Type of article (market-analysis, featured-news, strategic-assets, investment-guide)
         
         Returns:
             English image prompt optimized for Imagen 3.0
@@ -525,11 +459,11 @@ class GeminiClient:
         You are an expert at creating image generation prompts for Imagen 3.0.
         
         Based on the following article information, create a detailed English image prompt that:
-        1. Captures the main theme and context of the article
-        2. Is specific and descriptive (not abstract)
-        3. Focuses on logistics/warehouse/supply chain context
-        4. Is photorealistic and professional
-        5. Avoids text, human faces, or complex diagrams
+        1. Captures the main theme and context of the article (Financial Markets, Investment, Economy)
+        2. Is specific and descriptive but metaphorical (e.g., Bull vs Bear, Digital Charts, Global Trade)
+        3. **Style**: Premium, High-tech, Financial Professional, Bloomberg/WallStreetJournal style.
+        4. **Lighting**: Cinematic, Cyberpunk (for Crypto/Tech) or Clean Corporate (for Stocks).
+        5. Avoids text, human faces, or complex diagrams.
         
         Article Title: {title}
         Article Type: {article_type}
@@ -551,41 +485,7 @@ class GeminiClient:
             # Fallback to simple prompt
             return f"Professional logistics warehouse scene related to {title}, photorealistic, high quality, 4k"
 
-    def classify_content(self, content):
-        """
-        Classify the article content into categories and tags.
-        """
-        prompt = textwrap.dedent(f"""
-        You are an expert content classifier for a logistics media site.
-        Analyze the following article content and classify it.
 
-        Content:
-        {content[:3000]}... (truncated)
-
-        Output JSON format:
-        {{
-            "category": "one of [warehouse-management, logistics-dx, material-handling, 2024-problem, cost-reduction, global-logistics]",
-            "industry_tags": ["list", "of", "relevant", "industries", "e.g.", "manufacturing", "retail", "ecommerce", "3pl-warehouse", "transportation"],
-            "theme_tags": ["list", "of", "relevant", "themes", "e.g.", "labor-shortage", "automation", "cost-reduction", "quality-improvement", "safety", "environment"]
-        }}
-        """)
-        
-        try:
-            response = self._retry_request(
-                self.client.models.generate_content,
-                model='gemini-3-pro-preview',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
-            )
-            import json
-            return json.loads(response.text)
-        except Exception as e:
-            print(f"Classification failed: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
 
     def generate_static_page(self, page_type):
         """
@@ -603,12 +503,12 @@ class GeminiClient:
             以下の情報を基に、日本の個人情報保護法に準拠したプライバシーポリシーを作成してください。
             
             【サイト情報】
-            - サイト名: LogiShift（ロジシフト）
-            - 運営者: LogiShift編集部
-            - 設立: 2025年11月
-            - 目的: 物流業界のDX推進・課題解決に関する情報提供
+            - サイト名: FinShift（フィンシフト）
+            - 運営者: FinShift編集部
+            - 設立: 2025年12月
+            - 目的: 金融市場の分析・投資情報の提供
             - 使用技術: Googleアナリティクス、Cookie
-            - お問い合わせ: info@logishift.jp
+            - お問い合わせ: info@finshift.jp
             
             ## 含めるべき項目
             1. 個人情報の取り扱いについて
@@ -616,47 +516,50 @@ class GeminiClient:
             3. 利用目的（サイト改善、統計分析等）
             4. 第三者提供（Googleアナリティクス等）
             5. Cookie・アクセス解析ツールについて
-            6. 個人情報の開示・訂正・削除について
-            7. お問い合わせ先
-            8. 制定日・改定日
+            6. 免責事項（投資助言業務ではない旨を明記）
+            7. 個人情報の開示・訂正・削除について
+            8. お問い合わせ先
+            9. 制定日・改定日
             
             ## 出力形式
             - Markdown形式で出力
             - 見出しはH2（##）とH3（###）を使用
             - 箇条書きや表を適宜使用
             - 法的に正確で、かつ読みやすい文章
-            - 最後に「制定日: 2025年11月1日」を記載
+            - 最後に「制定日: 2025年12月1日」を記載
             
             ## 注意点
             - 専門用語は分かりやすく説明
-            - ユーザーの権利を明確に記載
+            - **投資判断は自己責任**であるという免責を必ず含める
             - 連絡先を明記
             """),
             
             "about": textwrap.dedent("""
             あなたはコーポレートコミュニケーションの専門家です。
-            以下の情報を基に、LogiShiftの運営者情報ページを作成してください。
+            以下の情報を基に、FinShiftの運営者情報ページを作成してください。
             
             【サイト情報】
-            - サイト名: LogiShift（ロジシフト）
-            - 運営者: LogiShift編集部
-            - 設立: 2025年11月
-            - お問い合わせ: info@logishift.jp
+            - サイト名: FinShift（フィンシフト）
+            - 運営者: FinShift編集部
+            - 設立: 2025年12月
+            - お問い合わせ: info@finshift.jp
             
             【ミッション】
-            物流業界の課題解決とDX推進に貢献し、業界No.1のSEOメディアを目指す
+            個人投資家に「機関投資家レベルの洞察」を提供し、健全な資産形成をサポートする。
+            「情報の非対称性」を解消し、誰でもプロ並みの分析にアクセスできる世界を目指す。
             
             【主なコンテンツ】
-            - 物流コスト削減のノウハウ
-            - 最新テクノロジー（WMS, RFID, マテハンなど）の解説
-            - 2024年問題などの業界トレンド解説
-            - 物流DXの成功事例紹介
+            - 世界の市況速報・トレンド分析
+            - 決算速報と株価インパクト分析
+            - 暗号資産・コモディティの戦略的資産運用
+            - 投資教育・ツール活用ガイド
             
             【ターゲット読者】
-            企業の物流担当者、倉庫管理者、経営層
+            - スイングトレーダー、中長期投資家
+            - テクニカル分析・ファンダメンタルズ分析を学びたい個人投資家
             
             ## 含めるべき項目
-            1. LogiShiftについて（サイトの目的・ビジョン）
+            1. FinShiftについて（サイトの目的・ビジョン）
             2. 基本情報（サイト名、運営者、設立年、お問い合わせ先）をテーブル形式で
             3. ミッション・ビジョン
             4. 主なコンテンツカテゴリの紹介
@@ -667,18 +570,18 @@ class GeminiClient:
             - Markdown形式で出力
             - 見出しはH2（##）とH3（###）を使用
             - 基本情報はMarkdownテーブルで整理
-            - 親しみやすく、信頼感のある文章
-            - 物流業界への熱意が伝わる内容
+            - 信頼感があり、かつエネルギッシュな文章
+            - 金融市場への情熱が伝わる内容
             """),
             
             "contact": textwrap.dedent("""
             あなたはカスタマーサポートの専門家です。
-            以下の情報を基に、LogiShiftのお問い合わせページを作成してください。
+            以下の情報を基に、FinShiftのお問い合わせページを作成してください。
             
             【サイト情報】
-            - サイト名: LogiShift（ロジシフト）
-            - 運営者: LogiShift編集部
-            - お問い合わせ: info@logishift.jp
+            - サイト名: FinShift（フィンシフト）
+            - 運営者: FinShift編集部
+            - お問い合わせ: info@finshift.jp
             - 対応時間: 平日 10:00-18:00（土日祝日を除く）
             
             ## 含めるべき項目
@@ -687,7 +590,7 @@ class GeminiClient:
             3. 対応時間
             4. お問い合わせ内容の例（記事の内容、広告掲載、取材依頼など）
             5. 返信までの目安時間
-            6. 注意事項（個人情報の取り扱い、営業目的の問い合わせなど）
+            6. 注意事項（個人情報の取り扱い、投資相談は受け付けていない旨など）
             
             ## 出力形式
             - Markdown形式で出力
@@ -699,6 +602,7 @@ class GeminiClient:
             ## 注意点
             - メールアドレスは必ず記載
             - 対応時間を明記
+            - **個別の投資相談や推奨銘柄の問い合わせには回答できない**旨を明記
             - プライバシーポリシーへのリンクを案内（「詳しくは[プライバシーポリシー](/privacy-policy/)をご覧ください」）
             """)
         }
@@ -722,6 +626,10 @@ class GeminiClient:
     def generate_structured_summary(self, content):
         """
         Generate a structured JSON summary of the article for internal linking relevance.
+        
+        [USAGE ROLE]: Output Processing
+        This method is used *AFTER* generation to extract metadata from the **INTERNAL** article.
+        The result is saved in WordPress 'ai_structured_summary' field.
         """
         prompt = textwrap.dedent(f"""
         You are an expert content analyst. Analyze the following article and generate a structured summary in JSON format.
@@ -754,7 +662,7 @@ class GeminiClient:
             print(f"Structured summary generation failed: {e}")
             return None
 
-    def generate_sns_content(self, title, content, article_type="know"):
+    def generate_sns_content(self, title, content, article_type="market-analysis"):
         """
         Generate engaging SNS (Twitter/X) post content.
         Output is JSON: {"hook": "...", "summary": "...", "hashtags": ["#tag1", ...]}
@@ -763,36 +671,36 @@ class GeminiClient:
         truncated_content = content[:3000]
         
         prompt = textwrap.dedent(f"""
-        You are an expert social media manager for a logistics media site "LogiShift".
+        You are an expert social media manager for a financial media site "FinShift".
         Create an engaging X (Twitter) post content based on the following article.
         
-        Target Audience: Logistics professionals, warehouse managers, executives.
-        Goal: Maximize CTR (Click Through Rate) and engagement. Use "FOMO" (Fear Of Missing Out) or "High Benefit" appeal.
-
+        Target Audience: Swing traders, individual investors, market analysts.
+        Goal: Maximize CTR and Engagement by appealing to "Profit Opportunity" or "Risk Management".
+        
         Article Title: {title}
         Article Type: {article_type}
         Content (excerpt):
         {truncated_content}
-
+        
         Requirements:
-        1. **Hook**: A strong, catchy opening line. Use a question, a shocking fact, or a counter-intuitive statement. 
-           - MUST include 1 relevant emoji at the beginning or end.
+        1. **Hook**: A strong, catchy opening line. Use a number, a price target, or a provocative question.
+           - MUST include 1 relevant emoji (📈, 📉, 💰, 🚨, etc.).
            - Max 50 chars.
-        2. **Summary**: A compelling teaser. Do NOT just summarize("〜について解説"). Explain "Why this matters" or "What they will lose by not reading".
-           - Focus on benefits (cost down, efficiency up, risk avoidance).
+        2. **Summary**: A compelling teaser. Do NOT just summarize. Explain "How this affects their wallet" or "What the next move is".
+           - Focus on price action, sector trends, or earning surprises.
            - Max 100 chars.
         3. **Hashtags**: 3-5 relevant hashtags.
-           - **CRITICAL**: To maximize Impressions (Imp), PRIORITIZE using **specific proper nouns** (Company names, Product names, Technology names) mentioned in the article content over generic terms.
-           - Example: Use "#Amazon" or "#RFID" instead of generic tags.
-
+           - **CRITICAL**: Use specific Ticker Symbols (e.g., $NVDA, $BTC, $USDJPY) if mentioned.
+           - Use standard finance tags like #米国株 #日経平均 #仮想通貨.
+        
         4. Language: Japanese. 
-        5. **Tone**: Professional but urgent/exciting. Avoid robotic or purely descriptive tone.
-
+        5. **Tone**: Professional, Insightful, slightly urgent ("Now or Never"). 
+        
         Output JSON format (Strictly JSON only):
         {{
-            "hook": "😱 2024年問題、実はまだ間に合う？",
-            "summary": "「もう手遅れ」と諦めるのは早い。現場がすぐ取り組める3つの即効策を公開。知らないと損する物流DXの最前線とは？",
-            "hashtags": ["#LogiShift", "#Amazon", "#RFID", "#物流DX"]
+            "hook": "� NVIDIA決算、予想を上回るも時間外で下落？",
+            "summary": "「材料出尽くし」か「押し目買い」か、プロの分析で見極める。AIセクターの第2章はここから始まる。",
+            "hashtags": ["#FinShift", "$NVDA", "#米国株", "#AI関連"]
         }}
         """)
         
@@ -812,8 +720,8 @@ class GeminiClient:
             # Fallback
             return {
                 "hook": f"【新着記事】{title}",
-                "summary": "最新の物流トレンドを解説しました。詳細はこちらをチェック！",
-                "hashtags": ["#LogiShift", "#物流"]
+                "summary": "最新の市場動向を分析しました。投資判断の参考にしてください。",
+                "hashtags": ["#FinShift", "#投資", "#株"]
             }
 
     def check_duplication(self, new_title, new_summary, existing_titles):
