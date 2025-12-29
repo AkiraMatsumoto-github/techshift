@@ -1,4 +1,4 @@
-# LogiShift サイトマップ
+# FinShift サイトマップ
 
 ## 構造図
 
@@ -13,27 +13,34 @@ graph TD
         Date[月別アーカイブ /date/yyyy/mm/]
     end
 
+    subgraph IndexLP [市況ランディングページ]
+        LP1[日経225 /market/nikkei225/]
+        LP2[NYダウ /market/ny-dow/]
+        LP3[ドル円 /market/usd-jpy/]
+        LP4[ビットコイン /market/btc-usd/]
+        LP5[イーサリアム /market/eth-usd/]
+        LP6[米10年債 /market/us10y/]
+        LP7[インドSENSEX /market/sensex/]
+        LP8[上海総合・香港 /market/china-indices/]
+        LP9[インドネシアIDX /market/idx-composite/]
+    end
+
     subgraph Categories [主要カテゴリ]
-        Cat1[物流DX・トレンド /category/logistics-dx/]
-        Cat2[倉庫管理・WMS /category/warehouse-management/]
-        Cat3[輸配送・TMS /category/transportation/]
-        Cat4[マテハン・ロボット /category/material-handling/]
-        Cat5[サプライチェーン /category/supply-chain/]
-        Cat6[事例・インタビュー /category/case-studies/]
-        Cat7[海外トレンド /category/news-global/]
+        Cat1[市況速報(Global) /category/global-news/]
+        Cat2[仮想通貨(Crypto) /category/crypto/]
+        Cat3[株式・指数(Index) /category/index-analysis/]
+        Cat4[コモディティ・為替 /category/commodity-fx/]
+        Cat5[初心者ガイド(How-to) /category/how-to/]
+        Cat6[IPO・決算 /category/ipo-earnings/]
     end
 
-    subgraph ThemeTags [課題別タグ]
-        Tag1[コスト削減 /tag/cost-reduction/]
-        Tag2[人手不足対策 /tag/labor-shortage/]
-        Tag3[品質向上 /tag/quality-improvement/]
-    end
-
-    subgraph Regions [海外トレンド]
+    subgraph Regions [国別エリア]
         Reg1[アメリカ /tag/usa/]
-        Reg2[ヨーロッパ /tag/europe/]
+        Reg2[日本 /tag/japan/]
         Reg3[中国 /tag/china/]
-        Reg4[東南アジア /tag/southeast-asia/]
+        Reg4[インド /tag/india/]
+        Reg5[インドネシア /tag/indonesia/]
+        Reg6[欧州・その他 /tag/others/]
     end
     
     subgraph Singles [詳細ページ系]
@@ -46,6 +53,8 @@ graph TD
     Home --> Search
     Home --> Post
     Home --> Page
+    Home --> LP1
+    Home --> LP2
 
     Cat --> Cat1
     Cat --> Cat2
@@ -53,58 +62,52 @@ graph TD
     Cat --> Cat4
     Cat --> Cat5
     Cat --> Cat6
-    Cat --> Cat7
 
-    Tag --> Tag1
-    Tag --> Tag2
-    Tag --> Tag3
     Tag --> Reg1
     Tag --> Reg2
     Tag --> Reg3
     Tag --> Reg4
+    Tag --> Reg5
     
-    Cat1 --> Post
-    Cat2 --> Post
-    Cat3 --> Post
-    Cat4 --> Post
-    Cat5 --> Post
-    Cat6 --> Post
-    Cat7 --> Post
+    %% インデックスページから関連記事へのリンク
+    LP1 --> Cat3
+    LP4 --> Cat2
     
     %% 具体的な固定ページ
     Page --> About[運営者情報 /about/]
     Page --> Contact[お問い合わせ /contact/]
     Page --> Policy[プライバシーポリシー /privacy-policy/]
     Page --> Sitemap[サイトマップ /sitemap/]
+    Page --> Disclaimer[免責事項 /disclaimer/]
 ```
 
 ## URL設計
 
 | ページ種類 | URLパターン | 備考 |
 | :--- | :--- | :--- |
-| トップページ | `https://logishift.jp/` | |
-| 記事詳細 | `https://logishift.jp/{post-slug}/` | 英単語のスラッグを推奨 |
+| トップページ | `https://finshift.net/` | スイングトレーダー向けダッシュボードUI |
+| 記事詳細 | `https://finshift.net/{post-slug}/` | |
+| **市況ランディングページ** | | TradingViewウィジェット大 + 関連ニュース |
+| 日経225 (日本) | `https://finshift.net/market/japan/` | |
+| NYダウ/S&P500 (米国) | `https://finshift.net/market/usa/` | |
+| 上海/香港 (中国) | `https://finshift.net/market/china/` | |
+| SENSEX/Nifty (インド) | `https://finshift.net/market/india/` | |
+| JCI (インドネシア) | `https://finshift.net/market/indonesia/` | |
+| 仮想通貨 | `https://finshift.net/market/crypto/` | |
 | **主要カテゴリ** | | |
-| 物流DX・トレンド | `https://logishift.jp/category/logistics-dx/` | |
-| 倉庫管理・WMS | `https://logishift.jp/category/warehouse-management/` | |
-| 輸配送・TMS | `https://logishift.jp/category/transportation/` | |
-| マテハン・ロボット | `https://logishift.jp/category/material-handling/` | |
-| サプライチェーン | `https://logishift.jp/category/supply-chain/` | |
-| 海外トレンド | `https://logishift.jp/category/news-global/` | |
-| 事例・インタビュー | `https://logishift.jp/category/case-studies/` | |
-| **課題別タグ** | | |
-| コスト削減 | `https://logishift.jp/tag/cost-reduction/` | |
-| 人手不足対策 | `https://logishift.jp/tag/labor-shortage/` | |
-| 品質向上 | `https://logishift.jp/tag/quality-improvement/` | |
-| **海外トレンド** | | |
-| アメリカ | `https://logishift.jp/tag/usa/` | |
-| ヨーロッパ | `https://logishift.jp/tag/europe/` | |
-| 中国 | `https://logishift.jp/tag/china/` | |
-| 東南アジア | `https://logishift.jp/tag/southeast-asia/` | |
-| **その他** | | |
-| 固定ページ (汎用) | `https://logishift.jp/{slug}/` | |
-| 運営者情報 | `https://logishift.jp/about/` | |
-| お問い合わせ | `https://logishift.jp/contact/` | |
-| プライバシーポリシー | `https://logishift.jp/privacy-policy/` | |
-| サイトマップ | `https://logishift.jp/sitemap/` | |
-| 検索結果 | `https://logishift.jp/?s={keyword}` | |
+| Daily Briefing | `https://finshift.net/category/daily-briefing/` | 国別デイリーまとめ |
+| Featured News | `https://finshift.net/category/featured-news/` | 重要ニュース個別記事 |
+| Weekly Summary | `https://finshift.net/category/weekly-summary/` | 週次振り返り & 展望 |
+| 投資戦略・コラム | `https://finshift.net/category/strategy/` | |
+| 初心者ガイド (How-to) | `https://finshift.net/category/how-to/` | |
+| **国別タグ** | | |
+| アメリカ | `https://finshift.net/tag/usa/` | |
+| 日本 | `https://finshift.net/tag/japan/` | |
+| 中国 | `https://finshift.net/tag/china/` | |
+| インド | `https://finshift.net/tag/india/` | |
+| インドネシア | `https://finshift.net/tag/indonesia/` | |
+| **固定ページ** | | |
+| 運営者情報 | `https://finshift.net/about/` | |
+| お問い合わせ | `https://finshift.net/contact/` | |
+| プライバシーポリシー | `https://finshift.net/privacy-policy/` | |
+| 免責事項 | `https://finshift.net/disclaimer/` | **重要** (投資助言規制対策) |

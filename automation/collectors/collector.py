@@ -8,22 +8,34 @@ import time
 
 # Default RSS Sources
 DEFAULT_SOURCES = {
-    "techcrunch": "https://techcrunch.com/feed/",
-    "wsj_logistics": "https://feeds.a.dj.com/rss/RSSLogistics.xml",
-    "supply_chain_dive": "https://www.supplychaindive.com/feeds/news/",
-    "logistics_mgmt": "https://www.logisticsmgmt.com/rss/topic/technology",
-    "robot_report": "http://www.therobotreport.com/feed",
-    "supply_chain_brain": "https://www.supplychainbrain.com/rss/articles",
-    "freightwaves": "https://www.freightwaves.com/news/feed",
-    "robotics_automation_news": "https://roboticsandautomationnews.com/feed/",
-    "36kr_japan": "https://36kr.jp/feed/",
-    "pandaily": "https://pandaily.com/feed/",
-    "lnews": "https://www.lnews.jp/feed/",
-    "logistics_today": "https://www.logi-today.com/feed",
-    "logi_biz": "https://online.logi-biz.com/feed/",
-    "the_loadstar": "https://theloadstar.com/feed/",
-    "logistics_manager_uk": "https://www.logisticsmanager.com/feed/",
-    "supply_chain_asia": "https://supplychainasia.org/feed/",
+    # --- Global News (Base) ---
+    "yahoo_finance_top": "https://finance.yahoo.com/news/rssindex",
+    "cnbc_world": "https://www.cnbc.com/id/100727362/device/rss/rss.html",
+    # "wsj_markets": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", # RSS Empty
+
+    # --- Asia Strategy (Source of Competitive Advantage) ---
+    # China (Native Sources - Deep Dive)
+    "36kr_china": "https://36kr.com/feed", # Tech & Startups (Unicorns) -> SUCCESS
+    # "sina_finance_focus": "http://rss.sina.com.cn/news/allnews/finance.xml", # XML Error
+    # "china_daily_biz": "http://www.chinadaily.com.cn/rss/bizchina_rss.xml", # XML Error
+    # "xinhua_biz": "http://english.news.cn/rss/business.xml", # XML Error
+
+    # India 
+    # "mint_top": "https://www.livemint.com/rss/news", # Fallback only
+    # "mint_markets": "https://www.livemint.com/rss/markets", # Fallback only
+    "economictimes": "https://economictimes.indiatimes.com/rssfeedsdefault.cms", # SUCCESS
+
+    # Indonesia
+    "antara_news_biz": "https://en.antaranews.com/rss/business-investment.xml", # SUCCESS
+    # "jakarta_globe": "https://jakartaglobe.id/rss/news", # XML Error
+    
+    # --- Japan Market ---
+    "yahoo_jp_business": "https://news.yahoo.co.jp/rss/categories/business.xml", # SUCCESS
+    
+    # --- Crypto & Assets (Strategic Indicators) ---
+    "coindesk": "https://www.coindesk.com/arc/outboundfeeds/rss/", # SUCCESS
+    # "cointelegraph": "https://cointelegraph.com/rss", # Fallback only
+    "bitcoin_magazine": "https://bitcoinmagazine.com/.rss/full/",
 }
 
 def fetch_rss(url, source_name, days=None, hours=None):
