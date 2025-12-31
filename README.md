@@ -94,7 +94,7 @@ GitHub Actions により、`main` ブランチへのプッシュで自動デプ�
     `automation/.env` を作成:
     ```bash
     GEMINI_API_KEY=your_apiKey
-    WORDPRESS_URL=http://localhost:8000
+    WORDPRESS_URL=http://localhost:8002
     WORDPRESS_USERNAME=admin
     WORDPRESS_APP_PASSWORD=your_appPassword
     ```

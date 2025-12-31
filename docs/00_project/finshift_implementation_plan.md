@@ -112,7 +112,7 @@ finshift/ (Current Dir)
     - **Strategic Assets用 (strategic-assets)**: 仮想通貨・コモディティ特有の「テクニカル分析」「半減期・需給」等の要素を重視した分析構成。
     - **Investment Guide用 (investment-guide)**: 初心者向け。「〜とは」「〜の買い方」等の教育的（Educational）な構成。
     - 共通: 「専門用語の適切な使用」「煽りすぎない冷静なトーン」の徹底。
-- [ ] **JSON Output Stability**: `classifier.py` 等の戻り値をより堅牢にする。
+- [x] **JSON Output Stability**: `classifier.py` and `summarizer.py` updated to use `response_mime_type: application/json` for robustness.
 
 ### 3.2. Pipeline Optimization
 - [ ] **Parallel Processing**: 記事のスコアリング（`scorer.py`）やスクレイピング（`url_reader.py`）の並列化（`ThreadPoolExecutor`導入）。
@@ -134,6 +134,25 @@ Automation側で生成したデータを、WordPressテーマ側でどう表示�
     - `workflows/indonesia_daily.yml`: インドネシア市場 (JKT 終了後)
 - [ ] **Weekly Summary**: `workflows/weekly_summary.yml` (毎週日曜夜) の設定。
 - [ ] **Market Ticker**: `workflows/market_ticker.yml` (Risk Monitor更新用, 20分毎) の設定。
+
+
+### 3.7. Market Analysis Enhancements (Precision & Depth)
+- [] **Technical Indicators**: Update `market_data.py` to calculate RSI (14-day) and SMA (50-day) Deviation.
+- [] **Economic Calendar**: Create `automation/collectors/economic_calendar.py` to fetch upcoming major events (CPI, FOMC) for the next 14 days.
+- [] **Market Regime Logic (Cross-Asset)**: Implement `automation/analysis/market_regime.py` to define market environment (e.g., "Risk-On", "Inflation Scare") based on correlations (Stocks vs Yields, EM FX Risk).
+- [] **Workflow Automation**: Create `.github/workflows/daily-briefing.yml` with Git commit persistence for JSON data to enable efficient caching across runs.
+
+### 3.6. Daily Briefing Implementation (New Architecture)
+**N対1 (複数記事→1記事)** の集約生成ロジックを実装します（設計書: `docs/02_design/daily_briefing_logic.md`）。
+
+- [ ] **Data Integration**:
+    - `market_data.py` (市況データ) と `sentiment_analyzer.py` (AIセンチメント) の出力をコンテキストとして利用できるように統合。
+- [ ] **New Aggregator Script (`daily_briefing.py`)**:
+    - 過去24時間の記事を収集し、重要度順にソート・フィルタリングするロジック。
+    - 取得した記事群を要約し、1つの「Market Context JSON」に合成する処理。
+- [ ] **Component Updates**:
+    - **`generate_article.py`**: 複数記事の要約リストを含む複雑なJSONコンテキストを受け取れるように改修。
+    - **`gemini_client.py`**: 新規プロンプト `market-analysis-briefing` を追加。個別のニュースの羅列ではなく、市場全体の「Trend」と「Key Drivers」を合成して語るプロンプトを作成。
 
 ### 3.5. WordPress Theme Integration (`/themes`)
 Automationと密接に連携するテーマ側の実装要件です。

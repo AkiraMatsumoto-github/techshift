@@ -8,6 +8,7 @@ Saves data to themes/finshift/assets/data/risk_monitor.json
 import os
 import json
 import yfinance as yf
+import pandas as pd
 from datetime import datetime
 import sys
 
@@ -19,6 +20,7 @@ ASSETS = {
         {"symbol": "^N225", "name": "Nikkei 225", "region": "JP"},
         {"symbol": "^NSEI", "name": "Nifty 50", "region": "IN"},
         {"symbol": "000001.SS", "name": "Shanghai Comp", "region": "CN"},
+        {"symbol": "^HSI", "name": "Hang Seng Index", "region": "CN"},
         {"symbol": "^JKSE", "name": "IDX Composite", "region": "ID"}, # Indonesia
         {"symbol": "^VIX", "name": "VIX", "region": "Global"}, # Volatility Index
     ],
@@ -34,6 +36,11 @@ ASSETS = {
     "forex": [
         {"symbol": "USDJPY=X", "name": "USD/JPY", "region": "Global"},
         {"symbol": "CNY=X", "name": "USD/CNY", "region": "Global"},
+        {"symbol": "INR=X", "name": "USD/INR", "region": "Global"},
+        {"symbol": "IDR=X", "name": "USD/IDR", "region": "Global"},
+    ],
+    "bonds": [
+        {"symbol": "^TNX", "name": "US 10Y Yield", "region": "US"}
     ]
 }
 
@@ -77,17 +84,33 @@ def fetch_data():
             
             try:
                 # Get history
-                # We need at least 1mo of data. 
-                # yfinance history() returns a DataFrame
+                # We need at least 3mo of data for 50-day SMA and 14-day RSI
                 ticker = tickers.tickers[symbol]
-                hist = ticker.history(period="1mo")
+                hist = ticker.history(period="3mo")
                 
                 if hist.empty:
                     print(f"Warning: No data for {symbol}")
                     continue
                 
-                # Current Price (Last available close)
+                # --- Technical Analysis ---
+                # 1. RSI (14-day)
+                delta = hist['Close'].diff()
+                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                rs = gain / loss
+                rsi = 100 - (100 / (1 + rs))
+                current_rsi = rsi.iloc[-1]
+                
+                # 2. SMA (50-day) and Deviation
+                sma_50 = hist['Close'].rolling(window=50).mean()
+                current_sma = sma_50.iloc[-1]
                 current_price = hist['Close'].iloc[-1]
+                
+                sma_dev = 0.0
+                if not pd.isna(current_sma) and current_sma != 0:
+                    sma_dev = ((current_price - current_sma) / current_sma) * 100
+                
+                # --- Price Changes ---
                 
                 # 1 Day Ago (iloc[-2])
                 price_1d = hist['Close'].iloc[-2] if len(hist) >= 2 else current_price
@@ -95,8 +118,8 @@ def fetch_data():
                 # 1 Week Ago (approx 5 trading days)
                 price_1w = hist['Close'].iloc[-6] if len(hist) >= 6 else hist['Close'].iloc[0]
                 
-                # 1 Month Ago (iloc[0])
-                price_1m = hist['Close'].iloc[0]
+                # 1 Month Ago (approx 20 trading days)
+                price_1m = hist['Close'].iloc[-21] if len(hist) >= 21 else hist['Close'].iloc[0]
                 
                 # Calculate Changes
                 change_1d = get_percentage_change(current_price, price_1d)
@@ -112,10 +135,14 @@ def fetch_data():
                         "1w": round(change_1w, 2),
                         "1m": round(change_1m, 2)
                     },
+                    "technical": {
+                        "rsi": round(current_rsi, 1) if not pd.isna(current_rsi) else None,
+                        "sma_50_dev": round(sma_dev, 2) if not pd.isna(sma_dev) else None
+                    },
                     "last_close_date": hist.index[-1].strftime('%Y-%m-%d')
                 }
                 results["data"][category].append(data_point)
-                print(f"Fetched {name}: {data_point['price']} ({data_point['changes']['1d']}%)")
+                print(f"Fetched {name}: {data_point['price']} (RSI: {data_point['technical']['rsi']})")
                 
             except Exception as e:
                 print(f"Error fetching {symbol}: {e}")

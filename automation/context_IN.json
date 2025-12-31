@@ -1,0 +1,495 @@
+{
+  "mode": "daily_briefing",
+  "region": "IN",
+  "date": "2025-12-31",
+  "articles": [
+    {
+      "summary": "中国は木曜日（2026年1月1日）より銀の輸出規制を強化し、同金属をレアアース同様の「戦略物資」として管理下に置く。商務省は2026-27年の輸出承認企業44社を発表済み。銀価格は供給懸念から一時80ドル/オンスを超え、年初来で2倍以上に急騰している。Teslaのイーロン・マスク氏が懸念を表明するなど、EV、太陽光、半導体などの米国産業界や防衛サプライチェーンへの影響が不可避な情勢だ。",
+      "key_facts": [
+        "銀スポット価格: 約73ドル/オンス（週初に一時80ドル超、1979年以来最高の上昇率）",
+        "実需プレミアム: カナダKuya Silverに対し、市場価格+8〜10ドルの買いオファー",
+        "中国貿易統計（1-11月）: 輸出4,600トン超 vs 輸入約220トン",
+        "市場パフォーマンス（年初来）: 銀 2倍超、金 +60%、ドル指数 -9.5%、Bitcoin -5%",
+        "関連企業: Tesla (TSLA), Kuya Silver"
+      ],
+      "finshift_view": "中国による「戦略物資化」は構造的な供給制約を意味し、銀価格の下値を切り上げる強力な買い材料だ。特に非中国系の銀鉱山銘柄には追い風となる。一方、太陽光パネルやEV関連にはコスト増による利益率圧迫リスクがあるため選別が必要。ドル安・金高も進行しており、現物資産への資金シフトが加速するシナリオを想定すべき。",
+      "future_events": [
+        {
+          "date": "2026-01-01",
+          "event": "中国による銀輸出規制強化の施行（記事中の'Thursday'）",
+          "country": "China",
+          "impact": "High"
+        },
+        {
+          "date": "2026-01-01",
+          "event": "タングステンおよびアンチモンの輸出規制開始",
+          "country": "China",
+          "impact": "Medium"
+        }
+      ],
+      "scenario_analysis": {
+        "market_sentiment": "Bullish",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Bullish",
+            "rationale": "Silver recently retreated from $80 to $73, creating a technical dip. However, news of physical buyers offering $8-$10 premiums over spot price indicates a massive disconnect between paper and physical markets. With restrictions starting Thursday, immediate buying pressure is likely to defend the $70-$73 zone.",
+            "key_level": "Support at $73; Resistance at $80"
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Bullish",
+            "main_scenario": "The formal elevation of silver to a 'strategic material' by China acts as a structural supply shock. As 4,600 tons of annualized Chinese exports face restriction, industrial panic buying (signaled by Tesla/Musk concerns) will likely drive the price back toward ATHs. The weak US Dollar (-9.5% YTD) provides further tailwinds.",
+            "risk_scenario": "If the run-up to $80 was a 'buy the rumor' event, the implementation of the ban could trigger a 'sell the news' liquidation event, potentially flushing leverage down to the $65 level."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Buy",
+          "comment": "The pull-back to $73 offers a high-reward swing entry. Physical market premiums confirm underlying demand is far higher than the current spot price reflects. Enter near $73 with stops below $70, targeting a retest of $80-$85."
+        }
+      },
+      "url": "https://www.cnbc.com/2025/12/31/china-silver-export-controls-2026-us-economy-prices-rare-earths-critical-minerals-xag-metals.html",
+      "source": "cnbc_world",
+      "published": "2025-12-31 04:09:34+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "東証上場のメタプラネットは第4四半期に約4億5100万ドルを投じ、4,279ビットコイン（BTC）を追加購入した。これにより同社の総保有量は35,102 BTCとなり、アジア最大の企業保有者としての地位を強化した。総投資額は約37.8億ドル、平均取得単価は約107,600ドルに達する。一方で記事時点のBTC価格は88,590ドルと取得単価を下回っており、株価は6月のピークから下落した405円で推移している。同社はデリバティブ事業による収益化も図りつつ、2027年末までに21万BTC保有という目標に向け、資金調達を継続している。",
+      "key_facts": [
+        "企業名: メタプラネット (Metaplanet Inc.)",
+        "保有状況: 総保有量 35,102 BTC (平均取得単価 $107,600)",
+        "市場価格乖離: 記事時点のBTC価格 $88,590 (含み損状態)",
+        "株価: 405円 (年初来8%高だがピーク比で大幅安)",
+        "中期目標: 2027年末までに210,000 BTC保有",
+        "デリバティブ事業収益予想: 来期約5,500万ドル"
+      ],
+      "finshift_view": "平均取得単価（$107.6k）が市場価格（$88.6k）を上回る中での借入による追加購入は、財務レバレッジリスクを高めるため、保守的な投資家にとっては「警戒（売り）」材料となる。しかし、デリバティブ収入によるキャッシュフロー確保が見込める点はプラス。BTC相場が11万ドル台を回復すれば株価の爆発的な上昇が見込めるため、ハイリスク許容層には押し目買いの好機だが、トレンド転換を確認するまでは様子見が賢明。",
+      "future_events": [
+        {
+          "date": "2027-12-31",
+          "event": "ビットコイン保有目標達成期限 (210,000 BTC)",
+          "country": "JP",
+          "impact": "High"
+        }
+      ],
+      "scenario_analysis": {
+        "market_sentiment": "Mixed",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Bullish",
+            "rationale": "The announcement of a massive $451M accumulation acts as a strong headline catalyst, signaling institutional conviction. This likely establishes a short-term psychological floor/support zone around the $88k level as traders front-run the 'whale' narrative.",
+            "key_level": "Support: $88,000 | Resistance: $90,000"
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Neutral",
+            "main_scenario": "Bitcoin likely consolidates as the market digests that Metaplanet's average cost ($107,600) is significantly higher than the current price ($88,590). The market needs to absorb this supply overhang before attempting to reclaim the $100k level.",
+            "risk_scenario": "A drop below $85,000 could trigger concerns regarding Metaplanet's leveraged balance sheet, turning the news from a 'conviction buy' into a 'trapped liquidity' narrative, increasing volatility."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Wait",
+          "comment": "Monitor for a confirmed breakout above $90,000 to validate the bullish momentum from the news. Current price levels are attractive but risky given the institutional cost basis is underwater."
+        }
+      },
+      "url": "https://bitcoinmagazine.com/news/metaplanet-spends-451-million-on-4279-btc",
+      "source": "bitcoin_magazine",
+      "published": "2025-12-30 14:57:35+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "中国国家統計局が発表した12月の製造業PMIは50.1となり、市場予想（49.2）および前月（49.2）を上回り、3月以来初めて好不況の分岐点である50を超えて拡大した。非製造業PMIも50.2へ上昇し、経済全体の改善を示唆した。この回復は主に大企業（PMI 50.8）と新規受注の増加が牽引したが、小規模企業のPMIは48.6へと低下しており、企業規模による二極化が鮮明である。発表後、中国本土株（CSI300）は小幅高となった一方、香港ハンセン指数は下落するなど市場の反応は限定的だった。",
+      "key_facts": [
+        "中国12月製造業PMI（政府版）: 50.1 (予想 49.2 / 前月 49.2)",
+        "中国12月総合PMI: 50.7 (前月 49.7)",
+        "企業規模別PMI: 大企業 50.8 (+1.5pt) vs 小企業 48.6 (-0.5pt)",
+        "市場反応: ハンセン指数 -0.83%、CSI300 +0.33%",
+        "RatingDog（民間調査）製造業PMI: 50.1 (予想 49.8)"
+      ],
+      "finshift_view": "予想外のPMI改善は「ポジティブサプライズ」であり、短期的には中国関連の資本財・素材セクターへの買い戻し材料となる。しかし、不動産不況の継続や中小企業の弱さは構造的な懸念として残る。本格的な上昇トレンド入りには消費の底堅さ確認が必要であり、現時点では大型株中心の選別投資に留めるのが賢明だ。",
+      "future_events": [],
+      "scenario_analysis": {
+        "market_sentiment": "Mixed",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Neutral",
+            "rationale": "While the PMI beat (50.1 vs 49.2 exp) is fundamentally positive, the immediate market reaction was divergent (CSI 300 up, Hang Seng down). This indicates investors are selling the news in offshore listings while domestic sentiment improves slightly. Volatility is expected as the market digests the discrepancy between strong headline numbers and weak small-enterprise data.",
+            "key_level": "Monitor CSI 300 support levels and whether the Hang Seng can reclaim intraday losses."
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Bullish",
+            "main_scenario": "The return to expansion (>50.0) for the first time since March suggests a cyclical bottom may be forming. Historically, crossing the 50 threshold triggers technical buying in China-linked assets (including Copper and Iron Ore) and large-cap Chinese equities, as funds re-allocate for a recovery play.",
+            "risk_scenario": "The divergence between large firms (expanding) and small firms (contracting at 48.6) poses a risk. If upcoming property sector news remains negative, the PMI bounce may be viewed as a 'dead cat bounce,' leading to a rollover in equity indices."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Buy",
+          "comment": "Focus on mainland indices (CSI 300) or commodities rather than Hong Kong tech/small-caps. Use the current mixed reaction to accumulate positions near support, betting on the macro trend shift back to expansion over the next 1-2 weeks."
+        }
+      },
+      "url": "https://www.cnbc.com/2025/12/31/china-manufacturing-activity-pmi-december-expands-for-the-first-time-since-march.html",
+      "source": "cnbc_world",
+      "published": "2025-12-31 03:50:22+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "ソフトバンクGは米データセンター投資会社DigitalBridgeを40億ドル（1株16ドル、全額現金）で買収することに合意した。これは12月26日の終値に対し15%のプレミアムとなる。孫正義CEOは「人工超知能（ASI）」実現に向けた計算能力や電力インフラの確保が目的とし、取締役会の承認を経て2026年後半の取引完了を見込む。SBGはこれに先立ちNvidia株を58.3億ドルで売却し、OpenAIや本件への投資資金を確保していた。",
+      "key_facts": [
+        "買収総額: 40億ドル (1株あたり16ドル)",
+        "プレミアム: 12月26日終値比 +15%",
+        "市場反応: DigitalBridge株価は約10%上昇 (報道先行で一時50%上昇)",
+        "SoftBank動向: 直近でNvidia株を58.3億ドルで全売却",
+        "DigitalBridge運用資産 (AUM): 約1,080億ドル (9月末時点)"
+      ],
+      "finshift_view": "SBGが流動性の高い半導体株から「ハードアセット（DCインフラ）」へ資金をシフトさせた点は、AI関連の電力・建設セクター全体への強力な買い材料となる。SBGにとっては長期安定収益の基盤となるが、各国の規制当局承認がハードルとなる可能性があり、完了までは関連銘柄のボラティリティに注意が必要。",
+      "future_events": [
+        {
+          "date": null,
+          "event": "SoftBankによるDigitalBridge買収完了 (2026年後半予定)",
+          "country": "US",
+          "impact": "High"
+        }
+      ],
+      "scenario_analysis": {
+        "market_sentiment": "Bullish",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Neutral",
+            "rationale": "With the acquisition price fixed at $16.00 per share in cash, the stock will likely gap up and trade very tightly just below this level (arbitrage spread). Upside is strictly capped at $16.00 unless a competing bid emerges, limiting immediate intraday volatility once the gap fills.",
+            "key_level": "Resistance at $16.00 (Deal Price)"
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Neutral",
+            "main_scenario": "The stock will likely enter a low-volatility phase, trading sideways slightly below the $16.00 acquisition price until the deal closes in H2 next year. This acts as a merger arbitrage play rather than a directional swing trade.",
+            "risk_scenario": "If regulatory concerns regarding foreign ownership or antitrust issues arise, the spread between the current price and the $16.00 deal price could widen, causing a downside drift."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Wait",
+          "comment": "The primary move has already occurred. With the upside capped at the $16.00 buyout price, the risk/reward ratio for new swing long positions is poor. Existing holders should consider taking profits near $16.00 to deploy capital into non-capped assets."
+        }
+      },
+      "url": "https://www.cnbc.com/2025/12/29/digitalbridge-shares-jump-on-report-softbank-in-talks-to-acquire-firm.html",
+      "source": "cnbc_world",
+      "published": "2025-12-30 14:23:42+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "銀価格が史上初めて80ドルを突破し、一時86.45ドルの最高値を記録。太陽光発電やAIデータセンターなどの構造的な産業需要と、金融不安による逃避需要が価格を押し上げている。この恩恵を受ける銘柄として、鉱山運営リスクを負わずに金属権益を持つ「ストリーミング企業」のWheaton Precious Metals (WPM)が注目されている。WPMの第3四半期決算は売上高が前年同期比54.5%増と好調で、アナリストからも「強い買い」推奨を受けている。",
+      "key_facts": [
+        "銀価格: 史上初の80ドル突破 (一時86.45ドル、その後72ドル付近へ調整)",
+        "Wheaton Precious Metals (WPM): 株価は過去52週で144%上昇、直近高値$124.30",
+        "WPM決算(Q3): 売上高 $476.3M (+54.5% YoY)、EPS $0.62 (市場予想を5.1%上回る)",
+        "アナリスト評価: コンセンサスは「Strong Buy」、平均目標株価 $132.86 (+13% upside)"
+      ],
+      "finshift_view": "銀市場はボラティリティが高いが、AI・環境関連の産業需要は構造的であり、長期トレンドは強気。採掘コスト上昇の影響を受けにくいビジネスモデルを持つWPMは、インフレ下での最適な投資対象となる。PER約46倍と割高感はあるが、利益成長率を加味すれば正当化可能。RSIなどの過熱感が冷める短期的な調整局面があれば、長期視点での「買い」推奨とする。",
+      "future_events": [
+        {
+          "date": null,
+          "event": "Wheaton Precious Metals 長期ガイダンス更新 (2026年初頭予定)",
+          "country": "US",
+          "impact": "Medium"
+        }
+      ],
+      "scenario_analysis": {
+        "market_sentiment": "Bullish",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Neutral",
+            "rationale": "Spot silver experienced a violent correction from an all-time high of $86.45 to below $72. This extreme volatility likely creates intraday headwinds and profit-taking for Wheaton Precious Metals (WPM), despite its recent bullish momentum.",
+            "key_level": "Support check at RSI reset levels; Watch Silver spot stability at $70"
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Bullish",
+            "main_scenario": "The technical setup for WPM is constructive with the MACD line crossing higher and RSI cooling to a healthy 56.47. Structural silver demand (AI, solar) and record financial results support a trend continuation once the commodity price stabilizes.",
+            "risk_scenario": "If silver's parabolic breakdown continues below $70, WPM's premium valuation (46.26x forward earnings) makes it vulnerable to a deeper multiple contraction."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Buy",
+          "comment": "Treat the immediate dip caused by silver's spot price volatility as an entry opportunity. The mid-term technicals and fundamentals remain strong."
+        }
+      },
+      "url": "https://finance.yahoo.com/news/silver-just-crossed-80-first-195530841.html",
+      "source": "yahoo_finance_top",
+      "published": "2025-12-29 19:55:30+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "米FRBは12月9-10日に開催されたFOMCの議事要旨を公表した。政策金利を0.25%引き下げ3.50-3.75%としたが、採決は9対3と2019年以来最多の反対票が出る異例の展開となった。議論は「微妙なバランス」で、賛成派の中にも据え置きを支持し得た参加者がいたことが判明。インフレ高止まりへの警戒感から、今後の利下げペースを落とす、あるいは一時停止する可能性が示唆された。一方で、短期金融市場の逼迫を緩和するため、月額400億ドルの短期国債購入（実質的な量的緩和）を再開することも決定された。",
+      "key_facts": [
+        "政策金利: 3.50% - 3.75%（0.25%利下げ）",
+        "FOMC投票行動: 9対3（2019年以来の造反数、意見が割れる）",
+        "米国GDP（第3四半期）: 年率+4.3%（予想を上回る好調さ）",
+        "資産購入策: 月額400億ドルの短期国債（T-bills）購入を再開",
+        "ドットチャート: 2026年と2027年に各1回の追加利下げを示唆"
+      ],
+      "finshift_view": "利下げ決定にもかかわらず、内容は極めて「タカ派的」である。僅差の投票に加え、新たに投票権を得る地区連銀総裁らが引き締め寄りであることから、早期の追加利下げ期待は後退する公算が高い。利下げ休止観測は高PERのハイテク株には売り材料。一方、好調なGDPと金利高止まりの組み合わせは、銀行・金融セクターにとって買い材料となるシナリオだ。",
+      "future_events": [
+        {
+          "date": null,
+          "event": "次回以降の利下げ（市場予想は4月へ傾斜）",
+          "country": "US",
+          "impact": "High"
+        },
+        {
+          "date": null,
+          "event": "FOMC投票メンバーのローテーション（タカ派色が強まる見通し）",
+          "country": "US",
+          "impact": "Medium"
+        }
+      ],
+      "scenario_analysis": {
+        "market_sentiment": "Mixed",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Neutral to Bearish",
+            "rationale": "Immediate market reaction was slightly negative. The 9-3 vote split (most dissents since 2019) and the minutes revealing the decision was a 'closer call' than expected introduces uncertainty. Traders are digesting the reality that the rate-cutting cycle may be pausing.",
+            "key_level": "Monitor previous session lows; failure to hold suggests deeper repricing."
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Neutral",
+            "main_scenario": "The market will likely enter a consolidation phase. The combination of strong GDP growth (4.3%) and a rotation of voting members to more hawkish officials (Hammack, Logan, Kashkari) supports the narrative that the Fed will 'stay put' for upcoming meetings. Upside is capped by rate pause fears, downside limited by strong economic growth.",
+            "risk_scenario": "If upcoming inflation data confirms the 'upside risks' mentioned in the minutes, the market could sell off sharply as it prices out the 2026 cut expectations, fearing the Fed is behind the curve on inflation."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Wait",
+          "comment": "Volatility is likely as the market adjusts to a less dovish Fed composition for the new year. Avoid chasing momentum; look for stability in interest-rate-sensitive sectors before entering new long positions."
+        }
+      },
+      "url": "https://www.cnbc.com/2025/12/30/fed-minutes-december-2025.html",
+      "source": "cnbc_world",
+      "published": "2025-12-30 21:37:46+00:00",
+      "region": "Global"
+    },
+    {
+      "summary": "Strategy（MSTR）は12月28日までの週に、普通株の売却資金を用いて1,229BTCを約1億880万ドル（平均単価88,568ドル）で追加購入した。これにより総保有量は672,497BTC（平均取得単価74,997ドル）に達し、未実現利益は80億ドルを超える。一方で、BTC価格は購入単価を下回る87,200ドル付近で推移し、同社株価はプレマーケットで下落、年初来では約45%下落している。同社はBTCを主要準備資産とする戦略を継続しており、2025年のBTC利回りは23.2%を記録している。",
+      "key_facts": [
+        "購入詳細: 1,229 BTCを約1.09億ドルで取得（平均単価 $88,568）",
+        "総保有量: 672,497 BTC（平均取得単価 $74,997、総投資額 約504.4億ドル）",
+        "企業名・銘柄: Strategy (MSTR)",
+        "市場価格: BTCは$87,200付近、MSTR株価は$156.51付近（年初来-45%）",
+        "資金調達: クラスA普通株式の売却（ATMプログラム）"
+      ],
+      "finshift_view": "高値圏での積極的な買い増しは、長期的にはBTCへの強力なコミットメントとして肯定されるが、直近のBTC価格が購入単価（$88,568）を下回っているため、短期的にはMSTR株の上値を重くする要因となる。株価の年初来大幅下落はレバレッジへの警戒感を示唆しており、BTC価格が9万ドル台を安定して回復するまでは、同社株への投資は慎重姿勢（押し目買い）が賢明。",
+      "future_events": [],
+      "scenario_analysis": {
+        "market_sentiment": "Mixed",
+        "scenarios": {
+          "short_term": {
+            "timeframe": "24 Hours",
+            "view": "Bearish",
+            "rationale": "Despite the news of accumulation, the market is reacting negatively with MSTR down 1% premarket and Bitcoin trading ($87,200) below the company's recent purchase price ($88,568). The rejection at $90,000 creates immediate overhead resistance.",
+            "key_level": "Watch MSTR $156 support and BTC $87,000"
+          },
+          "mid_term": {
+            "timeframe": "1-2 Weeks",
+            "view": "Neutral",
+            "main_scenario": "The continued accumulation ($109M buy) reinforces a long-term floor, but the stock's 45% YTD decline despite BTC gains indicates a decoupling or premium compression. MSTR likely chops sideways until BTC decisively reclaims $90k.",
+            "risk_scenario": "If BTC drops below $85k, the leverage inherent in MSTR's model could exacerbate the 45% YTD drawdown, leading to a capitulation move."
+          }
+        },
+        "action_plan": {
+          "recommendation": "Wait",
+          "comment": "The recent purchase is currently underwater ($88.5k cost basis vs $87.2k spot). Wait for BTC to reclaim $90,000 or for MSTR to find a distinct support base before entering."
+        }
+      },
+      "url": "https://bitcoinmagazine.com/news/strategy-buys-1229-btc-for-109-million",
+      "source": "bitcoin_magazine",
+      "published": "2025-12-29 14:33:31+00:00",
+      "region": "Global"
+    }
+  ],
+  "market_data": {
+    "updated_at": "2025-12-31T17:10:34.151306",
+    "data": {
+      "commodities": [
+        {
+          "symbol": "GC=F",
+          "name": "Gold",
+          "price": 4342.5,
+          "changes": {
+            "1d": -0.63,
+            "1w": -3.13,
+            "1m": 3.72
+          },
+          "technical": {
+            "rsi": 61.5,
+            "sma_50_dev": 4.02
+          },
+          "last_close_date": "2025-12-31"
+        },
+        {
+          "symbol": "CL=F",
+          "name": "Crude Oil",
+          "price": 57.77,
+          "changes": {
+            "1d": -0.31,
+            "1w": -1.04,
+            "1m": -1.48
+          },
+          "technical": {
+            "rsi": 46.4,
+            "sma_50_dev": -1.97
+          },
+          "last_close_date": "2025-12-31"
+        }
+      ],
+      "bonds": [
+        {
+          "symbol": "^TNX",
+          "name": "US 10Y Yield",
+          "price": 4.13,
+          "changes": {
+            "1d": 0.34,
+            "1w": -0.94,
+            "1m": 0.83
+          },
+          "technical": {
+            "rsi": 40.7,
+            "sma_50_dev": 0.84
+          },
+          "last_close_date": "2025-12-30"
+        }
+      ],
+      "crypto": [
+        {
+          "symbol": "BTC-USD",
+          "name": "Bitcoin",
+          "price": 88589.49,
+          "changes": {
+            "1d": 0.18,
+            "1w": 1.48,
+            "1m": -4.24
+          },
+          "technical": {
+            "rsi": 64.6,
+            "sma_50_dev": -1.4
+          },
+          "last_close_date": "2025-12-31"
+        },
+        {
+          "symbol": "ETH-USD",
+          "name": "Ethereum",
+          "price": 2975.17,
+          "changes": {
+            "1d": 0.13,
+            "1w": 1.69,
+            "1m": -8.09
+          },
+          "technical": {
+            "rsi": 68.6,
+            "sma_50_dev": -1.42
+          },
+          "last_close_date": "2025-12-31"
+        }
+      ],
+      "indices": [
+        {
+          "symbol": "^GSPC",
+          "name": "S&P 500",
+          "price": 6896.24,
+          "changes": {
+            "1d": -0.14,
+            "1w": 0.26,
+            "1m": 1.23
+          },
+          "technical": {
+            "rsi": 55.7,
+            "sma_50_dev": 1.41
+          },
+          "last_close_date": "2025-12-30"
+        },
+        {
+          "symbol": "^IXIC",
+          "name": "Nasdaq",
+          "price": 23419.08,
+          "changes": {
+            "1d": -0.24,
+            "1w": -0.04,
+            "1m": 0.62
+          },
+          "technical": {
+            "rsi": 46.5,
+            "sma_50_dev": 0.76
+          },
+          "last_close_date": "2025-12-30"
+        },
+        {
+          "symbol": "^NSEI",
+          "name": "Nifty 50",
+          "price": 26144.1,
+          "changes": {
+            "1d": 0.79,
+            "1w": -0.13,
+            "1m": 0.43
+          },
+          "technical": {
+            "rsi": 64.6,
+            "sma_50_dev": 0.79
+          },
+          "last_close_date": "2025-12-31"
+        },
+        {
+          "symbol": "^VIX",
+          "name": "VIX",
+          "price": 14.33,
+          "changes": {
+            "1d": 0.92,
+            "1w": 1.78,
+            "1m": -16.88
+          },
+          "technical": {
+            "rsi": 36.9,
+            "sma_50_dev": -18.31
+          },
+          "last_close_date": "2025-12-30"
+        }
+      ],
+      "forex": [
+        {
+          "symbol": "INR=X",
+          "name": "USD/INR",
+          "price": 89.85,
+          "changes": {
+            "1d": -0.05,
+            "1w": 0.28,
+            "1m": 0.27
+          },
+          "technical": {
+            "rsi": 49.1,
+            "sma_50_dev": 0.7
+          },
+          "last_close_date": "2025-12-31"
+        }
+      ]
+    }
+  },
+  "sentiment": {
+    "score": 73,
+    "label": "Greed",
+    "rationale": "Due to the absence of specific news headlines, the score is derived exclusively from the provided technical indicators. The VIX at 14.33 contributes a high 'Extreme Greed' score of 93, indicating significant market complacency and low implied volatility. This is tempered by the S&P 500's flat weekly performance (0.26%), which contributes a Neutral score of 53. The resulting average places the overall market sentiment in the Greed territory."
+  },
+  "market_regime": {
+    "regime": "Goldilocks / Risk-On",
+    "rationale": "株高・金利低下の典型的なゴルディロックス相場。",
+    "signals": {
+      "sp500_1w": "0.26%",
+      "yield_1w": "-0.94%",
+      "gold_1w": "-3.13%",
+      "usd_jpy_1w": "0.0%",
+      "em_fx_1w_avg": "0.09%"
+    }
+  },
+  "calendar": []
+}

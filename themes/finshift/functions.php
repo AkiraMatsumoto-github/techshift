@@ -392,3 +392,268 @@ function logishift_get_popular_posts_api( $request ) {
 
 // Force enable Application Passwords for Local HTTP dev
 add_filter( 'wp_is_application_passwords_available', '__return_true' );
+
+/**
+ * FinShift DB Integration
+ * Defines custom tables and REST API endpoints for Market Data, Analysis, and Economic Events.
+ */
+
+// Table Names
+define('FINSHIFT_TBL_MARKET_SNAPSHOTS', 'fs_market_snapshots');
+define('FINSHIFT_TBL_DAILY_ANALYSIS', 'fs_daily_analysis');
+define('FINSHIFT_TBL_ECONOMIC_EVENTS', 'fs_economic_events');
+
+/**
+ * Initialize Tables on Theme Switch / Admin Init
+ */
+function finshift_initialize_tables() {
+    global $wpdb;
+    $charset_collate = $wpdb->get_charset_collate();
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+    // 1. fs_market_snapshots
+    $sql_snapshots = "CREATE TABLE " . $wpdb->prefix . FINSHIFT_TBL_MARKET_SNAPSHOTS . " (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        date date NOT NULL,
+        data_json json NOT NULL,
+        sp500_close float DEFAULT NULL,
+        us10y_yield float DEFAULT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id),
+        UNIQUE KEY date (date)
+    ) $charset_collate;";
+    dbDelta( $sql_snapshots );
+
+    // 2. fs_daily_analysis
+    $sql_analysis = "CREATE TABLE " . $wpdb->prefix . FINSHIFT_TBL_DAILY_ANALYSIS . " (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        date date NOT NULL,
+        region varchar(10) NOT NULL,
+        sentiment_score float DEFAULT NULL,
+        sentiment_label varchar(20) DEFAULT NULL,
+        market_regime varchar(50) DEFAULT NULL,
+        scenarios_json json DEFAULT NULL,
+        full_briefing_md text DEFAULT NULL,
+        wp_post_id bigint(20) DEFAULT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id),
+        UNIQUE KEY region_date (region, date)
+    ) $charset_collate;";
+    dbDelta( $sql_analysis );
+
+    // 3. fs_economic_events
+    $sql_events = "CREATE TABLE " . $wpdb->prefix . FINSHIFT_TBL_ECONOMIC_EVENTS . " (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        event_date date NOT NULL,
+        country varchar(50) DEFAULT NULL,
+        event_name varchar(255) NOT NULL,
+        impact varchar(20) DEFAULT 'Medium',
+        description text DEFAULT NULL,
+        source varchar(50) DEFAULT 'system',
+        created_at datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id),
+        UNIQUE KEY event_unique (event_date, event_name, country)
+    ) $charset_collate;";
+    dbDelta( $sql_events );
+}
+add_action( 'after_switch_theme', 'finshift_initialize_tables' );
+// Also run on admin_init once to ensure created if theme already active
+function finshift_check_tables() {
+    if ( ! get_option( 'finshift_tables_created' ) ) {
+        finshift_initialize_tables();
+        update_option( 'finshift_tables_created', true );
+    }
+}
+add_action( 'admin_init', 'finshift_check_tables' );
+
+/**
+ * Register REST API Routes
+ */
+function finshift_register_api_routes() {
+    $namespace = 'finshift/v1';
+
+    // Market Snapshots
+    register_rest_route( $namespace, '/market-snapshots', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_market_snapshot',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( $namespace, '/market-snapshots/(?P<date>\d{4}-\d{2}-\d{2})', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_get_market_snapshot',
+        'permission_callback' => '__return_true',
+    ) );
+
+    // Daily Analysis
+    register_rest_route( $namespace, '/daily-analysis', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_daily_analysis',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+
+    // Economic Events
+    register_rest_route( $namespace, '/economic-events', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_economic_event',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( $namespace, '/economic-events/(?P<date>\d{4}-\d{2}-\d{2})', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_get_economic_event',
+        'permission_callback' => '__return_true',
+    ) );
+}
+add_action( 'rest_api_init', 'finshift_register_api_routes' );
+
+/**
+ * Auth Check (Application Passwords or Admin)
+ */
+function finshift_api_auth_check() {
+    return current_user_can( 'edit_posts' );
+}
+
+/**
+ * API Callbacks
+ */
+function finshift_api_save_market_snapshot( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_MARKET_SNAPSHOTS;
+    
+    $params = $request->get_json_params();
+    $data_json = json_encode( $params['data'] );
+    
+    // Extract key metrics for columns
+    $sp500 = null; 
+    $us10y = null;
+    
+    // Simple extraction logic (adjust based on actual JSON structure)
+    if (isset($params['data']['indices'])) {
+        foreach($params['data']['indices'] as $idx) {
+            if ($idx['symbol'] === '^GSPC') $sp500 = $idx['price'];
+        }
+    }
+    if (isset($params['data']['bonds'])) {
+        foreach($params['data']['bonds'] as $bnd) {
+            if ($bnd['symbol'] === '^TNX') $us10y = $bnd['yield'];
+        }
+    }
+
+    $result = $wpdb->replace( 
+        $table, 
+        array( 
+            'date' => $params['date'],
+            'data_json' => $data_json,
+            'sp500_close' => $sp500,
+            'us10y_yield' => $us10y,
+        ),
+        array( '%s', '%s', '%f', '%f' ) 
+    );
+
+    if ( $result === false ) return new WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
+    return array( 'success' => true, 'id' => $wpdb->insert_id );
+}
+
+function finshift_api_get_market_snapshot( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_MARKET_SNAPSHOTS;
+    $date = $request['date'];
+    $row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE date = %s", $date ) );
+    if ( ! $row ) return new WP_Error( 'not_found', 'Data not found', array( 'status' => 404 ) );
+    
+    $row->data_json = json_decode( $row->data_json );
+    return $row;
+}
+
+function finshift_api_save_daily_analysis( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_DAILY_ANALYSIS;
+    $params = $request->get_json_params();
+
+    $result = $wpdb->replace( 
+        $table, 
+        array( 
+            'date' => $params['date'],
+            'region' => $params['region'],
+            'sentiment_score' => $params['sentiment_score'],
+            'sentiment_label' => $params['sentiment_label'],
+            'market_regime' => $params['market_regime'],
+            'scenarios_json' => json_encode( $params['scenarios'] ),
+            'full_briefing_md' => $params['full_briefing_md'], // Optional
+            'wp_post_id' => $params['wp_post_id']
+        ),
+        array( '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%d' ) 
+    );
+    
+    if ( $result === false ) return new WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
+    return array( 'success' => true );
+}
+
+function finshift_api_save_economic_event( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ECONOMIC_EVENTS;
+    $params = $request->get_json_params();
+
+    // Use replace to handle uniqueness on (date, name, country)
+    $result = $wpdb->replace( 
+        $table, 
+        array( 
+            'event_date' => $params['event_date'],
+            'country' => $params['country'],
+            'event_name' => $params['event_name'],
+            'impact' => $params['impact'],
+            'description' => $params['description'],
+            'source' => $params['source']
+        ),
+        array( '%s', '%s', '%s', '%s', '%s', '%s' ) 
+    );
+    
+    if ( $result === false ) return new WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
+    return array( 'success' => true );
+}
+
+function finshift_api_get_economic_event( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ECONOMIC_EVENTS;
+    $date = $request['date'];
+    // Return ALL events for that date
+    $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE event_date = %s", $date ) );
+    return $rows;
+}
+
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'finshift/v1', '/market-snapshots', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_market_snapshot',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( 'finshift/v1', '/market-snapshots/(?P<date>\d{4}-\d{2}-\d{2})', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_get_market_snapshot',
+        'permission_callback' => '__return_true',
+    ) );
+    register_rest_route( 'finshift/v1', '/daily-analysis', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_daily_analysis',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( 'finshift/v1', '/economic-events', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_economic_event',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( 'finshift/v1', '/economic-events/(?P<date>\d{4}-\d{2}-\d{2})', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_get_economic_event',
+        'permission_callback' => '__return_true',
+    ) );
+    register_rest_route( 'finshift/v1', '/update-schema', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_update_schema',
+        'permission_callback' => '__return_true',
+    ) );
+} );
+
+function finshift_api_update_schema( $request ) {
+    finshift_initialize_tables();
+    return array( 'success' => true, 'message' => 'Schema updated via dbDelta' );
+}
