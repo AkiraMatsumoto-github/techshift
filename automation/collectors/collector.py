@@ -38,10 +38,26 @@ DEFAULT_SOURCES = {
     "bitcoin_magazine": "https://bitcoinmagazine.com/.rss/full/",
 }
 
+# Region to Source Mapping
+REGION_MAPPING = {
+    "US": ["yahoo_finance_top", "cnbc_world"],
+    "JP": ["yahoo_jp_business"],
+    "CN": ["36kr_china"],
+    "IN": ["economictimes"],
+    "ID": ["antara_news_biz"],
+    "Crypto": ["coindesk", "bitcoin_magazine"],
+    "Global": ["yahoo_finance_top", "cnbc_world"] # Global fallback
+}
+
 def fetch_rss(url, source_name, days=None, hours=None):
     """Fetches and parses an RSS feed."""
     print(f"Fetching {source_name} from {url}...")
-    feed = feedparser.parse(url)
+    try:
+        feed = feedparser.parse(url)
+    except Exception as e:
+        print(f"Error fetching {url}: {e}")
+        return []
+
     articles = []
     
     if feed.bozo:
@@ -94,37 +110,70 @@ def fetch_rss(url, source_name, days=None, hours=None):
                 "url": entry.link,
                 "published": str(published_parsed) if published_parsed else "Unknown",
                 "source": source_name,
-                "summary": entry.summary if hasattr(entry, 'summary') else ""
+                "summary": entry.summary if hasattr(entry, 'summary') else "",
+                # Guess region based on source if not provided, basically the source map knows it
+                "region": next((r for r, srcs in REGION_MAPPING.items() if source_name in srcs), "Global")
             })
             
     return articles
 
+def collect_articles(region=None, days=None, hours=None):
+    """
+    Collect articles for a specific region or all.
+    """
+    targets = {}
+    if region and region in REGION_MAPPING:
+        source_keys = REGION_MAPPING[region]
+        for key in source_keys:
+            if key in DEFAULT_SOURCES:
+                targets[key] = DEFAULT_SOURCES[key]
+    elif region == "all" or region is None:
+        targets = DEFAULT_SOURCES
+    else:
+        # Try to find by keys directly? or just return empty
+        print(f"Region {region} not found in mapping.")
+        return []
+        
+    all_articles = []
+    for name, url in targets.items():
+        articles = fetch_rss(url, name, days=days, hours=hours)
+        all_articles.extend(articles)
+        time.sleep(1)
+        
+    return all_articles
+
 def main():
     parser = argparse.ArgumentParser(description="Collect articles from RSS feeds.")
-    parser.add_argument("--source", type=str, help="Comma-separated list of source keys (e.g., techcrunch,wsj_logistics) or 'all'", default="all")
+    parser.add_argument("--source", type=str, help="Comma-separated list of source keys or 'all'", default=None)
+    parser.add_argument("--region", type=str, help="Region code (US, JP, CN, IN, ID, Crypto) or 'all'", default="all")
     parser.add_argument("--dry-run", action="store_true", help="Print results to stdout instead of saving (currently only prints)")
     parser.add_argument("--days", type=int, help="Filter articles published within last N days")
     parser.add_argument("--hours", type=int, help="Filter articles published within last N hours")
 
     args = parser.parse_args()
 
-    target_sources = {}
-    if args.source == "all":
-        target_sources = DEFAULT_SOURCES
-    else:
-        keys = args.source.split(",")
-        for key in keys:
-            key = key.strip()
-            if key in DEFAULT_SOURCES:
-                target_sources[key] = DEFAULT_SOURCES[key]
-            else:
-                print(f"Warning: Source '{key}' not found in defaults.")
-
     all_articles = []
-    for name, url in target_sources.items():
-        articles = fetch_rss(url, name, days=args.days, hours=args.hours)
-        all_articles.extend(articles)
-        time.sleep(1) # Be nice to servers
+    
+    if args.source:
+        # Source mode (Legacy/Direct)
+        target_sources = {}
+        if args.source == "all":
+            target_sources = DEFAULT_SOURCES
+        else:
+            keys = args.source.split(",")
+            for key in keys:
+                key = key.strip()
+                if key in DEFAULT_SOURCES:
+                    target_sources[key] = DEFAULT_SOURCES[key]
+        
+        for name, url in target_sources.items():
+            articles = fetch_rss(url, name, days=args.days, hours=args.hours)
+            all_articles.extend(articles)
+            time.sleep(1)
+            
+    else:
+        # Region mode (New)
+        all_articles = collect_articles(args.region, days=args.days, hours=args.hours)
 
     # Output results
     print(f"\nFound {len(all_articles)} articles.")

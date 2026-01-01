@@ -9,3 +9,4 @@ lxml==5.1.0
 requests==2.31.0
 tweepy
 yfinance
+mysql-connector-python

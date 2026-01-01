@@ -127,11 +127,6 @@ Automation側で生成したデータを、WordPressテーマ側でどう表示�
 
 ### 3.4. Workflow Setup (GitHub Actions)
 - [ ] **Daily Workflows**: 国ごとのデイリー・ブリーフィングの定期実行設定。
-    - `workflows/us_daily.yml`: 米国市場 (NY Close後)
-    - `workflows/china_daily.yml`: 中国市場 (CST 終了後)
-    - `workflows/india_daily.yml`: インド市場 (IST 終了後)
-    - `workflows/japan_daily.yml`: 日本市場 (大引け後)
-    - `workflows/indonesia_daily.yml`: インドネシア市場 (JKT 終了後)
 - [ ] **Weekly Summary**: `workflows/weekly_summary.yml` (毎週日曜夜) の設定。
 - [ ] **Market Ticker**: `workflows/market_ticker.yml` (Risk Monitor更新用, 20分毎) の設定。
 

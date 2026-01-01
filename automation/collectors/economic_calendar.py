@@ -26,7 +26,7 @@ IMPORTANT_KEYWORDS = [
     "ISM", "PMI", "Caixin", "Tankan",
     "Retail Sales",
     "Consumer Confidence",
-    "Housing Starts",
+    "Housing Starts", "Permits",
     "BOJ", "Bank of Japan",
     "ECB", "European Central Bank",
     "PBOC", "People's Bank of China",
@@ -77,15 +77,22 @@ def fetch_and_save_calendar(days=14):
              continue
         
         cols = row.find_all('td')
-        if not cols or len(cols) < 4: continue
+        if not cols or len(cols) < 4: 
+            continue
         
+        # Col 0: Event Name
+        # Col 1: Region
+        # Col 2: Time
+        # Col 3: Period
+        event = cols[0].get_text(strip=True)
         region = cols[1].get_text(strip=True)
-        event = cols[2].get_text(strip=True)
         
         # Keyword Filter
-        if not any(kw.lower() in event.lower() for kw in IMPORTANT_KEYWORDS): continue
+        if not any(kw.lower() in event.lower() for kw in IMPORTANT_KEYWORDS): 
+            continue
         # Region Filter
-        if not any(r in region for r in TARGET_REGIONS) and "USD" not in region: continue
+        if not any(r in region for r in TARGET_REGIONS) and "USD" not in region: 
+            continue
         
         impact = "High" if any(x in event for x in ["Fed", "FOMC", "GDP", "CPI", "Payrolls"]) else "Medium"
         description = row.get_text(" | ", strip=True) # Full row as desc
@@ -99,6 +106,7 @@ def fetch_and_save_calendar(days=14):
         })
         
         print(f"Saving Event: {current_date} [{region}] {event}")
+
         
         db.save_economic_event(
             event_date=current_date,

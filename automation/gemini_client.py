@@ -98,6 +98,8 @@ class GeminiClient:
         prompts = {
             # --- FinShift Specific Prompts ---
             
+            # [Standard Pipeline] Used for generating individual articles (1:1) based on a specific keyword/topic.
+            # This is NOT used for the Daily Briefing aggregation.
             "market-analysis": textwrap.dedent(f"""
             {context_section}あなたは金融市場のシニア・ストラテジスト（元ヘッジファンド運用者）です。
             本日の市場ニュースを統合し、投資家向けの「市況分析（Daily Briefing）」を執筆してください。
@@ -109,28 +111,29 @@ class GeminiClient:
             - 「なぜ動いたか」だけでなく「明日どうなるか」を知りたい個人投資家
             
             ## 構成案
-            1. **Market Pulse (本日の結論)**:
+            1. **【市場概況】 (Market Overview)**:
                - 本日の市場全体のムード（Risk-on / Risk-off）を一言で定義。
                - 最も影響力のあったドライバー（材料）を端的に提示。
-            2. **Deep Dive (主要ニュースの深掘り)**:
-               - {keyword} に関するニュースの詳細分析。
-               - 単なる事実の羅列ではなく、「市場参加者がこれをどう解釈したか（織り込み度合い）」を分析。
-            3. **Key Levels (テクニカル視点)**:
-               - 関連指数（S&P500, 日経平均など）や銘柄の重要な価格帯（サポート/レジスタンス）に言及。
-            4. **Scenario (シナリオ)**:
-               - **Bull Case (強気)**: 上昇が続くための条件。
-               - **Bear Case (弱気)**: 下落リスクへの警戒点。
-            5. **Actionable Insights (投資家の行動)**:
-               - 「様子見」「押し目買い」「利益確定」など、具体的なスタンスの提案。
+            2. **【詳細分析】 (Deep Dive)**:
+               - {keyword} に関するニュースを深掘り。
+               - 「市場参加者がこれをどう解釈したか（織り込み度合い）」を分析。
+            3. **【注目ライン】 (Key Levels)**:
+               - 関連指数や銘柄の重要な価格帯（サポート/レジスタンス）に到達したか、意識されているかを解説。
+            4. **【シナリオ分析】**:
+               - **強気 (Bull)**: 上昇継続のための条件。
+               - **弱気 (Bear)**: 下落リスク・警戒点。
+            5. **【投資戦略】 (Actionable Insights)**:
+               - 「様子見」「押し目買い」「利益確定」など、具体的なスタンスを提案。
             
             ## 執筆ルール
-            - **トーン**: 冷静、客観的、プロフェッショナル。「〜だ。」「〜である。」の常体、または信頼感のある「です・ます」調（一貫性を保つこと）。
-            - **専門性**: 金融用語（タカ派/ハト派、ショートカバー、織り込み済み、RSIなど）を適切に使用し、玄人好みの内容にする。
-            - **データ重視**: 数値（株価、騰落率、金利、指数値）なしの曖昧な表現は禁止。
+            - **見出し**: 全て日本語を使用すること（例：## 市場概況）。
+            - **トーン**: 冷静、客観的、プロフェッショナル。「です・ます」調で統一し、読みやすさを重視。
+            - **専門性**: 金融用語を適切に使用しつつ、論理的なつながりを明確にする。
+            - **データ重視**: 数値（株価、騰落率、金利）を必ず引用する。
             
             ## フォーマット
             - Markdown形式
-            - 3000文字程度
+            - 4000文字程度
             - **重要な数値データはMarkdownテーブルで整理する**
             - HTMLタグ使用禁止
             """),
@@ -459,18 +462,22 @@ class GeminiClient:
         You are an expert at creating image generation prompts for Imagen 3.0.
         
         Based on the following article information, create a detailed English image prompt that:
-        1. Captures the main theme and context of the article (Financial Markets, Investment, Economy)
-        2. Is specific and descriptive but metaphorical (e.g., Bull vs Bear, Digital Charts, Global Trade)
-        3. **Style**: Premium, High-tech, Financial Professional, Bloomberg/WallStreetJournal style.
-        4. **Lighting**: Cinematic, Cyberpunk (for Crypto/Tech) or Clean Corporate (for Stocks).
-        5. Avoids text, human faces, or complex diagrams.
-        
-        Article Title: {title}
-        Article Type: {article_type}
-        Content Summary: {content_summary[:500]}
-        
-        Generate a single, detailed English image prompt (max 100 words) that would create a compelling hero image for this article.
-        Output ONLY the prompt text, no explanations.
+    1. Captures the main theme and context of the article (Financial Markets, Investment, Economy)
+    2. **Visual Metaphors**: Use diverse metaphors beyond just animals. Consider:
+       - **Abstract**: Geometric patterns, digital data flows, balancing scales, architectural structures, weather elements (storm vs calm).
+       - **Cityscapes**: Futuristic financial districts, glowing networks.
+       - **Kinetic**: Moving gears, rising/falling tides, accelerating lights.
+       - **Animals**: Use Bull/Bear ONLY if explicitly fitting, but prefer subtler symbolism.
+    3. **Style**: Premium, High-tech, Financial Professional, Bloomberg/WallStreetJournal style.
+    4. **Lighting**: Cinematic, Cyberpunk (for Crypto/Tech) or Clean Corporate (for Stocks).
+    5. Avoids text, human faces, or complex diagrams.
+    
+    Article Title: {title}
+    Article Type: {article_type}
+    Content Summary: {content_summary[:2000]}
+    
+    Generate a single, detailed English image prompt (max 100 words) that would create a compelling hero image for this article.
+    Output ONLY the prompt text, no explanations.
         """)
         
         try:
@@ -786,8 +793,217 @@ class GeminiClient:
             
             return None
             
+            return None
+            
         except Exception as e:
             print(f"Duplication check failed: {e}")
+            return None
+
+    # --- Daily Briefing Methods ---
+
+    def check_relevance(self, title, summary):
+        """
+        Check if an article is relevant to financial markets/economy using Gemini Flash.
+        Returns: (is_relevant: bool, reason: str)
+        """
+        prompt = f"""
+        You are a financial news filter. Determine if the following article is relevant to **financial markets, economy, business, or investment**.
+        
+        Criteria for "Relevant":
+        - Reports on stock markets, companies, earnings, economic indicators (GDP, CPI), central banks.
+        - Discusses commodities, crypto, forex, or trade policies.
+        - Covers major geopolitical events affecting markets.
+        
+        Criteria for "Not Relevant" (Noise):
+        - Lifestyle insights, health tips, pure entertainment/celebrity gossip.
+        - Sports scores (unless business related).
+        - Shopping guides/reviews (unless significant for retail sector).
+        - Career advice, HR tips, general "how to be productive".
+        
+        Article:
+        Title: "{title}"
+        Summary: "{summary}"
+        
+        Output JSON:
+        {{
+            "is_relevant": true/false,
+            "reason": "Brief explanation"
+        }}
+        """
+        
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-2.0-flash-exp', # Use fast model
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            res_json = json.loads(response.text)
+            return res_json.get('is_relevant', False), res_json.get('reason', 'Unknown')
+        except Exception as e:
+            print(f"Relevance check failed: {e}")
+            # Default to True to match 'inclusive' policy if AI fails, but maybe False to avoid spam? 
+            # Let's say True but log reason.
+            return True, f"AI Check Failed: {e}"
+
+    def analyze_daily_market(self, context_news_list, market_data_str, economic_events_str, region):
+        """
+        Analyze multiple news and market data to generate market insights.
+        Returns: JSON with sentiment, regime, drivers, scenarios.
+        """
+        news_text = "\n".join([f"- [{art['published_at']}] {art['title']}: {art['summary'][:200]}" for art in context_news_list])
+        
+        prompt = textwrap.dedent(f"""
+        You are a Senior Market Strategist. Analyze the provided data for the **{region}** market.
+        
+        ## Input Data
+        
+        ### 1. Market Data (Snapshot)
+        {market_data_str}
+        
+        ### 2. Economic Calendar (Upcoming)
+        {economic_events_str}
+        
+        ### 3. Key News (Last 24h)
+        {news_text}
+        
+        ## Analysis Tasks
+        1. **Market Regime**: Define the current mood (e.g., "Risk-On", "Risk-Off", "Goldilocks", "Stagflation Fear").
+        2. **Sentiment Score**: 0 (Extreme Fear) to 100 (Extreme Greed). Estimate based on news tone and VIX/Market moves.
+        3. **Primary Driver**: What single factor is driving prices today? (e.g. "Fed Pivot Hope", "China Slowdown").
+        4. **Scenarios**:
+           - **Bull Case**: What needs to happen for prices to rise?
+           - **Bear Case**: What are the downside risks?
+        
+        ## Output JSON
+        {{
+            "market_regime": "Risk-On",
+            "sentiment_score": 75,
+            "sentiment_label": "Greed",
+            "primary_driver": "...",
+            "scenarios": {{
+                "bull": {{ "condition": "...", "probability": "Low/Medium/High" }},
+                "bear": {{ "condition": "...", "probability": "Low/Medium/High" }}
+            }},
+            "reasoning": "Brief reasoning for the score"
+        }}
+        """)
+        
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-3-pro-preview', # High reasoning model
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            result = json.loads(response.text)
+            if isinstance(result, list):
+                if len(result) > 0:
+                    return result[0]
+                else:
+                    return {}
+            return result
+        except Exception as e:
+            print(f"Market analysis failed: {e}")
+            return None
+
+    def write_briefing(self, analysis_result, region, context_news=None, market_data_str=None, events_str=None, date_str=None):
+        """
+        [Daily Briefing Pipeline]
+        Write the final Daily Briefing article in Markdown based on the analysis and raw context.
+        This method aggregates multiple data sources (N:1) into a single comprehensive report.
+        """
+        # Prepare context strings if provided
+        news_text = ""
+        if context_news:
+             news_text = "\n".join([f"- {art['title']}" for art in context_news[:10]]) # Limit to top 10 for context
+
+        prompt = textwrap.dedent(f"""
+        You are a Senior Market Analyst at a top-tier Hedge Fund. Write a "Daily Briefing" for the **{region}** market.
+        
+        ## Input Data
+        
+        ### 1. Strategy & Analysis (AI Derived)
+        {json.dumps(analysis_result, ensure_ascii=False, indent=2)}
+        
+        ### 2. Market Snapshot (Raw Data)
+        {market_data_str if market_data_str else "N/A"}
+        
+        ### 3. Key News Headlines
+        {news_text if news_text else "N/A"}
+        
+        ### 4. Upcoming Events
+        {events_str if events_str else "N/A"}
+        
+        ## Goal
+        Create a **highly practical, data-dense, and readable** report for Swing Traders. 
+        Avoid generic statements. Explain "Why" things moved using specific correlations (e.g., "Yields up -> Tech down").
+        
+        ## Tone & Style
+        - **Professional & Insightful**: Like a Bloomberg terminal note or a bank's morning note.
+        - **Japanese Language**: Natural, sophisticated financial Japanese.
+        - **Data-First**: Cite specific prices, % changes, and levels from the Raw Data.
+        
+        ## Structure & Requirements (Japanese Headers Only)
+        
+        1. **Title**: Catchy, specific, includes the primary driver. (e.g. "CPIショックでハイテク急落；VIXは20台へ")
+        
+        2. **【{date_str if date_str else 'YYYY/MM/DD'}の市況概要】 (Market Pulse)**
+           - Concisely state the Regime and Sentiment. 
+           - **Bold** key numbers.
+           - Explain the "Big Picture".
+        
+        3. **【相場変動の主因】 (Key Drivers)**
+           - Analyze the primary driver. Connect it to asset moves.
+           - *Must* cite specific news or data points from Input.
+           - Explain the mechanism.
+        
+        4. **【注目アセット】 (Asset Watch)**
+           - Markdown table summarizing key asset moves.
+           - Columns: 資産 (Asset), 価格 (Price), 変化 (Change), コメント (Comment).
+           - Select 3-4 relevant assets.
+        
+        5. **【シナリオ分析】 (Scenarios)**
+           - **短期シナリオ (Short-term: 24-48h)**:
+             - **メイン (Main)**: Most likely path. (Probability %)
+             - **アップサイド (Bull)**: Trigger & Target.
+             - **ダウンサイド (Bear)**: Trigger & Risk level.
+             - **着目イベント**: Specific economic indicator or event to watch in the next 48h.
+           
+           - **中期シナリオ (Mid-term: 1-2 Weeks)**:
+             - **見通し**: Bullish/Neutral/Bearish.
+             - **重要イベント**: Upcoming key events (e.g. FOMC, Earnings) that will define this trend.
+             - **リスク**: What could derail the trend?
+        
+        6. **【投資戦略】 (Outlook)**
+           - Conclude with clear stance: "押し目買い (Buy Dips)", "戻り売り (Sell Rallies)", "様子見 (Wait)".
+           - Provide concrete "Risk Level" (Support/Resistance).
+        
+        ## Format Rules
+        ## Format Rules
+        - 日本語で4000文字程度
+        - Use standard Markdown.
+        - **First line MUST be the specific Catchy Title prefixed with `#`** (e.g. `# CPIショックで...`).
+        - **DO NOT** use generic titles like "Daily Briefing" or "Market Analysis".
+        - **DO NOT** include metadata like "Date:", "Author:", or "Created by" at the top. Start directly with the Title.
+        - Use H2 for sections (e.g., ## 【市場概況】).
+        - **Use Japanese for ALL Section Headers.**
+        - Use Tables where requested.
+        """)
+        
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-3-pro-preview',
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            print(f"Briefing writing failed: {e}")
             return None
 
 if __name__ == "__main__":
