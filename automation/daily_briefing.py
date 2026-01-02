@@ -43,38 +43,69 @@ def phase_1_collection(args):
     articles = collect_articles(region=collect_region, hours=args.hours)
     print(f"Fetched {len(articles)} raw articles.")
     
-    new_count = 0
+    today_date = datetime.now()
+    
+    # --- Optimization: Batch Deduplication ---
+    print(">> Checking Database for duplicates (Batch)...")
+    art_map = {}
+    all_hashes = []
+    
     for art in articles:
         u_hash = get_url_hash(art['url'])
-        if db.check_article_exists(u_hash):
-            continue
+        art['url_hash'] = u_hash
+        all_hashes.append(u_hash)
+        art_map[u_hash] = art
+        
+    known_hashes = db.check_known_hashes(all_hashes)
+    print(f"Skipped {len(known_hashes)} existing articles.")
+    
+    new_articles = [art for art in articles if art['url_hash'] not in known_hashes]
+    
+    if not new_articles:
+        print("No new articles to process.")
+        # Proceed to market data anyway
+    
+    # --- Optimization: Parallel Processing ---
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    
+    def process_article(art):
+        """Worker function for threading"""
+        try:
+             # Relevance Check (AI)
+            is_relevant, reason = gemini.check_relevance(art['title'], art['summary'])
             
-        # Relevance Check (AI)
-        # To save cost/time in dry-run or verification, one might skip this, but let's run it.
-        # Note: In collect_articles, we might want to batch this? But 1-by-1 is safer for now.
-        is_relevant, reason = gemini.check_relevance(art['title'], art['summary'])
-        
-        # Save
-        article_record = {
-            "url_hash": u_hash,
-            "title": art['title'],
-            "source": art['source'],
-            "region": art.get('region', 'Global'),
-            "published_at": art['published'],
-            "summary": art['summary'],
-            "is_relevant": is_relevant,
-            "relevance_reason": reason
-        }
-        if article_record['published_at'] == "Unknown":
-             article_record['published_at'] = datetime.now()
-        
-        if params_dry_run := args.dry_run:
-            print(f"[Dry-Run] Would save: {art['title']} (Relevant: {is_relevant})")
-        else:
-             db.save_article(article_record)
-             new_count += 1
-        
-    print(f"Saved {new_count} new articles.")
+            # Save
+            article_record = {
+                "url_hash": art['url_hash'],
+                "title": art['title'],
+                "source": art['source'],
+                "region": art.get('region', 'Global'),
+                "published_at": art['published'],
+                "summary": art['summary'],
+                "is_relevant": is_relevant,
+                "relevance_reason": reason
+            }
+            if article_record['published_at'] == "Unknown":
+                 article_record['published_at'] = today_date
+            
+            if args.dry_run:
+                return f"[Dry-Run] Processed: {art['title']} (Relevant: {is_relevant})"
+            else:
+                 db.save_article(article_record)
+                 return f"Saved: {art['title'][:20]}... (Relevant: {is_relevant})"
+        except Exception as e:
+            return f"Error processing {art['title'][:20]}...: {e}"
+
+    if new_articles:
+        print(f"Processing {len(new_articles)} new articles with ThreadPool (max_workers=5)...")
+        new_count = 0
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_art = {executor.submit(process_article, art): art for art in new_articles}
+            for future in as_completed(future_to_art):
+                print(future.result())
+                new_count += 1
+                
+        print(f"Finished processing {new_count} new articles.")
 
     # 2. Market Data
     # Always collect market data if we are in collection phase, as it's needed for analysis context

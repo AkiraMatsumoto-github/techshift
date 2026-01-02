@@ -68,6 +68,22 @@ class DBClient:
              return url_hash in res["exists"]
         return False
 
+    def check_known_hashes(self, hashes_list):
+        """
+        Batch check which hashes exist in DB.
+        Returns a set of existing hashes.
+        """
+        chunk_size = 100
+        existing = set()
+        
+        # Split into chunks to avoid huge payload
+        for i in range(0, len(hashes_list), chunk_size):
+            chunk = hashes_list[i:i + chunk_size]
+            res = self._post("articles/check", {"hashes": chunk})
+            if res and "exists" in res:
+                existing.update(res["exists"])
+        return existing
+
     def save_article(self, article):
         """
         Save an article via API.
