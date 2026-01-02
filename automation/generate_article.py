@@ -286,6 +286,12 @@ Select the most relevant ones (if any) and include them in the article using sta
     try:
         classifier = ArticleClassifier()
         classification = classifier.classify_article(title, content[:1000])
+        
+        # Override category if provided via arguments (Source of Truth)
+        if args.category:
+            print(f"Category forced by argument: {args.category}")
+            classification["category"] = args.category
+            
         print(f"Classification Result: {classification}")
         
         # Resolve IDs if not dry-run (or even in dry-run if we want to test lookup, but let's skip for speed)

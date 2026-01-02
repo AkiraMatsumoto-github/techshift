@@ -1,6 +1,7 @@
 import os
 import json
-import mysql.connector
+import requests
+from datetime import datetime, date
 from dotenv import load_dotenv
 
 # Load env from parent directory
@@ -9,200 +10,138 @@ load_dotenv(env_path)
 
 class DBClient:
     def __init__(self):
-        # Default to localhost:3308 for local dev (mapped in docker-compose)
-        self.host = os.getenv("DB_HOST", "localhost")
-        self.port = int(os.getenv("DB_PORT", 3308))
-        self.user = os.getenv("DB_USER", "wordpress")
-        self.password = os.getenv("DB_PASSWORD", "password")
-        self.database = os.getenv("DB_NAME", "wordpress")
+        self.wp_url = os.getenv("WP_URL")
+        self.wp_user = os.getenv("WP_USER")
+        self.wp_password = os.getenv("WP_APP_PASSWORD")
+        
+        # Fallback for WP_URL if ending in slash
+        if self.wp_url and self.wp_url.endswith('/'):
+            self.wp_url = self.wp_url[:-1]
 
-    def get_connection(self):
+        self.auth = (self.wp_user, self.wp_password)
+        self.api_url = f"{self.wp_url}/wp-json/finshift/v1"
+
+    def _post(self, endpoint, data):
         try:
-            conn = mysql.connector.connect(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                database=self.database
+            # Json serialize helper for dates
+            def json_serial(obj):
+                if isinstance(obj, (datetime, date)):
+                    return obj.isoformat()
+                raise TypeError ("Type %s not serializable" % type(obj))
+
+            resp = requests.post(
+                f"{self.api_url}/{endpoint}", 
+                data=json.dumps(data, default=json_serial), 
+                headers={'Content-Type': 'application/json'},
+                auth=self.auth
             )
-            return conn
-        except mysql.connector.Error as err:
-            print(f"Error connecting to DB: {err}")
-            raise
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            print(f"API Error (POST {endpoint}): {e}")
+            if isinstance(e, requests.exceptions.HTTPError):
+                 print(f"Response: {e.response.text}")
+            return None
 
-    def execute_query(self, query, params=None):
-        conn = self.get_connection()
-        cursor = conn.cursor()
+    def _get(self, endpoint, params=None):
         try:
-            cursor.execute(query, params)
-            conn.commit()
-            return cursor
-        except mysql.connector.Error as err:
-            print(f"Error executing query: {err}")
-            conn.rollback()
-            raise
-        finally:
-            cursor.close()
-            conn.close()
-            
-    def fetch_all(self, query, params=None):
-        conn = self.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        try:
-            cursor.execute(query, params)
-            return cursor.fetchall()
-        except mysql.connector.Error as err:
-            print(f"Error fetching data: {err}")
-            raise
-        finally:
-            cursor.close()
-            conn.close()
+            resp = requests.get(f"{self.api_url}/{endpoint}", params=params, auth=self.auth)
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            print(f"API Error (GET {endpoint}): {e}")
+            return None
 
-    def fetch_one(self, query, params=None):
-        conn = self.get_connection()
-        cursor = conn.cursor(dictionary=True)
-        try:
-            cursor.execute(query, params)
-            return cursor.fetchone()
-        except mysql.connector.Error as err:
-            print(f"Error fetching data: {err}")
-            raise
-        finally:
-            cursor.close()
-            conn.close()
-
-    # --- Specific Data Access Methods ---
+    # --- Reimplemented Methods ---
 
     def check_article_exists(self, url_hash):
-        query = "SELECT id FROM fs_articles WHERE url_hash = %s"
-        result = self.fetch_one(query, (url_hash,))
-        return result is not None
+        res = self._post("articles/check", {"hashes": [url_hash]})
+        if res and "exists" in res:
+             return url_hash in res["exists"]
+        return False
 
     def save_article(self, article):
         """
-        Save an article to fs_articles.
-        article: dict with title, url_hash, source, region, published_at, summary, is_relevant, relevance_reason
+        Save an article via API.
         """
-        query = """
-        INSERT INTO fs_articles 
-        (url_hash, title, source, region, published_at, summary, is_relevant, relevance_reason)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = (
-            article['url_hash'],
-            article['title'],
-            article.get('source'),
-            article.get('region'),
-            article.get('published_at'), # Should be datetime object or string
-            article.get('summary'),
-            article.get('is_relevant', True),
-            article.get('relevance_reason', "")
-        )
-        try:
-            self.execute_query(query, params)
-            print(f"Saved Article: {article['title'][:30]}...")
-        except mysql.connector.Error as err:
-            if err.errno == 1062: # Duplicate entry
-                print(f"Duplicate article skipped: {article['title'][:20]}...")
-            else:
-                print(f"Error saving article: {err}")
+        # Ensure dict keys match API expectation
+        # API expects: url_hash, title, source, region, published_at, summary, is_relevant, relevance_reason
+        # article dict usually has these.
+        res = self._post("articles", article)
+        if res and res.get('success'):
+            print(f"Saved Article: {article.get('title', '')[:30]}...")
+        else:
+            print(f"Failed to save article: {article.get('title', '')[:30]}...")
 
     def save_economic_event(self, event_date, event_name, country, impact, description, source):
-        """
-        Save economic event.
-        """
-        query = """
-        INSERT INTO fs_economic_events (event_date, event_name, country, impact, description, source)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        params = (event_date, event_name, country, impact, description, source)
-        self.execute_query(query, params)
+        data = {
+            "event_date": event_date,
+            "event_name": event_name,
+            "country": country,
+            "impact": impact,
+            "description": description,
+            "source": source
+        }
+        self._post("economic-events", data)
 
     def save_market_snapshot(self, date_str, data_json, vix, spx, us10y):
-        """
-        Save market snapshot.
-        date_str: YYYY-MM-DD
-        data_json: json string
-        """
-        query = """
-        INSERT INTO fs_market_snapshots (date, data_json, vix_close, spx_close, us10y_yield)
-        VALUES (%s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            data_json = VALUES(data_json),
-            vix_close = VALUES(vix_close),
-            spx_close = VALUES(spx_close),
-            us10y_yield = VALUES(us10y_yield)
-        """
-        params = (date_str, data_json, vix, spx, us10y)
-        self.execute_query(query, params)
+        # API expects { date, data: {...} } where data is the json object
+        # but data_json arg here is string.
+        try:
+            data_obj = json.loads(data_json)
+        except:
+            data_obj = {}
+            
+        payload = {
+            "date": date_str,
+            "data": data_obj 
+            # Note: API callback extracts sp500/us10y from 'data' automatically
+        }
+        self._post("market-snapshots", payload)
 
     def get_articles(self, region=None, hours=24, limit=50):
-        """
-        Get relevant articles for context.
-        If region is specified, filters by region + Global.
-        """
-        # Logic: 
-        # - Published within last `hours`
-        # - is_relevant = 1
-        # - Region matches OR Region='Global' (if region provided)
-        
-        query = """
-        SELECT title, summary, source, region, published_at 
-        FROM fs_articles 
-        WHERE is_relevant = 1 
-        AND published_at >= DATE_SUB(NOW(), INTERVAL %s HOUR)
-        """
-        params = [hours]
-        
-        if region and region != "Global":
-            query += " AND (region = %s OR region = 'Global')"
-            params.append(region)
-        elif region == "Global":
-            # For Global briefing, maybe include everything? or specific sources?
-            # Let's say Global includes everything for now, or major markets.
-            pass
+        params = {
+            "hours": hours,
+            "limit": limit
+        }
+        if region:
+            params["region"] = region
             
-        query += " ORDER BY published_at DESC LIMIT %s"
-        params.append(limit)
-        
-        return self.fetch_all(query, tuple(params))
+        res = self._get("articles", params)
+        return res if res else []
 
     def get_latest_market_snapshot(self):
-        query = "SELECT * FROM fs_market_snapshots ORDER BY date DESC LIMIT 1"
-        return self.fetch_one(query)
+        # Get list limit 1
+        res = self._get("market-snapshots", {"limit": 1})
+        if res and len(res) > 0:
+            # The API returns list of objects.
+            # Client code expects a specific dict structure?
+            # Existing code: snapshot['data_json'] (as dict), snapshot['date']...
+            # The API returns `data_json` as OBJECT already (decoded in PHP callback)
+            # wait, `finshift_api_get_market_snapshots`:
+            # foreach ($results as $row) { $row->data_json = json_decode( $row->data_json ); }
+            # So JSON response has `data_json` as an object/dict.
+            
+            # Legacy code expected what?
+            # daily_briefing.py: 
+            # market_data_str = json.dumps(market_snap['data_json']) if market_snap and 'data_json' in market_snap else "No Data"
+            
+            # Since requests .json() decodes the whole response, `res[0]['data_json']` will be a dict.
+            # So `json.dumps(res[0]['data_json'])` will work.
+            return res[0]
+        return None
 
     def get_upcoming_events(self, days=7):
-        query = """
-        SELECT * FROM fs_economic_events 
-        WHERE event_date BETWEEN CURRENT_DATE AND DATE_ADD(CURRENT_DATE, INTERVAL %s DAY)
-        ORDER BY event_date ASC
-        """
-        return self.fetch_all(query, (days,))
+        # API supports start_date (default today) and days
+        res = self._get("economic-events", {"days": days})
+        return res if res else []
 
     def save_daily_analysis(self, analysis_record):
-        """
-        Save daily analysis result.
-        """
-        query = """
-        INSERT INTO fs_daily_analysis 
-        (date, region, sentiment_score, sentiment_label, market_regime, scenarios_json, full_briefing_md)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            sentiment_score = VALUES(sentiment_score),
-            sentiment_label = VALUES(sentiment_label),
-            market_regime = VALUES(market_regime),
-            scenarios_json = VALUES(scenarios_json),
-            full_briefing_md = VALUES(full_briefing_md)
-        """
-        params = (
-            analysis_record['date'],
-            analysis_record['region'],
-            analysis_record.get('sentiment_score'),
-            analysis_record.get('sentiment_label'),
-            analysis_record.get('market_regime'),
-            json.dumps(analysis_record.get('scenarios', {})), # Ensure JSON string
-            analysis_record.get('full_briefing_md')
-        )
-        self.execute_query(query, params)
+        # API expects: date, region, sentiment_score, ...
+        # analysis_record matches.
+        self._post("daily-analysis", analysis_record)
 
+    def update_schema(self):
+        """Trigger remote DB schema update/initialization."""
+        self._get("update-schema")
 

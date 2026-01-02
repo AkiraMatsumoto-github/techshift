@@ -29,6 +29,12 @@ def phase_1_collection(args):
     print("\n=== Phase 1: Global Data Collection ===")
     db = DBClient()
     gemini = GeminiClient()
+    
+    # Ensure DB Schema is up to date
+    try:
+        db.update_schema()
+    except Exception as e:
+        print(f"Schema update warning: {e}")
 
     # 1. News Collection
     print(">> Collecting News...")

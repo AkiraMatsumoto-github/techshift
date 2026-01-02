@@ -401,6 +401,7 @@ add_filter( 'wp_is_application_passwords_available', '__return_true' );
 define('FINSHIFT_TBL_MARKET_SNAPSHOTS', 'fs_market_snapshots');
 define('FINSHIFT_TBL_DAILY_ANALYSIS', 'fs_daily_analysis');
 define('FINSHIFT_TBL_ECONOMIC_EVENTS', 'fs_economic_events');
+define('FINSHIFT_TBL_ARTICLES', 'fs_articles');
 
 /**
  * Initialize Tables on Theme Switch / Admin Init
@@ -454,6 +455,26 @@ function finshift_initialize_tables() {
         UNIQUE KEY event_unique (event_date, event_name, country)
     ) $charset_collate;";
     dbDelta( $sql_events );
+
+    // 4. fs_articles
+    $sql_articles = "CREATE TABLE " . $wpdb->prefix . FINSHIFT_TBL_ARTICLES . " (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        url_hash char(64) NOT NULL,
+        title varchar(512) NOT NULL,
+        source varchar(100) DEFAULT NULL,
+        region varchar(20) DEFAULT NULL,
+        published_at datetime DEFAULT NULL,
+        fetched_at datetime DEFAULT CURRENT_TIMESTAMP,
+        summary text DEFAULT NULL,
+        is_relevant tinyint(1) DEFAULT 1,
+        relevance_reason text DEFAULT NULL,
+        sentiment_score int(11) DEFAULT NULL,
+        PRIMARY KEY  (id),
+        UNIQUE KEY url_hash (url_hash),
+        KEY idx_region (region),
+        KEY idx_published (published_at)
+    ) $charset_collate;";
+    dbDelta( $sql_articles );
 }
 add_action( 'after_switch_theme', 'finshift_initialize_tables' );
 // Also run on admin_init once to ensure created if theme already active
@@ -473,9 +494,16 @@ function finshift_register_api_routes() {
 
     // Market Snapshots
     register_rest_route( $namespace, '/market-snapshots', array(
-        'methods' => 'POST',
-        'callback' => 'finshift_api_save_market_snapshot',
-        'permission_callback' => 'finshift_api_auth_check',
+        array(
+            'methods' => 'POST',
+            'callback' => 'finshift_api_save_market_snapshot',
+            'permission_callback' => 'finshift_api_auth_check',
+        ),
+        array(
+            'methods' => 'GET',
+            'callback' => 'finshift_api_get_market_snapshots',
+            'permission_callback' => '__return_true',
+        )
     ) );
     register_rest_route( $namespace, '/market-snapshots/(?P<date>\d{4}-\d{2}-\d{2})', array(
         'methods' => 'GET',
@@ -492,15 +520,68 @@ function finshift_register_api_routes() {
 
     // Economic Events
     register_rest_route( $namespace, '/economic-events', array(
-        'methods' => 'POST',
-        'callback' => 'finshift_api_save_economic_event',
-        'permission_callback' => 'finshift_api_auth_check',
+        array(
+            'methods' => 'POST',
+            'callback' => 'finshift_api_save_economic_event',
+            'permission_callback' => 'finshift_api_auth_check',
+        ),
+        array(
+            'methods' => 'GET',
+            'callback' => 'finshift_api_get_economic_events',
+            'permission_callback' => '__return_true',
+        )
     ) );
     register_rest_route( $namespace, '/economic-events/(?P<date>\d{4}-\d{2}-\d{2})', array(
         'methods' => 'GET',
         'callback' => 'finshift_api_get_economic_event',
         'permission_callback' => '__return_true',
     ) );
+
+    // Articles
+    register_rest_route( $namespace, '/articles/check', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_check_articles_exist',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( $namespace, '/articles', array(
+        'methods' => 'POST',
+        'callback' => 'finshift_api_save_article',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+    register_rest_route( $namespace, '/articles', array(
+        'methods' => 'GET',
+        'callback' => 'finshift_api_get_articles',
+        'permission_callback' => 'finshift_api_auth_check',
+    ) );
+}
+
+function finshift_api_get_market_snapshots( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_MARKET_SNAPSHOTS;
+    $limit = $request->get_param('limit') ? intval($request->get_param('limit')) : 1;
+    
+    $results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table ORDER BY date DESC LIMIT %d", $limit ) );
+    
+    foreach ($results as $row) {
+        $row->data_json = json_decode( $row->data_json );
+    }
+    return $results;
+}
+
+function finshift_api_get_economic_events( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ECONOMIC_EVENTS;
+    
+    // Support date range
+    $start_date = $request->get_param('start_date') ?: date('Y-m-d');
+    $days = $request->get_param('days') ? intval($request->get_param('days')) : 7;
+    $end_date = date('Y-m-d', strtotime("$start_date + $days days"));
+
+    $results = $wpdb->get_results( $wpdb->prepare( 
+        "SELECT * FROM $table WHERE event_date BETWEEN %s AND %s ORDER BY event_date ASC",
+        $start_date, $end_date
+    ) );
+    return $results;
 }
 add_action( 'rest_api_init', 'finshift_register_api_routes' );
 
@@ -617,6 +698,76 @@ function finshift_api_get_economic_event( $request ) {
     // Return ALL events for that date
     $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE event_date = %s", $date ) );
     return $rows;
+}
+
+function finshift_api_check_articles_exist( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ARTICLES;
+    $params = $request->get_json_params();
+    $hashes = $params['hashes']; // Expect list of hashes
+
+    if ( empty( $hashes ) ) return array( 'exists' => array() );
+
+    // Sanitize hashes (they are hex strings)
+    $escaped_hashes = array_map( function($h) { return "'" . esc_sql($h) . "'"; }, $hashes );
+    $hashes_str = implode(',', $escaped_hashes);
+
+    $results = $wpdb->get_results( "SELECT url_hash FROM $table WHERE url_hash IN ($hashes_str)" );
+    
+    $existing = array_column( $results, 'url_hash' );
+    return array( 'exists' => $existing );
+}
+
+function finshift_api_save_article( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ARTICLES;
+    $params = $request->get_json_params();
+
+    // Use replace or insert ignore? 
+    // Requirement is deduplication. If hash exists, we might want to update or skip.
+    // Client logic usually checks existence first. But INSERT IGNORE or ON DUPLICATE UPDATE is safer.
+    // Let's use $wpdb->replace which does DELETE + INSERT (might change ID).
+    // Or just custom query for INSERT IGNORE.
+    // Let's use replace for simplicity, assumption is hash is unique.
+
+    $result = $wpdb->replace( 
+        $table, 
+        array( 
+            'url_hash' => $params['url_hash'],
+            'title' => $params['title'],
+            'source' => $params['source'],
+            'region' => $params['region'],
+            'published_at' => $params['published_at'], // Ensure ISO format or mysql format
+            'summary' => $params['summary'],
+            'is_relevant' => isset($params['is_relevant']) ? $params['is_relevant'] : 1,
+            'relevance_reason' => isset($params['relevance_reason']) ? $params['relevance_reason'] : '',
+        ),
+        array( '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' ) 
+    );
+    
+    if ( $result === false ) return new WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
+    return array( 'success' => true, 'id' => $wpdb->insert_id );
+}
+
+function finshift_api_get_articles( $request ) {
+    global $wpdb;
+    $table = $wpdb->prefix . FINSHIFT_TBL_ARTICLES;
+    
+    $hours = $request->get_param('hours') ? intval($request->get_param('hours')) : 24;
+    $region = $request->get_param('region');
+    $limit = $request->get_param('limit') ? intval($request->get_param('limit')) : 50;
+
+    $query = "SELECT title, summary, source, region, published_at FROM $table WHERE is_relevant = 1";
+    $query .= $wpdb->prepare( " AND published_at >= DATE_SUB(NOW(), INTERVAL %d HOUR)", $hours );
+
+    if ( $region && $region !== 'Global' ) {
+        $query .= $wpdb->prepare( " AND (region = %s OR region = 'Global')", $region );
+    }
+
+    $query .= " ORDER BY published_at DESC LIMIT %d";
+    
+    $articles = $wpdb->get_results( $wpdb->prepare( $query, $limit ) );
+    return $articles;
 }
 
 add_action( 'rest_api_init', function () {
