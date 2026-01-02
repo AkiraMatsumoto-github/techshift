@@ -19,7 +19,7 @@ class DBClient:
             self.wp_url = self.wp_url[:-1]
 
         self.auth = (self.wp_user, self.wp_password)
-        self.api_url = f"{self.wp_url}/wp-json/finshift/v1"
+        self.api_url = f"{self.wp_url}/?rest_route=/finshift/v1"
 
     def _post(self, endpoint, data):
         try:
@@ -43,8 +43,8 @@ class DBClient:
         except Exception as e:
             print(f"API Error (POST {endpoint}): {e}")
             if isinstance(e, requests.exceptions.HTTPError):
-                 # Log only first 500 chars to avoid dumping full HTML
-                 error_preview = e.response.text[:500] + ("..." if len(e.response.text) > 500 else "")
+                 # Log only first 200 chars to avoid dumping full HTML
+                 error_preview = e.response.text[:200] + ("..." if len(e.response.text) > 200 else "")
                  print(f"Response: {error_preview}")
             return None
 
