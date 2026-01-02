@@ -92,8 +92,10 @@ function finshift_get_popular_posts( $days = 7, $limit = 5, $term_id = null, $ta
 
     // Build Query
     $sql = "SELECT v.post_id, SUM(v.count) as views FROM $table_name v";
+    $sql .= " INNER JOIN {$wpdb->posts} p ON v.post_id = p.ID"; // Join posts table
+    
     $join = "";
-    $where = "WHERE v.view_date >= %s";
+    $where = "WHERE v.view_date >= %s AND p.post_status = 'publish' AND p.post_type = 'post'"; // Filter status & type
     $args = array( $start_date );
 
     // Add Taxonomy Filtering
