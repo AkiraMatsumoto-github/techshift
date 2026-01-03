@@ -107,18 +107,35 @@ get_header();
 						<h3 class="related-title"><?php esc_html_e( '関連記事', 'finshift' ); ?></h3>
 						<div class="article-grid">
 							<?php
-							$related_args = array(
+                            // Improved Related Posts Logic
+                            $related_tags = get_the_tags();
+                            $related_args = array(
 								'post_type'      => 'post',
 								'posts_per_page' => 3,
 								'post__not_in'   => array( get_the_ID() ),
-								'orderby'        => 'rand',
+								'orderby'        => 'date',
+                                'order'          => 'DESC',
 							);
-							
-							if ( ! empty( $categories ) ) {
-								$related_args['category__in'] = array( $categories[0]->term_id );
-							}
 
-							$related_query = new WP_Query( $related_args );
+                            // Priority 1: Tags
+                            if ( $related_tags ) {
+                                $tag_ids = array();
+                                foreach( $related_tags as $t ) $tag_ids[] = $t->term_id;
+                                $related_args['tag__in'] = $tag_ids;
+                            } 
+                            // Priority 2: Category (if no tags, or fallback logic needed - but let's stick to simple tag priority first, or mix?)
+                            // Let's rely on tags if present. If query returns 0, we could fallback. 
+                            // For simplicity and performance, let's add category as well if tags are few? 
+                            // Better approach: Try tags first.
+                            
+                            $related_query = new WP_Query( $related_args );
+                            
+                            // Fallback to Category if NO posts found by tags (or no tags)
+                            if ( ! $related_query->have_posts() && ! empty( $categories ) ) {
+                                unset($related_args['tag__in']);
+                                $related_args['category__in'] = array( $categories[0]->term_id );
+                                $related_query = new WP_Query( $related_args );
+                            }
 
 							if ( $related_query->have_posts() ) :
 								while ( $related_query->have_posts() ) :
