@@ -35,7 +35,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python generate_weekly_summary.py
+          python -u generate_weekly_summary.py
       
       - name: Upload artifacts
         if: success()

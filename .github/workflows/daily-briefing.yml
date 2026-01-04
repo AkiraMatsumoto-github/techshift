@@ -36,7 +36,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python daily_briefing.py --region all --phase collect
+          python -u daily_briefing.py --region all --phase collect
 
       # --- PHASE 2: Analysis & Generation (Sequential) ---
       
@@ -50,7 +50,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python daily_briefing.py --region US --phase analyze
+          python -u daily_briefing.py --region US --phase analyze
 
       # 2. Japan Briefing
       - name: Generate Briefing (JP)
@@ -62,7 +62,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python daily_briefing.py --region JP --phase analyze
+          python -u daily_briefing.py --region JP --phase analyze
 
       # 3. Crypto Briefing
       - name: Generate Briefing (Crypto)
@@ -74,7 +74,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python daily_briefing.py --region Crypto --phase analyze
+          python -u daily_briefing.py --region Crypto --phase analyze
 
       - name: Upload artifacts
         if: success() || failure() # Upload what we have even if one step fails

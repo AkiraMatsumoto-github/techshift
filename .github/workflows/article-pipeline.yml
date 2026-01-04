@@ -40,7 +40,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python pipeline.py --hours 12 --threshold 75 --limit 2
+          python -u pipeline.py --hours 12 --threshold 75 --limit 2
       
       - name: Upload artifacts on failure
         if: failure()
