@@ -4,7 +4,7 @@ import base64
 from dotenv import load_dotenv
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(env_path)
+load_dotenv(env_path, override=True)
 
 class WordPressClient:
     def __init__(self):
@@ -109,6 +109,7 @@ class WordPressClient:
             # Re-fetch with context=edit to ensure meta is present
             params['context'] = 'edit'
             response = requests.get(url, params=params, auth=self.auth)
+            response.raise_for_status()
             pages = response.json()
             
             for page in pages:

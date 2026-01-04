@@ -113,7 +113,7 @@ if ( ! $region_tag_slug ) {
                     'japan-market' => 'jp',
                     'china-market' => 'cn',
                     'indonesia-market' => 'ID',
-                    'crypto-market'    => 'crypto',
+                    'crypto'           => 'crypto',
                     'global'       => 'global'
                 ];
                 $query_tags = [ $region_tag_slug ];
