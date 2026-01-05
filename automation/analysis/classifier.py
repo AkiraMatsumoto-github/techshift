@@ -62,25 +62,27 @@ class ArticleClassifier:
         
         ## 2. タグ (該当するものを全て選択)
         【地域】
-        - US Market (us-market)
-        - Japan Market (japan-market)
-        - China Market (china-market)
-        - India Market (india-market)
-        - Indonesia Market (indonesia-market)
-        - Global (global)
+        - US Market (us-market): 米国株市場（S&P500, Nasdaq, NYダウ）
+        - Japan Market (japan-market): 日本株市場（日経平均, TOPIX）
+        - China Market (china-market): 中国・香港市場
+        - India Market (india-market): インド市場
+        - Indonesia Market (indonesia-market): インドネシア市場
+        - Global (global): クロスボーダーな市場動向、世界経済
         
         【資産クラス】
-        - Stock (stock)
-        - Crypto (crypto)
-        - Forex (forex)
-        - Commodity (commodity)
+        - Stock (stock): 個別銘柄の分析、決算、M&A
+        - Crypto (crypto): 暗号資産（ビットコイン、イーサリアム）
+        - Forex (forex): 為替市場（ドル円、ユーロドル）
+        - Commodity (commodity): 金、原油、銅など商品市場
         
         【テーマ】
-        - Tech & AI (tech-ai)
-        - EV & Auto (ev-auto)
-        - Energy (energy)
-        - Earnings (earnings)
-        - Central Bank (central-bank)
+        - Tech & AI (tech-ai): 半導体、人工知能、SaaS、ハイテク株
+        - EV & Auto (ev-auto): 電気自動車、バッテリー、自動運転
+        - Energy (energy): 再生可能エネルギー、石油・ガス、インフラ
+        - Earnings (earnings): 決算速報、ガイダンス修正
+        - Central Bank (central-bank): FRB, 日銀, ECBなどの金融政策
+        - Macro Economy (macro): マクロ経済、インフレ、GDP成長率
+        - Geopolitics (geopolitics): 地政学リスク、戦争、貿易摩擦
         
         ## 出力フォーマット (JSONのみ)
         {{

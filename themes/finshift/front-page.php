@@ -282,18 +282,15 @@ get_header();
 	<section class="industry-tags-section" style="padding: var(--spacing-section) 0;">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( 'アセット・セクター別', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( 'アセットクラス', 'finshift' ); ?></h2>
 			</div>
 
 			<?php
 			$industry_tags = array(
-				array( 'slug' => 'stocks', 'name' => '株式 (Stocks)' ),
-				array( 'slug' => 'fx', 'name' => '為替 (FX)' ),
+				array( 'slug' => 'stock', 'name' => '株式 (Stock)' ),
 				array( 'slug' => 'crypto', 'name' => '暗号資産 (Crypto)' ),
-				array( 'slug' => 'commodities', 'name' => '商品 (Commodities)' ),
-				array( 'slug' => 'tech', 'name' => 'ハイテク' ),
-				array( 'slug' => 'semiconductor', 'name' => '半導体' ),
-				array( 'slug' => 'finance', 'name' => '金融・金利' ),
+				array( 'slug' => 'forex', 'name' => '為替 (Forex)' ),
+				array( 'slug' => 'commodity', 'name' => '商品 (Commodity)' ),
 			);
 			?>
 
@@ -363,16 +360,17 @@ get_header();
 	<section class="theme-tags-section" style="background-color: var(--color-bg-secondary);">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( '注目テーマ', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( '注目テーマ・セクター', 'finshift' ); ?></h2>
 			</div>
 
 			<?php
 			$theme_tags = array(
-				array( 'slug' => 'ai', 'name' => 'AI (人工知能)' ),
-				array( 'slug' => 'ev', 'name' => 'EV (電気自動車)' ),
-				array( 'slug' => 'earnings', 'name' => '決算速報' ),
-				array( 'slug' => 'macro', 'name' => 'マクロ経済' ),
-				array( 'slug' => 'geopolitics', 'name' => '地政学リスク' ),
+				array( 'slug' => 'tech-ai', 'name' => 'Tech & AI (ハイテク・AI)' ),
+				array( 'slug' => 'ev-auto', 'name' => 'EV & Auto (電気自動車)' ),
+				array( 'slug' => 'energy', 'name' => 'エネルギー (Energy)' ),
+				array( 'slug' => 'earnings', 'name' => '決算速報 (Earnings)' ),
+				array( 'slug' => 'macro,central-bank', 'name' => 'マクロ・金利 (Macro)' ),
+				array( 'slug' => 'geopolitics', 'name' => '地政学リスク (Geopolitics)' ),
 			);
 			?>
 

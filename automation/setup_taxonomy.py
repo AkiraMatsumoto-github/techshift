@@ -62,6 +62,8 @@ def create_tags(wp):
         {"name": "Energy", "slug": "energy", "description": "再生可能エネルギー、石油・ガス、電力インフラ。"},
         {"name": "Earnings", "slug": "earnings", "description": "決算速報。サプライズ決算やガイダンス修正におる株価変動。"},
         {"name": "Central Bank", "slug": "central-bank", "description": "FRB, 日銀, ECBなどの金融政策決定会合。利上げ・利下げシナリオ。"},
+        {"name": "Macro Economy", "slug": "macro", "description": "マクロ経済、インフレ、GDP成長率など経済全体の動向。"},
+        {"name": "Geopolitics", "slug": "geopolitics", "description": "地政学リスク、戦争、貿易摩擦など市場に影響を与える政治的要因。"},
     ]
     
     print("\nCreating/Updating Tags (FinShift)...")
