@@ -70,7 +70,7 @@ get_header();
 	</section>
 
 	<!-- Global Ticker -->
-	<div class="finshift-global-ticker" style="background: #000; padding: 0;">
+	<div class="finshift-global-ticker">
 		<!-- TradingView Widget END -->
 		<div class="tradingview-widget-container">
 			<div class="tradingview-widget-container__widget"></div>

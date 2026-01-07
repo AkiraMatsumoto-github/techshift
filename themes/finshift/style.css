@@ -2468,6 +2468,13 @@ section {
 
 /* Bronze */
 
+/* Global Ticker */
+.finshift-global-ticker {
+    background: #000;
+    padding: 0;
+    margin-bottom: var(--spacing-xl);
+}
+
 /* Dashboard / Market Pulse Styles */
 .market-pulse-section {
     padding: var(--spacing-md) 0;
