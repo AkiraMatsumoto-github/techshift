@@ -828,9 +828,6 @@ function finshift_api_get_articles( $request ) {
 
 
 
-function finshift_api_update_schema( $request ) {
-    finshift_initialize_tables();
-    return array( 'success' => true, 'message' => 'Schema updated via dbDelta' );
-}
+
 
 
