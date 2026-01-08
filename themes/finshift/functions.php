@@ -712,6 +712,14 @@ function finshift_api_get_daily_analysis( $request ) {
     foreach ($results as $row) {
         $row->scenarios = json_decode( $row->scenarios_json );
         unset($row->scenarios_json); 
+        
+        // Add Permalinks for SEO Linking
+        if ( !empty($row->wp_post_id) ) {
+            $row->article_url = get_permalink( $row->wp_post_id );
+            $row->article_title = get_the_title( $row->wp_post_id );
+        } else {
+            $row->article_url = null;
+        }
     }
     
     // If limit is 1, return single object or null

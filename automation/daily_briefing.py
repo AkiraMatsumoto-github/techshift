@@ -249,7 +249,13 @@ def phase_2_analysis(args):
             events_str=events_str,
             date_str=today_str
         )
-        
+
+        # SEO: Add Internal Link to Previous Analysis
+        if prev_analysis and prev_analysis.get('article_url'):
+            link_title = prev_analysis.get('article_title', '昨日の市場分析')
+            link_url = prev_analysis.get('article_url')
+            # Append to bottom
+            article_md += f"\n\n---\n**前日の分析**: [{link_title}]({link_url})"
         if args.dry_run:
             print("\n[Dry-Run] Generated Briefing (Excerpt):")
             print("-" * 40)
