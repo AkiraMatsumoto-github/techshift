@@ -210,10 +210,10 @@ if ( ! $region_tag_slug ) {
                         if ( $sentiment_score !== '' ) {
                             $score = (int)$sentiment_score;
                             $sentiment = $score; // Display number
-                            if ($score >= 60) {
-                                $s_class = 'bull';
-                            } elseif ($score <= 40) {
-                                $s_class = 'bear';
+                            if ($score > 60) {
+                                $s_class = 'greed';
+                            } elseif ($score < 40) {
+                                $s_class = 'fear';
                             } else {
                                 $s_class = 'neutral';
                             }
