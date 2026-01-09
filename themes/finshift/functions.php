@@ -257,47 +257,6 @@ function finshift_output_json_ld() {
 }
 add_action( 'wp_head', 'finshift_output_json_ld', 5 );
 
-/**
- * Breadcrumbs Function
- */
-function finshift_breadcrumb() {
-    // Only show on front page or home if needed, usually we hide.
-    if ( is_front_page() || is_home() ) {
-        return;
-    }
-
-    echo '<nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">';
-    echo '<a href="' . home_url() . '" style="color: #666; text-decoration: none;">Home</a>';
-    echo ' &gt; ';
-
-    if ( is_category() || is_single() ) {
-        $cats = get_the_category();
-        if ( $cats ) {
-            // Use the first category
-            $cat = $cats[0];
-            echo '<a href="' . get_category_link( $cat->term_id ) . '" style="color: #666; text-decoration: none;">' . $cat->name . '</a>';
-            if ( is_single() ) {
-                echo ' &gt; ';
-            }
-        }
-    }
-
-    if ( is_single() ) {
-        // Truncate title if too long
-        $title = get_the_title();
-        if ( mb_strlen( $title ) > 30 ) {
-            $title = mb_substr( $title, 0, 30 ) . '...';
-        }
-        echo '<span style="color: #999;">' . $title . '</span>';
-    } elseif ( is_page() ) {
-        echo '<span style="color: #999;">' . get_the_title() . '</span>';
-    } elseif ( is_search() ) {
-        echo '<span style="color: #999;">Search Results for "' . get_search_query() . '"</span>';
-    }
-
-    echo '</nav>';
-}
-
 
 /**
  * Disable canonical redirects only for category URLs.
