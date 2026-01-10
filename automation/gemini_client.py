@@ -1053,9 +1053,11 @@ class GeminiClient:
            - Analyze the primary driver. Connect it to asset moves.
            - *Must* cite specific news or data points from Input.
            - Explain the mechanism.
-            - **Scenario Continuity (CRITICAL)**: You MUST include a distinct paragraph reviewing yesterday's forecast.
-              - Use the content from `scenarios.review` (Input 1).
+            - **Scenario Continuity (CRITICAL)**:
+              - Create a subsection `### 昨日のシナリオ検証` (Verification of Previous Scenario).
               - Explicitly state: "Yesterday's Main Scenario (Condition: ...) was [Hit/Missed] because..."
+              - Analyze the cause of the outcome (Hit/Miss) specifically as a **primary factor of market fluctuation** (e.g., "The miss was caused by unexpected CPI data," or "The hit was driven by tech sector momentum").
+              - **Format Rule**: ALWAYS use `### 昨日のシナリオ検証` as the header. Do NOT use numbered lists or bold text for the header itself.
 
         
         4. **【注目アセット】 (Asset Watch)**
