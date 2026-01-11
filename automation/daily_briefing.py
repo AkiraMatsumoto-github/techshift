@@ -436,8 +436,10 @@ def phase_2_analysis(args):
             if res:
                 print(f"Posted to WordPress (ID: {res.get('id')}). Status: {status}")
                 # Update DB with the public URL for future linking
+                # Update DB with the public URL using FULL SAVE to prevent overwriting scenarios
                 if res.get('link'):
-                    db.update_daily_analysis_url(today_str, region, res.get('link'))
+                    analysis_record['article_url'] = res.get('link')
+                    db.save_daily_analysis(analysis_record)
                     print(f"Updated DB with Article URL: {res.get('link')}")
             else:
                 print("Failed to post to WordPress.")

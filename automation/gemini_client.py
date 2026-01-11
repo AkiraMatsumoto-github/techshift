@@ -946,9 +946,18 @@ class GeminiClient:
             - If no (surprise), what unexpected factor intervened?
 
         5. **Scenarios**:
-           - **Main Scenario (Base Case)**: The most likely outcome. Write in **Japanese**. **Format**: "Condition -> Result (Specific Marker Change)". Example: "US CPI matches expectation -> S&P500 maintains 6000 level / USDJPY stays at 155".
-           - **Bull Case**: Condition for upside. Write in **Japanese**. **Format**: "Condition -> Result (Specific Marker Change)". Example: "Job data cools -> Yields drop to 4.2%, S&P500 rises to 6050".
-           - **Bear Case**: Condition for downside. Write in **Japanese**. **Format**: "Condition -> Result (Specific Marker Change)". Example: "Inflation spike -> Yields jump to 4.5%, S&P500 falls below 5900".
+           - **Main Scenario (Base Case)**: The most likely outcome. Write in **Japanese**.
+             - **Format**: "Condition -> Result (Specific Marker Change)". 
+             - **Detail**: Write a detailed explanation (approx. 80-100 characters) including the logical flow.
+             - **Example**: "米CPIが予想通り鈍化し金利低下が継続 -> リスクオンムードが強まり、S&P500は6000ポイントを回復、ドル円は150円前半へ下落".
+           - **Bull Case**: Condition for upside. Write in **Japanese**.
+             - **Format**: "Condition -> Result (Specific Marker Change)". 
+             - **Detail**: Write a detailed explanation (approx. 80-100 characters).
+             - **Example**: "雇用統計が市場予想より弱く利下げ期待が再燃 -> 米長期金利が4.0%割れを試し、グロース株主導でナスダックは最高値を更新".
+           - **Bear Case**: Condition for downside. Write in **Japanese**.
+             - **Format**: "Condition -> Result (Specific Marker Change)". 
+             - **Detail**: Write a detailed explanation (approx. 80-100 characters).
+             - **Example**: "中東情勢の悪化で原油急騰 -> インフレ懸念から金利が上昇し、S&P500は5800ラインまで調整、VIXは20台へ急伸".
            - **Probability Requirement**: Assign a percentage probability (e.g. "60%", "20%", "20%") to Main, Bull, and Bear scenarios. **The sum MUST be 100%.**
            - **Mid-term Outlook (1-2 weeks)**: General trend and key events.
         
@@ -964,9 +973,18 @@ class GeminiClient:
             "primary_driver": "...",
             "scenarios": {{
                 "review": "Verification of yesterday's scenario. e.g., 'Yesterday's Bull case was realized due to...'",
-                "main": {{ "condition": "...", "probability": "60%", "target": "..." }},
-                "bull": {{ "condition": "...", "probability": "20%", "target": "..." }},
-                "bear": {{ "condition": "...", "probability": "20%", "target": "..." }},
+                "main": {{ 
+                    "condition": "Specific trigger AND outcome (e.g. CPI > 3.0% -> JPY weakens to 152)", 
+                    "probability": "60%"
+                }},
+                "bull": {{ 
+                    "condition": "Upside trigger AND outcome", 
+                    "probability": "20%"
+                }},
+                "bear": {{ 
+                    "condition": "Downside trigger AND outcome", 
+                    "probability": "20%"
+                }},
                 "mid_term": {{ 
                     "view": "Bullish/Neutral/Bearish", 
                     "events": "FOMC (Day X), Earnings (Company Y)", 
