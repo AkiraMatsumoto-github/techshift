@@ -358,6 +358,21 @@ get_header();
 							endif;
 							?>
 						</div>
+						<div class="section-footer" style="text-align: right; margin-top: var(--spacing-md);">
+							<?php
+							$slugs = explode( ',', $industry_tag['slug'] );
+							$primary_slug = trim( $slugs[0] );
+							$term = get_term_by( 'slug', $primary_slug, 'post_tag' );
+							if ( $term && ! is_wp_error( $term ) ) :
+								$term_link = get_term_link( $term );
+								if ( ! is_wp_error( $term_link ) ) :
+									?>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'finshift' ), esc_html( $industry_tag['name'] ) ); ?> &rarr;</a>
+									<?php
+								endif;
+							endif;
+							?>
+						</div>
 					</div>
 				<?php endforeach; ?>
 			</div>
@@ -431,6 +446,21 @@ get_header();
 									<?php
 								endwhile;
 								wp_reset_postdata();
+							endif;
+							?>
+						</div>
+						<div class="section-footer" style="text-align: right; margin-top: var(--spacing-md);">
+							<?php
+							$slugs = explode( ',', $theme_tag['slug'] );
+							$primary_slug = trim( $slugs[0] );
+							$term = get_term_by( 'slug', $primary_slug, 'post_tag' );
+							if ( $term && ! is_wp_error( $term ) ) :
+								$term_link = get_term_link( $term );
+								if ( ! is_wp_error( $term_link ) ) :
+									?>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'finshift' ), esc_html( $theme_tag['name'] ) ); ?> &rarr;</a>
+									<?php
+								endif;
 							endif;
 							?>
 						</div>
