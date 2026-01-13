@@ -1145,6 +1145,7 @@ section {
     display: flex;
     justify-content: center;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .pagination .page-numbers {
@@ -2035,6 +2036,16 @@ section {
         gap: 8px;
         align-content: flex-start;
         margin-top: 0px;
+    }
+
+    /* Mobile Pagination */
+    .pagination {
+        margin-top: var(--spacing-lg);
+    }
+
+    .pagination .page-numbers {
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 }
 
