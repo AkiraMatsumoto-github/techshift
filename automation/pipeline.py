@@ -15,6 +15,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime
+import random
 
 # Source to Content Type Mapping
 SOURCE_TYPE_MAPPING = {
@@ -92,7 +93,11 @@ def main():
         lookback_hours = 6
         print(f"Collecting articles from last {lookback_hours} hours (default)...")
         
-    for name, url in DEFAULT_SOURCES.items():
+    # Shuffle sources to randomize fetch order (User Request)
+    source_items = list(DEFAULT_SOURCES.items())
+    random.shuffle(source_items)
+
+    for name, url in source_items:
         # fetch_rss accepts both, prioritizes hours if set not None
         fetched = fetch_rss(url, name, days=lookback_days, hours=lookback_hours)
         collected_articles.extend(fetched)
