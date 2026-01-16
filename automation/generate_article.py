@@ -510,7 +510,7 @@ Select the most relevant ones (if any) and include them in the article using sta
                         
                         if sns_content_data:
                             # Construct post text
-                            post_text = f"【新着記事】\n{sns_content_data.get('hook', optimized_title)}\n\n"
+                            post_text = f"{sns_content_data.get('hook', optimized_title)}\n\n"
                             post_text += f"{sns_content_data.get('summary', '')}\n\n"
                             
                             # Add Link BEFORE hashtags

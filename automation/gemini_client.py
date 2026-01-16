@@ -722,18 +722,22 @@ class GeminiClient:
         2. **Summary**: A compelling teaser. Do NOT just summarize. Explain "How this affects their wallet" or "What the next move is".
            - Focus on price action, sector trends, or earning surprises.
            - Max 100 chars.
-        3. **Hashtags**: 3-5 relevant hashtags.
-           - **CRITICAL**: Use specific Ticker Symbols (e.g., $NVDA, $BTC, $USDJPY) if mentioned.
-           - Use standard finance tags like #米国株 #日経平均 #仮想通貨.
+        3. **Hashtags**: 5 hashtags optimized for ENGAGEMENT (Middle Words).
+           - **STRATEGY**: Focus on "Middle Words" (specific interest communities) rather than "Big Words" (too broad/competitive).
+           - **Required**:
+             - Relevant Ticker Symbols (e.g., $NVDA).
+             - **Middle Words**: #米国株投資, #高配当株, #半導体, #スイングトレード (Avoid just #株 or #投資).
+             - Specific themes/sectors mentioned in article.
+           - **Goal**: Reach active, interested traders rather than passive general public.
         
         4. Language: Japanese. 
         5. **Tone**: Professional, Insightful, slightly urgent ("Now or Never"). 
         
         Output JSON format (Strictly JSON only):
         {{
-            "hook": "� NVIDIA決算、予想を上回るも時間外で下落？",
+            "hook": " NVIDIA決算、予想を上回るも時間外で下落？",
             "summary": "「材料出尽くし」か「押し目買い」か、プロの分析で見極める。AIセクターの第2章はここから始まる。",
-            "hashtags": ["#FinShift", "$NVDA", "#米国株", "#AI関連"]
+            "hashtags": ["$NVDA", "#米国株投資", "#AI半導体", "#決算プレイ", "#ハイテク株"]
         }}
         """)
         
@@ -752,9 +756,9 @@ class GeminiClient:
             print(f"SNS content generation failed: {e}")
             # Fallback
             return {
-                "hook": f"【新着記事】{title}",
+                "hook": f"{title}",
                 "summary": "最新の市場動向を分析しました。投資判断の参考にしてください。",
-                "hashtags": ["#FinShift", "#投資", "#株"]
+                "hashtags": ["#FinShift", "#株式投資", "#資産形成", "#相場解説", "#経済ニュース"]
             }
 
     def check_duplication(self, new_title, new_summary, existing_titles):
