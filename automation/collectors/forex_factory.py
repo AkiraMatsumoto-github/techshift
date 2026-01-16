@@ -5,7 +5,7 @@ Fetches economic events from ForexFactory.com and saves them to the DB.
 Extracts data from embedded JSON-like structures in the HTML.
 """
 
-import requests
+from curl_cffi import requests
 import re
 import json
 import os
@@ -70,7 +70,7 @@ def fetch_and_save_calendar(days=14):
     for url in urls:
         print(f"Fetching {url}...")
         try:
-            resp = requests.get(url, headers=headers, timeout=15)
+            resp = requests.get(url, headers=headers, timeout=15, impersonate="chrome")
             if resp.status_code != 200:
                 print(f"Failed to fetch {url}: {resp.status_code}")
                 continue
