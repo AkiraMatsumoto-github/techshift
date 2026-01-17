@@ -2,7 +2,7 @@
 /**
  * The template for displaying all single posts
  *
- * @package FinShift
+ * @package TechShift
  */
 
 get_header();
@@ -45,23 +45,23 @@ get_header();
 							</div>
                             
                             <?php
-                            // FinShift Custom Meta
-                            $sentiment = get_post_meta( get_the_ID(), '_finshift_sentiment', true );
-                            $regime = get_post_meta( get_the_ID(), '_finshift_regime', true );
+                            // TechShift Custom Meta
+                            $impact = get_post_meta( get_the_ID(), '_techshift_impact', true );
+                            $phase = get_post_meta( get_the_ID(), '_techshift_phase', true );
                             
-                            if ( $sentiment !== '' || $regime ) : ?>
-                                <div class="finshift-market-meta">
-                                    <?php if ( $regime ) : ?>
-                                        <span class="market-chip regime-label"><?php echo esc_html( $regime ); ?></span>
+                            if ( $impact !== '' || $phase ) : ?>
+                                <div class="techshift-impact-meta">
+                                    <?php if ( $phase ) : ?>
+                                        <span class="market-chip phase-label"><?php echo esc_html( $phase ); ?></span>
                                     <?php endif; ?>
                                     
-                                    <?php if ( $sentiment !== '' ) : 
-                                        $s_val = intval( $sentiment );
-                                        $s_class = ($s_val > 60) ? 'greed' : (($s_val < 40) ? 'fear' : 'neutral');
-                                        $s_text = ($s_val > 60) ? 'Greed' : (($s_val < 40) ? 'Fear' : 'Neutral');
+                                    <?php if ( $impact !== '' ) : 
+                                        $i_val = intval( $impact );
+                                        $i_class = ($i_val > 60) ? 'accelerated' : (($i_val < 40) ? 'delayed' : 'neutral');
+                                        $i_text = ($i_val > 60) ? 'Accelerated' : (($i_val < 40) ? 'Delayed' : 'Neutral');
                                     ?>
-                                        <span class="market-chip sentiment-label <?php echo $s_class; ?>">
-                                            Sentiment: <?php echo $s_val; ?> (<?php echo $s_text; ?>)
+                                        <span class="market-chip impact-label <?php echo $i_class; ?>">
+                                            Impact: <?php echo $i_val; ?> (<?php echo $i_text; ?>)
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -82,7 +82,7 @@ get_header();
 
 							wp_link_pages(
 								array(
-									'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'finshift' ),
+									'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'techshift' ),
 									'after'  => '</div>',
 								)
 							);
@@ -104,7 +104,7 @@ get_header();
 
 					<!-- Related Posts -->
 					<div class="related-posts">
-						<h3 class="related-title"><?php esc_html_e( '関連記事', 'finshift' ); ?></h3>
+						<h3 class="related-title"><?php esc_html_e( '関連記事', 'techshift' ); ?></h3>
 						<div class="article-grid">
 							<?php
                             // Improved Related Posts Logic
@@ -160,7 +160,7 @@ get_header();
 								endwhile;
 								wp_reset_postdata();
 							else :
-								echo '<p>' . esc_html__( '関連記事はありません。', 'finshift' ) . '</p>';
+								echo '<p>' . esc_html__( '関連記事はありません。', 'techshift' ) . '</p>';
 							endif;
 							?>
 						</div>

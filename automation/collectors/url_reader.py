@@ -14,80 +14,71 @@ import sys
 # Content selectors for each source
 # Content selectors for FinShift sources
 CONTENT_SELECTORS = {
-    # --- Global ---
-    "yahoo_finance_top": {
-        "content": "div.caas-body",
+    # --- TechShift Sources (Added) ---
+    "mit_tech_review": {
+        "content": ".piano__post_body, #content-body, .story-body, main",
         "title": "h1",
-        "author": "span.caas-author-byline-collapse-link",
+        "author": "span.byline__author, a.author",
     },
-    "yahoo_jp_business": {
-        "content": "div.article_body",
-        "title": "h1.sc-bqyKva, h1.article_title",
-        "author": ".article_body b",
+    "techcrunch_ai": {
+        "content": "div.article-content, div.entry-content, article",
+        "title": "h1.article__title",
+        "author": "div.article__byline",
     },
-    "cnbc_world": {
-        "content": "div.ArticleBody-articleBody",
-        "title": "h1.ArticleHeader-headline",
-        "author": "div.Author-authorName",
+    "wired_science": {
+        "content": "div.body__content, article.article, main",
+        "title": "h1.content-header__row",
+        "author": "span.byline__name",
     },
-    "wsj_markets": {
-        "content": "div.article-content", # Often Paywalled, need fallback
-        "title": "h1.wsj-article-headline",
-        "author": "span.author-name",
-    },
-    
-    # --- Asia Giants ---
-    "scmp_china": {
-        "content": "div.article-body-text, div.details__body, article.article",
-        "title": "h1.article-title-text, h1.headline, h1",
-        "author": "span.author, a.author-link, div.article-attributes__author",
-    },
-    "sina_finance_focus": {
-        "content": "div.article, div#artibody", 
-        "title": "h1.main-title",
-        "author": ".date-source .source",
-    },
-    "mint_top": {
-        "content": "div.mainArea",
-        "title": "h1.headline",
+    "venturebeat_ai": {
+        "content": "div.article-content, div.entry-content, article",
+        "title": "h1.article-title",
         "author": "span.author",
     },
-    "mint_markets": {
-        "content": "div.mainArea",
-        "title": "h1.headline",
+    "nvidia_blog": {
+        "content": "div.entry-content",
+        "title": "h1.entry-title",
+        "author": "span.entry-author",
+    },
+    "google_ai": {
+        "content": "div.post-content, div.entry-content",
+        "title": "h1",
         "author": "span.author",
     },
-    "economictimes": {
-        "content": "div.artText",
-        "title": "h1.artTitle",
-        "author": "a.auth_name",
+    "microsoft_ai": {
+        "content": "div.entry-content, div.post-content",
+        "title": "h1.entry-title",
+        "author": "a.author",
     },
-    "antara_news_biz": {
-        "content": "div.post-content",
-        "title": "h1.post-title",
-        "author": "span.text-muted",
+    "huggingface_blog": {
+        "content": "div.prose, main article",
+        "title": "h1",
+        "author": "div.author",
     },
-    "jakarta_globe": {
-        "content": "div.content-body",
-        "title": "h1.title-large",
-        "author": "div.name-author",
+    "quantum_daily": {
+        "content": "div.entry-content, div.td-post-content",
+        "title": "h1.entry-title",
+        "author": "div.td-post-author-name",
     },
-
-    # --- Crypto ---
-    "coindesk": {
-        "content": "div.at-text",
-        "title": "h1.at-headline",
-        "author": "div.at-authors",
+    "cleantechnica": {
+        "content": "div.entry-content, article, main",
+        "title": "h1.entry-title",
+        "author": "div.entry-meta",
     },
-    "cointelegraph": {
-        "content": "div.post-content",
-        "title": "h1.post__title",
-        "author": "div.post-meta__author-name",
+    "energy_storage_news": {
+        "content": "div.elementor-widget-theme-post-content, div.elementor-widget-text-editor, article",
+        "title": "h1.elementor-heading-title, h1",
+        "author": "span.elementor-icon-list-text, span.author",
     },
-    "bitcoin_magazine": {
-        "content": "div.m-detail--body",
-        "title": "h1.m-detail--title",
-        "author": "div.m-detail--author a",
+    "ieee_spectrum_energy": {
+        "content": "div.article-body, section.article-content",
+        "title": "h1.widget__headline",
+        "author": "div.widget__author",
+    },
+    "y_combinator": {
+        "content": "div.post-content, div.entry-content",
+        "title": "h1.entry-title",
+        "author": "span.author",
     },
 }
 

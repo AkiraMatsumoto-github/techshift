@@ -3,7 +3,7 @@
  * The template for displaying archive pages
  * Modern design matching front-page.php
  *
- * @package FinShift
+ * @package TechShift
  */
 
 get_header();
@@ -121,7 +121,7 @@ get_header();
 				</div>
 
 			<?php else : ?>
-				<p class="no-posts"><?php esc_html_e( '記事が見つかりませんでした。', 'finshift' ); ?></p>
+				<p class="no-posts"><?php esc_html_e( '記事が見つかりませんでした。', 'techshift' ); ?></p>
 			<?php endif; ?>
 		</div>
 	</section>
@@ -130,19 +130,19 @@ get_header();
 	<section class="popular-articles-section" style="background-color: var(--color-light-gray); margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--color-border-gray);">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( 'このカテゴリの人気記事', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( 'このカテゴリの人気記事', 'techshift' ); ?></h2>
 			</div>
 
 			<div class="featured-grid">
 				<?php
-				if ( function_exists( 'finshift_get_popular_posts' ) ) {
+				if ( function_exists( 'techshift_get_popular_posts' ) ) {
 					// Get current term context
 					$obj = get_queried_object();
 					$term_id = isset( $obj->term_id ) ? $obj->term_id : null;
 					$taxonomy = isset( $obj->taxonomy ) ? $obj->taxonomy : 'category';
 
 					// Fetch filtered popular posts
-					$popular_posts = finshift_get_popular_posts( 30, 5, $term_id, $taxonomy );
+					$popular_posts = techshift_get_popular_posts( 30, 5, $term_id, $taxonomy );
 
 					if ( ! empty( $popular_posts ) ) {
 						$rank = 1;
@@ -178,7 +178,7 @@ get_header();
 						endforeach;
 						wp_reset_postdata();
 					} else {
-						echo '<p>' . esc_html__( '集計中...', 'finshift' ) . '</p>';
+						echo '<p>' . esc_html__( '集計中...', 'techshift' ) . '</p>';
 					}
 				}
 				?>

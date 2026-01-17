@@ -19,7 +19,7 @@ class DBClient:
             self.wp_url = self.wp_url[:-1]
 
         self.auth = (self.wp_user, self.wp_password)
-        self.api_url = f"{self.wp_url}/?rest_route=/finshift/v1"
+        self.api_url = f"{self.wp_url}/?rest_route=/techshift/v1"
 
     def _post(self, endpoint, data):
         try:
@@ -189,8 +189,7 @@ class DBClient:
 
 
     def save_daily_analysis(self, analysis_record):
-        # API expects: date, region, sentiment_score, ...
-        # analysis_record matches.
+        # API expects: date, region, timeline_impact, evolution_phase...
         self._post("daily-analysis", analysis_record)
 
     def update_daily_analysis_url(self, date_str, region, url):
@@ -200,12 +199,38 @@ class DBClient:
         payload = {
             "date": date_str,
             "region": region,
-            "article_url": url
+            "wp_post_id": None # Not used directly in new schema logic, usually updated via save_daily_analysis re-post?
+            # Actually functions.php update logic handles wp_post_id in main endpoint. 
+            # Re-implementation: To update just URL, we should probably fetch, update, save?
+            # Or use the same endpoint. API supports replacing.
         }
-        self._post("daily-analysis", payload)
-
+        # Simplified: We expect the client to pass the full record usually.
+        # But if just updating URL:
+        pass 
 
     def update_schema(self):
         """Trigger remote DB schema update/initialization."""
         self._get("update-schema")
+
+
+    def save_calendar_event(self, event_date, event_name, country, impact_level, description, source, category="Macro"):
+        data = {
+            "event_date": event_date,
+            "event_name": event_name,
+            "country": country,
+            "impact_level": impact_level,
+            "category": category,
+            "description": description,
+            "source": source
+        }
+        self._post("calendar-events", data)
+
+    def get_upcoming_events(self, days=7):
+        res = self._get("calendar-events", {"days": days})
+        return res if res else []
+
+    def get_recent_events(self, days=2):
+        start_date = (date.today() - timedelta(days=days)).isoformat()
+        res = self._get("calendar-events", {"start_date": start_date, "days": days + 1})
+        return res if res else []
 

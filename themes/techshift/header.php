@@ -2,7 +2,7 @@
 /**
  * The header for our theme
  *
- * @package FinShift
+ * @package TechShift
  */
 ?>
 <!doctype html>
@@ -19,7 +19,7 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 <div id="page" class="site">
-	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'finshift' ); ?></a>
+	<a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'techshift' ); ?></a>
 
 	<header id="masthead" class="site-header">
 		<div class="container header-container">
@@ -30,7 +30,7 @@
 					?>
 				<h1 class="site-title">
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-						<img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo.svg" alt="FinShift" style="height: 40px; width: auto; display: block;">
+						<img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo.svg" alt="TechShift" style="height: 40px; width: auto; display: block;">
 					</a>
 				</h1>
 					<?php
@@ -45,16 +45,16 @@
 				endif;
 				?>
 				<?php
-				$finshift_description = get_bloginfo( 'description', 'display' );
-				if ( $finshift_description || is_customize_preview() ) :
+				$techshift_description = get_bloginfo( 'description', 'display' );
+				if ( $techshift_description || is_customize_preview() ) :
 					?>
-					<p class="site-description"><?php echo $finshift_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+					<p class="site-description"><?php echo $techshift_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 
 			<nav id="site-navigation" class="main-navigation">
 				<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
-					<span class="screen-reader-text"><?php esc_html_e( 'Menu', 'finshift' ); ?></span>
+					<span class="screen-reader-text"><?php esc_html_e( 'Menu', 'techshift' ); ?></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
@@ -73,7 +73,7 @@
 	</header><!-- #masthead -->
 
     <?php 
-    if ( function_exists( 'finshift_breadcrumb' ) ) {
-        finshift_breadcrumb(); 
+    if ( function_exists( 'techshift_breadcrumb' ) ) {
+        techshift_breadcrumb(); 
     }
     ?>

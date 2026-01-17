@@ -2,7 +2,7 @@
 /**
  * The template for displaying the footer
  *
- * @package FinShift
+ * @package TechShift
  */
 ?>
 
@@ -13,7 +13,7 @@
 				<div class="footer-columns">
 					<!-- About Column -->
 					<div class="footer-column">
-						<h3 class="footer-title">FinShift</h3>
+						<h3 class="footer-title">TechShift</h3>
 						<p class="footer-description">世界主要市場（US, JP, India, China）と重要資産（Crypto, Commodity）の「今」を読み解くマーケット・インテリジェンス・メディア。データとAIシナリオで、スイングトレーダーの意思決定を支援します。</p>
 					</div>
 
@@ -54,7 +54,7 @@
 
 				<!-- Footer Bottom -->
 				<div class="footer-bottom">
-					<p class="copyright">&copy; <?php echo date( 'Y' ); ?> FinShift. All rights reserved.</p>
+					<p class="copyright">&copy; <?php echo date( 'Y' ); ?> TechShift. All rights reserved.</p>
 				</div>
 			</div>
 		</div>

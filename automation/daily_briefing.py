@@ -238,7 +238,7 @@ def phase_2_analysis(args):
 
 
 
-        analysis = gemini.analyze_daily_market(
+        analysis = gemini.analyze_tech_impact(
             news, 
             market_data_str, 
             events_str, 
@@ -250,7 +250,7 @@ def phase_2_analysis(args):
             print("Analysis failed.")
             continue
             
-        print(f"Analysis Complete. Regime: {analysis.get('market_regime')}")
+        print(f"Analysis Complete. Phase: {analysis.get('evolution_phase')}")
         
         # 2.5 Internal Linking Suggestions
         internal_links_context = ""
@@ -260,11 +260,11 @@ def phase_2_analysis(args):
             candidates = linker.fetch_candidates(limit=50)
             
             if candidates:
-                # Context for scoring: Region + Market Regime + Main Scenario
+                # Context for scoring: Region + Evolution Phase + Main Scenario
                 scen = analysis.get('scenarios', {}).get('main', {}).get('condition', '')
-                scoring_context = f"Region: {region}\nMarket Regime: {analysis.get('market_regime')}\nKey Topics: {scen}"
+                scoring_context = f"Region: {region}\nPhase: {analysis.get('evolution_phase')}\nKey Topics: {scen}"
                 
-                relevant_links = linker.score_relevance(f"{region} Market Analysis", scoring_context, candidates)
+                relevant_links = linker.score_relevance(f"{region} Tech Impact Analysis", scoring_context, candidates)
                 
                 if relevant_links:
                     print(f"   Found {len(relevant_links)} relevant articles.")
@@ -292,7 +292,7 @@ def phase_2_analysis(args):
 
         # SEO: Add Internal Link to Previous Analysis
         if prev_analysis and prev_analysis.get('article_url'):
-            link_title = prev_analysis.get('article_title', '昨日の市場分析')
+            link_title = prev_analysis.get('article_title', '昨日の分析')
             link_url = prev_analysis.get('article_url')
             # Append to bottom
             article_md += f"\n\n---\n**前日の分析**: [{link_title}]({link_url})"
@@ -312,10 +312,12 @@ def phase_2_analysis(args):
         analysis_record = {
             "date": today_str,
             "region": region,
-            "sentiment_score": analysis.get("sentiment_score"),
-            "sentiment_label": analysis.get("sentiment_label"),
-            "market_regime": analysis.get("market_regime"),
+            "timeline_impact": analysis.get("timeline_impact"),
+            "impact_label": analysis.get("impact_label"),
+            "evolution_phase": analysis.get("evolution_phase"),
+            "hero_topic": analysis.get("hero_topic"),
             "scenarios": analysis.get("scenarios"),
+            "ai_structured_summary": analysis.get("ai_structured_summary"),
             "full_briefing_md": article_md
         }
         db.save_daily_analysis(analysis_record)
@@ -372,7 +374,7 @@ def phase_2_analysis(args):
         if not args.dry_run:
             try:
                 print("Generating Feature Image...")
-                img_prompt = gemini.generate_image_prompt(title, content_body_md[:2000], "market-analysis") # Use MD for context
+                img_prompt = gemini.generate_image_prompt(title, content_body_md[:2000], "daily-briefing") # Use MD for context
                 
                 # Save image to generated_articles
                 img_path = os.path.join(output_dir, f"{filename_base}.png")
@@ -414,11 +416,11 @@ def phase_2_analysis(args):
         ai_structured_summary = analysis.get("ai_structured_summary", {})
 
         post_meta = {
-            "_finshift_sentiment": analysis.get("sentiment_score"),
-            "_finshift_regime": analysis.get("market_regime"),
-            "_finshift_scenario_main": main_text,
-            "_finshift_scenario_bull": bull_text,
-            "_finshift_scenario_bear": bear_text,
+            "_techshift_impact": analysis.get("timeline_impact"),
+            "_techshift_phase": analysis.get("evolution_phase"),
+            "_techshift_scenario_main": main_text,
+            "_techshift_scenario_bull": bull_text,
+            "_techshift_scenario_bear": bear_text,
             "_ai_structured_summary": json.dumps(ai_structured_summary, ensure_ascii=False)
         }
 

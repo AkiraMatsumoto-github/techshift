@@ -1,5 +1,6 @@
 import argparse
 import feedparser
+import requests
 import json
 import os
 from datetime import datetime, timedelta
@@ -30,9 +31,10 @@ DEFAULT_SOURCES = {
     # "quanta_magazine": "https://www.quantamagazine.org/feed/", # Excellent for foundation
 
     # Green & Energy (Batteries, Fusion)
+    # Green & Energy (Batteries, Fusion)
     "cleantechnica": "https://cleantechnica.com/feed/",
-    "green_car_congress": "https://www.greencarcongress.com/atom.xml", # Deep tech on batteries
-    "ieee_spectrum_energy": "https://spectrum.ieee.org/feeds/topic/energy-power",
+    "energy_storage_news": "https://energy-storage.news/feed", # Added for solid-state
+    "ieee_spectrum_energy": "https://spectrum.ieee.org/feeds/topic/energy.rss", # Fixed URL
 
     # --- Startups &VC ---
     "y_combinator": "https://blog.ycombinator.com/feed/",
@@ -43,7 +45,7 @@ REGION_MAPPING = {
     # We repurpose "Region" as "Technology Domain" for TechShift
     "AI": ["techcrunch_ai", "venturebeat_ai", "nvidia_blog", "google_ai", "microsoft_ai", "huggingface_blog", "y_combinator"],
     "Quantum": ["quantum_daily", "wired_science", "mit_tech_review"], # MIT/Wired cover quantum often
-    "Green": ["cleantechnica", "green_car_congress", "ieee_spectrum_energy"],
+    "Green": ["cleantechnica", "ieee_spectrum_energy", "energy_storage_news"], # Added new sources
     "General": ["mit_tech_review", "wired_science"]
 }
 
@@ -51,8 +53,16 @@ def fetch_rss(url, source_name, days=None, hours=None):
     """Fetches and parses an RSS feed."""
     print(f"Fetching {source_name} from {url}...")
     try:
-        # User-Agent handling might be needed for some sites
-        feed = feedparser.parse(url)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/rss+xml, application/xml, text/xml, */*"
+        }
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            print(f"Error fetching {url}: Status {resp.status_code}")
+            return []
+            
+        feed = feedparser.parse(resp.content)
     except Exception as e:
         print(f"Error fetching {url}: {e}")
         return []

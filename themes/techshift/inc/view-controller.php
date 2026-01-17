@@ -2,15 +2,15 @@
 /**
  * View tracking and retrieval logic for Popular Articles
  *
- * @package FinShift
+ * @package TechShift
  */
 
 /**
  * Create the daily views table if it doesn't exist.
  */
-function finshift_create_view_table() {
+function techshift_create_view_table() {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'finshift_daily_views';
+    $table_name = $wpdb->prefix . 'techshift_daily_views';
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $table_name (
@@ -25,13 +25,13 @@ function finshift_create_view_table() {
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $sql );
     
-    update_option( 'finshift_view_table_version', '1.0.0' );
+    update_option( 'techshift_view_table_version', '1.0.0' );
 }
 
 /**
  * Track post view.
  */
-function finshift_track_post_view() {
+function techshift_track_post_view() {
     if ( ! is_single() ) {
         return;
     }
@@ -47,10 +47,10 @@ function finshift_track_post_view() {
 
     $post_id = $post->ID;
     $date = current_time( 'Y-m-d' );
-    $table_name = $wpdb->prefix . 'finshift_daily_views';
+    $table_name = $wpdb->prefix . 'techshift_daily_views';
 
     // Debug logging
-    // error_log( "FinShift View Tracking: Post ID $post_id, Date $date" );
+    // error_log( "TechShift View Tracking: Post ID $post_id, Date $date" );
 
     // Insert or Update count
     // Using simple query since dbDelta created the table
@@ -64,12 +64,12 @@ function finshift_track_post_view() {
     $result = $wpdb->query( $query );
     
     if ( $result === false ) {
-         // error_log( "FinShift View Tracking Error: " . $wpdb->last_error );
+         // error_log( "TechShift View Tracking Error: " . $wpdb->last_error );
     } else {
-         // error_log( "FinShift View Tracking Success: Updated/Inserted row." );
+         // error_log( "TechShift View Tracking Success: Updated/Inserted row." );
     }
 }
-add_action( 'wp_head', 'finshift_track_post_view' );
+add_action( 'wp_head', 'techshift_track_post_view' );
 
 /**
  * Get popular posts by view count.
@@ -78,9 +78,9 @@ add_action( 'wp_head', 'finshift_track_post_view' );
  * @param int $limit Number of posts to return.
  * @return array List of WP_Post objects with 'views' property.
  */
-function finshift_get_popular_posts( $days = 7, $limit = 5, $term_id = null, $taxonomy = 'category' ) {
+function techshift_get_popular_posts( $days = 7, $limit = 5, $term_id = null, $taxonomy = 'category' ) {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'finshift_daily_views';
+    $table_name = $wpdb->prefix . 'techshift_daily_views';
     
     // Check if table exists (to avoid errors if called before init)
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
@@ -138,9 +138,9 @@ function finshift_get_popular_posts( $days = 7, $limit = 5, $term_id = null, $ta
  * @param int $days Number of days to look back.
  * @return int Total views.
  */
-function finshift_get_post_views( $post_id, $days = 7 ) {
+function techshift_get_post_views( $post_id, $days = 7 ) {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'finshift_daily_views';
+    $table_name = $wpdb->prefix . 'techshift_daily_views';
     
     // Check if table exists
     if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
@@ -158,29 +158,29 @@ function finshift_get_post_views( $post_id, $days = 7 ) {
 /**
  * Add PV column to Admin Post List
  */
-function finshift_manage_posts_columns( $columns ) {
-    $columns['finshift_pv'] = __( '週間PV', 'finshift' );
+function techshift_manage_posts_columns( $columns ) {
+    $columns['techshift_pv'] = __( '週間PV', 'techshift' );
     return $columns;
 }
-add_filter( 'manage_posts_columns', 'finshift_manage_posts_columns' );
+add_filter( 'manage_posts_columns', 'techshift_manage_posts_columns' );
 
 /**
  * Render PV column content
  */
-function finshift_manage_posts_custom_column( $column, $post_id ) {
-    if ( 'finshift_pv' === $column ) {
-        $views = finshift_get_post_views( $post_id, 7 );
+function techshift_manage_posts_custom_column( $column, $post_id ) {
+    if ( 'techshift_pv' === $column ) {
+        $views = techshift_get_post_views( $post_id, 7 );
         echo number_format( $views );
     }
 }
-add_action( 'manage_posts_custom_column', 'finshift_manage_posts_custom_column', 10, 2 );
+add_action( 'manage_posts_custom_column', 'techshift_manage_posts_custom_column', 10, 2 );
 
 /**
  * Style the PV column
  */
-function finshift_admin_column_styling() {
+function techshift_admin_column_styling() {
     echo '<style>
-        .column-finshift_pv { width: 80px; text-align: right; }
+        .column-techshift_pv { width: 80px; text-align: right; }
     </style>';
 }
-add_action( 'admin_head', 'finshift_admin_column_styling' );
+add_action( 'admin_head', 'techshift_admin_column_styling' );

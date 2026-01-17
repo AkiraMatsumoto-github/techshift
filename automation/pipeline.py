@@ -243,7 +243,9 @@ def main():
         # Determine Category & Type
         classification = classifier.classify_article(article['title'], article['summary'], excluded_categories=['market-analysis'])
         category_slug = classification.get('category', 'featured-news')
-        article_type = category_slug
+        
+        # TechShift Simplification: Pipeline always generates Single Topic Deep Dives
+        article_type = "topic-focus"
             
         print(f"Category: {category_slug} -> Type: {article_type}")
         

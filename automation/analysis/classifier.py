@@ -2,6 +2,7 @@ import json
 import re
 import sys
 import os
+import textwrap
 
 # Add parent directory to path to import GeminiClient
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -21,7 +22,7 @@ class ArticleClassifier:
         
     def classify_article(self, title, content_summary, excluded_categories=None):
         """
-        Classify an article into FinShift Category and Tags.
+        Classify an article into TechShift Category (Topic) and Tags.
         
         Args:
             title (str): Article title
@@ -30,73 +31,96 @@ class ArticleClassifier:
         
         Returns:
             dict: {
-                "category": "slug",
-                "tags": ["slug1", "slug2"]
+                "category": "slug_of_child_topic",  # e.g., 'solid-state-batteries'
+                "tags": ["slug1", "slug2"]          # e.g., ['technology', 'japan']
             }
         """
         
-        # Define available categories
-        categories = [
-            {"name": "Market Analysis", "slug": "market-analysis", "desc": "毎日の市況、全体の流れ、トレンド分析"},
-            {"name": "Featured News", "slug": "featured-news", "desc": "特定のニュース（決算、政策、M&A）の深掘り記事"},
-            {"name": "Strategic Assets", "slug": "strategic-assets", "desc": "仮想通貨・コモディティの分析記事"},
-            {"name": "Investment Guide", "slug": "investment-guide", "desc": "手法解説、ツール使い方、初心者向けガイド（ストック記事）"},
-        ]
+        prompt = textwrap.dedent(f"""
+        You are the Chief Editor of "TechShift", a future foresight media.
+        Classify the following article into the appropriate **Technical Topic (Category)** and **Context Tags**.
         
-        # Filter categories
-        if excluded_categories:
-            categories = [c for c in categories if c['slug'] not in excluded_categories]
-            
-        # Build category prompt string
-        category_prompt_str = ""
-        for c in categories:
-            category_prompt_str += f"- {c['name']} ({c['slug']}): {c['desc']}\n"
+        ## Article Info
+        Title: {title}
+        Summary: {content_summary}
         
-        prompt = f"""
-        あなたは金融メディア「FinShift」の編集者です。
-        以下の記事タイトルと概要を分析し、最も適切な「カテゴリ（1つ）」と「タグ（複数可）」を選択してください。
+        ## 1. Category (Select ONE specific Topic Slug)
         
-        ## 記事情報
-        タイトル: {title}
-        概要: {content_summary}
+        **Target: Choose the most specific sub-category (Topic) from the hierarchy below.**
         
-        ## 1. カテゴリ (必ず1つ選択)
-{category_prompt_str}
+        **1. Space & Aero (space-aero)**
+           - reusable-rockets (再使用型ロケット)
+           - mega-constellations (衛星コンステレーション)
+           - lunar-exploration (月面開発・アルテミス計画)
+           - osam-debris (軌道上サービス・宇宙デブリ)
+           - supersonic-hypersonic (超音速・極超音速技術)
+           
+        **2. Quantum (quantum)**
+           - quantum-gate-computing (量子ゲート型コンピュータ)
+           - quantum-annealing (量子アニーリング)
+           - post-quantum-cryptography (耐量子暗号 PQC)
+           - quantum-sensing (量子センシング)
+           - quantum-internet (量子通信・インターネット)
+           
+        **3. Advanced AI (advanced-ai)**
+           - foundation-models (基盤モデル LLM/SLM)
+           - multi-agent-systems (マルチエージェント自律システム)
+           - edge-ai (オンデバイス・エッジAI)
+           - ai-native-dev (AIネイティブ開発 No-Code)
+           - digital-provenance (デジタル・プロヴェナンス)
+           
+        **4. Robotics (robotics)**
+           - humanoid-robots (ヒューマノイドロボット)
+           - l4-autonomous-driving (レベル4 自動運転)
+           - delivery-robots (ラストワンマイル配送ロボ)
+           - spatial-computing (空間コンピューティング XR)
+           - bci (ブレイン・コンピュータ I/F)
+           
+        **5. Life Science (life-science)**
+           - ai-drug-discovery (AI創薬)
+           - gene-editing (ゲノム編集・遺伝子治療)
+           - protein-structure (タンパク質構造予測)
+           - regenerative-medicine (再生医療・オルガノイド)
+           - longevity (老化制御・長寿研究)
+           
+        **6. Green Tech (green-tech)**
+           - fusion-energy (核融合発電)
+           - solid-state-batteries (全固体電池・次世代蓄電)
+           - direct-air-capture (直接空気回収 DAC)
+           - smr (小型モジュール炉)
+           - hydrogen-new-fuels (水素・次世代燃料)
+           
+        *(If none fit perfectly, choose the closest Section Parent slug)*
         
-        ## 2. タグ (該当するものを全て選択)
-        【地域】
-        - US Market (us-market): 米国株市場（S&P500, Nasdaq, NYダウ）
-        - Japan Market (japan-market): 日本株市場（日経平均, TOPIX）
-        - China Market (china-market): 中国・香港市場
-        - India Market (india-market): インド市場
-        - Indonesia Market (indonesia-market): インドネシア市場
-        - Global (global): クロスボーダーな市場動向、世界経済
+        ## 2. Tags (Select ALL relevant slugs)
         
-        【資産クラス】
-        - Stock (stock): 個別銘柄の分析、決算、M&A
-        - Crypto (crypto): 暗号資産（ビットコイン、イーサリアム）
-        - Forex (forex): 為替市場（ドル円、ユーロドル）
-        - Commodity (commodity): 金、原油、銅など商品市場
+        **Layer (Focus Area)**
+        - regulation (規制・法整備・政策)
+        - technology (技術開発・R&D, スペック向上)
+        - market (市場・ビジネス・M&A・資金調達)
         
-        【テーマ】
-        - Tech & AI (tech-ai): 半導体、人工知能、SaaS、ハイテク株
-        - EV & Auto (ev-auto): 電気自動車、バッテリー、自動運転
-        - Energy (energy): 再生可能エネルギー、石油・ガス、インフラ
-        - Earnings (earnings): 決算速報、ガイダンス修正
-        - Central Bank (central-bank): FRB, 日銀, ECBなどの金融政策
-        - Macro Economy (macro): マクロ経済、インフレ、GDP成長率
-        - Geopolitics (geopolitics): 地政学リスク、戦争、貿易摩擦
+        **Region (Comparison)**
+        - global-general (世界トレンド)
+        - us (米国市場)
+        - europe (欧州市場)
+        - china (中国市場)
+        - asia (アジア新興国)
+        - japan (日本国内)
         
-        ## 出力フォーマット (JSONのみ)
+        **Priority**
+        - hero-topic (Top Story of the day, Major Breakthrough)
+        - strategic-asset (Key National Strategy)
+        
+        ## Output Format (JSON Only)
         {{
-            "category": "slug",
-            "tags": ["slug1", "slug2", "slug3"]
+            "category": "slug_of_selected_topic",
+            "tags": ["tag_slug_1", "tag_slug_2", ...]
         }}
-        """
+        """)
         
         try:
             response = self.gemini.client.models.generate_content(
-                model='gemini-3-flash-preview',
+                model='gemini-2.0-flash-exp', # Use Flash for classification speed
                 contents=prompt,
                 config={
                     'response_mime_type': 'application/json'
@@ -111,16 +135,13 @@ class ArticleClassifier:
             print(f"Classification failed: {e}")
             # Default fallback
             return {
-                "category": "market-analysis",
-                "tags": ["global"]
+                "category": "advanced-ai", # Default to AI
+                "tags": ["global-general"]
             }
-
-            
-
 
 if __name__ == "__main__":
     # Test
     classifier = ArticleClassifier()
-    sample_title = "インド株SENSEXが最高値更新、タタ・モーターズが牽引"
-    sample_summary = "インド市場は自動車セクターの好調により続伸。外国人投資家の買い越しが続く。"
+    sample_title = "トヨタ、全固体電池の量産化へ一歩前進"
+    sample_summary = "トヨタ自動車は出光興産と提携し、全固体電池の量産パイロットラインを稼働させた。2027年の実用化を目指す。"
     print(json.dumps(classifier.classify_article(sample_title, sample_summary), indent=2, ensure_ascii=False))

@@ -3,7 +3,7 @@
  * The template for displaying the front page
  * SEO-optimized design based on content_strategy.md
  *
- * @package FinShift
+ * @package TechShift
  */
 
 get_header();
@@ -42,7 +42,7 @@ get_header();
 						$hero_query->the_post();
 						$thumb_url = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : get_template_directory_uri() . '/assets/images/hero-bg.png';
 						$categories = get_the_category();
-						$cat_name = ! empty( $categories ) ? $categories[0]->name : 'FINSHIFT';
+						$cat_name = ! empty( $categories ) ? $categories[0]->name : 'TECHSHIFT';
 						?>
 						<div class="swiper-slide" style="background-image: url('<?php echo esc_url( $thumb_url ); ?>');">
 							<a href="<?php the_permalink(); ?>" class="hero-full-link"><span class="screen-reader-text"><?php the_title(); ?></span></a>
@@ -70,7 +70,7 @@ get_header();
 	</section>
 
 	<!-- Global Ticker -->
-	<div class="finshift-global-ticker">
+	<div class="techshift-global-ticker">
 		<!-- TradingView Widget END -->
 		<div class="tradingview-widget-container">
 			<div class="tradingview-widget-container__widget"></div>
@@ -112,8 +112,8 @@ get_header();
                 
 				if ( $dashboard_query->have_posts() ) :
 					while ( $dashboard_query->have_posts() ) : $dashboard_query->the_post();
-						$regime = get_post_meta(get_the_ID(), '_finshift_regime', true);
-						$sentiment = get_post_meta(get_the_ID(), '_finshift_sentiment', true);
+						$phase = get_post_meta(get_the_ID(), '_techshift_phase', true);
+						$impact = get_post_meta(get_the_ID(), '_techshift_impact', true);
                         
                         // Get Summary
                         $summary_json = get_post_meta(get_the_ID(), '_ai_structured_summary', true);
@@ -125,8 +125,8 @@ get_header();
                             }
                         }
 
-						$s_val = intval($sentiment);
-						$s_class = ($s_val > 60) ? 'greed' : (($s_val < 40) ? 'fear' : 'neutral');
+						$i_val = intval($impact);
+						$i_class = ($i_val > 60) ? 'accelerated' : (($i_val < 40) ? 'delayed' : 'neutral');
                         
                         // Get Region from Tag (First tag usually)
                         $post_tags = get_the_tags();
@@ -138,18 +138,18 @@ get_header();
 					<div class="dashboard-metrics">
                         <!-- Region -->
                         <div class="metric-box region-box">
-							<span class="metric-label">MKT</span>
+							<span class="metric-label">Region</span>
 							<span class="metric-value"><?php echo esc_html($region_label); ?></span>
 						</div>
-                        <!-- Regime -->
+                        <!-- Phase (formerly Regime) -->
 						<div class="metric-box">
-							<span class="metric-label">Regime</span>
-							<span class="metric-value regime-<?php echo strtolower($regime); ?>"><?php echo $regime ? esc_html($regime) : '-'; ?></span>
+							<span class="metric-label">Phase</span>
+							<span class="metric-value"><?php echo $phase ? esc_html($phase) : '-'; ?></span>
 						</div>
-                        <!-- Sentiment -->
+                        <!-- Impact (formerly Sentiment) -->
 						<div class="metric-box">
-							<span class="metric-label">Sentiment</span>
-							<span class="metric-value sentiment-<?php echo $s_class; ?>"><?php echo $sentiment !== '' ? esc_html($sentiment) : '-'; ?></span>
+							<span class="metric-label">Impact</span>
+							<span class="metric-value impact-<?php echo $i_class; ?>"><?php echo $impact !== '' ? esc_html($impact) : '-'; ?></span>
 						</div>
 					</div>
 					
@@ -170,7 +170,7 @@ get_header();
 					endwhile;
                     wp_reset_postdata();
                 else :
-                    echo '<p style="color:var(--color-text-secondary);">' . esc_html__('No scenarios available yet.', 'finshift') . '</p>';
+                    echo '<p style="color:var(--color-text-secondary);">' . esc_html__('No scenarios available yet.', 'techshift') . '</p>';
 				endif;
 				?>
 			</div>
@@ -230,13 +230,13 @@ get_header();
 	<section id="popular-articles" class="popular-articles-section" style="background-color: var(--color-bg-secondary);">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( '人気記事ランキング', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( '人気記事ランキング', 'techshift' ); ?></h2>
 			</div>
 
 			<div class="featured-grid">
 				<?php
-				if ( function_exists( 'finshift_get_popular_posts' ) ) {
-					$popular_posts = finshift_get_popular_posts( 7, 5 ); // 5 posts for ranking
+				if ( function_exists( 'techshift_get_popular_posts' ) ) {
+					$popular_posts = techshift_get_popular_posts( 7, 5 ); // 5 posts for ranking
 
 					if ( ! empty( $popular_posts ) ) {
 						$rank = 1;
@@ -266,14 +266,14 @@ get_header();
 						endforeach;
 						wp_reset_postdata();
 					} else {
-						echo '<p>' . esc_html__( '集計中...', 'finshift' ) . '</p>';
+						echo '<p>' . esc_html__( '集計中...', 'techshift' ) . '</p>';
 					}
 				}
 				?>
 			</div>
 
 			<div class="section-footer" style="text-align: right; margin-top: var(--spacing-md);">
-				<a href="<?php echo esc_url( home_url( '/ranking/' ) ); ?>" class="text-link-arrow"><?php esc_html_e( 'ランキング一覧を見る', 'finshift' ); ?> &rarr;</a>
+				<a href="<?php echo esc_url( home_url( '/ranking/' ) ); ?>" class="text-link-arrow"><?php esc_html_e( 'ランキング一覧を見る', 'techshift' ); ?> &rarr;</a>
 			</div>
 		</div>
 	</section>
@@ -282,7 +282,7 @@ get_header();
 	<section class="industry-tags-section" style="padding: var(--spacing-section) 0;">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( 'アセットクラス', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( 'アセットクラス', 'techshift' ); ?></h2>
 			</div>
 
 			<?php
@@ -353,7 +353,7 @@ get_header();
 								wp_reset_postdata();
 							else:
 								?>
-								<p class="no-posts"><?php esc_html_e( '記事がまだありません。', 'finshift' ); ?></p>
+								<p class="no-posts"><?php esc_html_e( '記事がまだありません。', 'techshift' ); ?></p>
 								<?php
 							endif;
 							?>
@@ -367,7 +367,7 @@ get_header();
 								$term_link = get_term_link( $term );
 								if ( ! is_wp_error( $term_link ) ) :
 									?>
-									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'finshift' ), esc_html( $industry_tag['name'] ) ); ?> &rarr;</a>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'techshift' ), esc_html( $industry_tag['name'] ) ); ?> &rarr;</a>
 									<?php
 								endif;
 							endif;
@@ -383,7 +383,7 @@ get_header();
 	<section class="theme-tags-section" style="background-color: var(--color-bg-secondary);">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( '注目テーマ・セクター', 'finshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( '注目テーマ・セクター', 'techshift' ); ?></h2>
 			</div>
 
 			<?php
@@ -458,7 +458,7 @@ get_header();
 								$term_link = get_term_link( $term );
 								if ( ! is_wp_error( $term_link ) ) :
 									?>
-									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'finshift' ), esc_html( $theme_tag['name'] ) ); ?> &rarr;</a>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'techshift' ), esc_html( $theme_tag['name'] ) ); ?> &rarr;</a>
 									<?php
 								endif;
 							endif;

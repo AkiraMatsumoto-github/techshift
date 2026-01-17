@@ -1,115 +1,186 @@
 #!/usr/bin/env python3
 """
-Setup WordPress Categories and Tags for FinShift
-Based on docs/00_project/finshift_media_plan.md
+Setup WordPress Categories and Tags for TechShift
+Based on docs/00_project/media_concept_sheet.md
 """
 
+import sys
+import os
+
+# Ensure automation directory is in path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 try:
-    from automation.wp_client import WordPressClient
-except ImportError:
     from wp_client import WordPressClient
+except ImportError:
+    # Fallback for running from root
+    from automation.wp_client import WordPressClient
 
 import requests
 
-def create_categories(wp):
-    """Create FinShift categories."""
-    categories = [
-        {
-            "name": "Market Analysis",
-            "slug": "market-analysis",
-            "description": "米国・日本・インド・中国・インドネシアなど、世界主要市場のデイリー市況解説。AIシナリオ分析による「今日の強気・弱気」判断と、スイングトレーダー向けのアクションプランを提供します。"
-        },
-        {
-            "name": "Featured News",
-            "slug": "featured-news",
-            "description": "市場を動かす重要ニュース（雇用統計、決算、政策転換）の深掘り解説。単なる事実の報道ではなく、それが「どの銘柄に」「どう影響するか」を投資家視点で分析します。"
-        },
-        {
-            "name": "Strategic Assets",
-            "slug": "strategic-assets",
-            "description": "株式市場の先行指標となる「仮想通貨（Crypto）」「金・原油（Commodities）」の分析。市場間の相関性（Inter-market Correlation）を読み解き、リスクセンチメントの変化を捉えます。"
-        },
-        {
-            "name": "Investment Guide",
-            "slug": "investment-guide",
-            "description": "新興国株（インド・中国）の買い方、証券口座の選び方、TradingViewなどのツール活用法。初心者から中級者へのステップアップを支援する普遍的な知識（ストック情報）。"
-        }
-    ]
+def create_techshift_taxonomy(wp):
+    """Create TechShift categories and tags."""
     
-    print("Creating/Updating Categories (FinShift)...")
-    _process_terms(wp, "categories", categories)
-
-def create_tags(wp):
-    """Create FinShift tags."""
-    tags = [
-        # Region
-        {"name": "US Market", "slug": "us-market", "description": "米国株市場（S&P500, Nasdaq, NYダウ）。世界の金融センターであるウォール街の動向を追う。"},
-        {"name": "Japan Market", "slug": "japan-market", "description": "日本株市場（日経平均, TOPIX）。円安・金融政策・外国人投資家の動向。"},
-        {"name": "China Market", "slug": "china-market", "description": "中国・香港市場（上海総合, ハンセン）。政府の景気刺激策やEV・テック規制の動き。"},
-        {"name": "India Market", "slug": "india-market", "description": "インド市場（SENSEX, Nifty50）。世界一の人口ボーナスと高成長企業のトレンド。"},
-        {"name": "Indonesia Market", "slug": "indonesia-market", "description": "インドネシア市場（IDX）。東南アジアの成長エンジンとコモディティ関連株。"},
-        {"name": "Global", "slug": "global", "description": "クロスボーダーな市場動向、地政学リスク、世界経済全体のトレンド。"},
-
-        # Asset Class
-        {"name": "Stock", "slug": "stock", "description": "個別銘柄（Stock）の分析。決算、M&A、新製品発表など。"},
-        {"name": "Crypto", "slug": "crypto", "description": "ビットコイン、イーサリアムなど暗号資産（仮想通貨）。リスクオン・オフの温度計。"},
-        {"name": "Forex", "slug": "forex", "description": "為替市場（ドル円、ユーロドル）。金利差や通貨強弱による市場への影響。"},
-        {"name": "Commodity", "slug": "commodity", "description": "金（ゴールド）、原油、銅など商品市場。インフレ動向や地政学リスクの反映。"},
-
-        # Sector / Theme
-        {"name": "Tech & AI", "slug": "tech-ai", "description": "半導体、人工知能、SaaS。市場を牽引するハイテク・グロース株。"},
-        {"name": "EV & Auto", "slug": "ev-auto", "description": "電気自動車、バッテリー、自動運転技術。産業構造の転換点。"},
-        {"name": "Energy", "slug": "energy", "description": "再生可能エネルギー、石油・ガス、電力インフラ。"},
-        {"name": "Earnings", "slug": "earnings", "description": "決算速報。サプライズ決算やガイダンス修正におる株価変動。"},
-        {"name": "Central Bank", "slug": "central-bank", "description": "FRB, 日銀, ECBなどの金融政策決定会合。利上げ・利下げシナリオ。"},
-        {"name": "Macro Economy", "slug": "macro", "description": "マクロ経済、インフレ、GDP成長率など経済全体の動向。"},
-        {"name": "Geopolitics", "slug": "geopolitics", "description": "地政学リスク、戦争、貿易摩擦など市場に影響を与える政治的要因。"},
+    # --- 1. Main Categories (Sectors) ---
+    # Slug format: English slug derived from "Space & Aero" -> "space-aero"
+    sectors = [
+        {"name": "宇宙・航空", "slug": "space-aero", "description": "Space & Aero: ロケット、衛星、月面開発などの宇宙技術および航空技術。"},
+        {"name": "量子技術", "slug": "quantum", "description": "Quantum: 量子コンピューティング、量子暗号、量子センシング。"},
+        {"name": "次世代知能", "slug": "advanced-ai", "description": "Advanced AI: LLM, 自律エージェント, エッジAIなどの次世代人工知能技術。"},
+        {"name": "ロボ・移動", "slug": "robotics", "description": "Robotics & Mobility: ヒューマノイド, 自動運転, BCI, 空間コンピューティング。"},
+        {"name": "生命・バイオ", "slug": "life-science", "description": "Life Science: AI創薬, ゲノム編集, 次世代医療技術。"},
+        {"name": "環境・エネルギー", "slug": "green-tech", "description": "Green Tech: 核融合, 全固体電池, DAC, 水素などの気候テック。"}
     ]
-    
-    print("\nCreating/Updating Tags (FinShift)...")
-    _process_terms(wp, "tags", tags)
 
-def _process_terms(wp, taxonomy, terms):
-    """Helper to create or update terms."""
-    for term in terms:
-        try:
-            # 1. Try create
-            url = f"{wp.api_url}/{taxonomy}"
-            response = requests.post(url, json=term, auth=wp.auth)
+    print("--- Creating Main Categories (Sectors) ---")
+    sector_map = {} # name -> id
+    for sector in sectors:
+        cat_id = _create_or_update_term(wp, "categories", sector)
+        if cat_id:
+            sector_map[sector["slug"]] = cat_id
+
+    # --- 2. Sub Categories (Topics) ---
+    # Structure: parent_slug -> list of children
+    topics = {
+        "space-aero": [
+            {"name": "再使用型ロケット", "slug": "reusable-rockets", "description": "Reusable Rockets"},
+            {"name": "衛星コンステレーション", "slug": "mega-constellations", "description": "Mega Constellations"},
+            {"name": "月面開発・アルテミス計画", "slug": "lunar-exploration", "description": "Lunar Exploration"},
+            {"name": "軌道上サービス・宇宙デブリ", "slug": "osam-debris", "description": "OSAM / Debris"},
+            {"name": "超音速・極超音速技術", "slug": "supersonic-hypersonic", "description": "Supersonic / Hypersonic"},
+        ],
+        "quantum": [
+            {"name": "量子ゲート型コンピュータ", "slug": "quantum-gate-computing", "description": "Quantum Gate Computing"},
+            {"name": "量子アニーリング", "slug": "quantum-annealing", "description": "Quantum Annealing"},
+            {"name": "耐量子暗号 (PQC)", "slug": "post-quantum-cryptography", "description": "Post-Quantum Cryptography"},
+            {"name": "量子センシング", "slug": "quantum-sensing", "description": "Quantum Sensing"},
+            {"name": "量子通信・インターネット", "slug": "quantum-internet", "description": "Quantum Internet"},
+        ],
+        "advanced-ai": [
+            {"name": "基盤モデル (LLM/SLM)", "slug": "foundation-models", "description": "Foundation Models"},
+            {"name": "マルチエージェント自律システム", "slug": "multi-agent-systems", "description": "Multi-Agent Systems"},
+            {"name": "オンデバイス・エッジAI", "slug": "edge-ai", "description": "Edge AI"},
+            {"name": "AIネイティブ開発 (No-Code)", "slug": "ai-native-dev", "description": "AI-Native Dev"},
+            {"name": "デジタル・プロヴェナンス", "slug": "digital-provenance", "description": "Digital Provenance"},
+        ],
+        "robotics": [
+            {"name": "ヒューマノイドロボット", "slug": "humanoid-robots", "description": "Humanoid Robots"},
+            {"name": "レベル4 自動運転", "slug": "l4-autonomous-driving", "description": "L4 Autonomous Driving"},
+            {"name": "ラストワンマイル配送ロボ", "slug": "delivery-robots", "description": "Delivery Robots"},
+            {"name": "空間コンピューティング (XR)", "slug": "spatial-computing", "description": "Spatial Computing"},
+            {"name": "ブレイン・コンピュータ I/F (BCI)", "slug": "bci", "description": "BCI"},
+        ],
+        "life-science": [
+            {"name": "AI創薬", "slug": "ai-drug-discovery", "description": "AI Drug Discovery"},
+            {"name": "ゲノム編集・遺伝子治療", "slug": "gene-editing", "description": "Gene Editing"},
+            {"name": "タンパク質構造予測", "slug": "protein-structure", "description": "Protein Structure"},
+            {"name": "再生医療・オルガノイド", "slug": "regenerative-medicine", "description": "Regenerative Medicine"},
+            {"name": "老化制御・長寿研究", "slug": "longevity", "description": "Longevity"},
+        ],
+        "green-tech": [
+            {"name": "核融合発電", "slug": "fusion-energy", "description": "Fusion Energy"},
+            {"name": "全固体電池・次世代蓄電", "slug": "solid-state-batteries", "description": "Solid-State Batteries"},
+            {"name": "直接空気回収 (DAC)", "slug": "direct-air-capture", "description": "Direct Air Capture"},
+            {"name": "小型モジュール炉 (SMR)", "slug": "smr", "description": "SMR"},
+            {"name": "水素・次世代燃料", "slug": "hydrogen-new-fuels", "description": "Hydrogen & New Fuels"},
+        ]
+    }
+
+    print("\n--- Creating Sub Categories (Topics) ---")
+    for parent_slug, children in topics.items():
+        if parent_slug not in sector_map:
+            print(f"Skipping children for {parent_slug} (Parent not found)")
+            continue
             
-            if response.status_code == 201:
-                print(f"✓ Created {taxonomy[:-1]}: {term['name']}")
-            elif response.status_code == 400 and "term_exists" in response.text:
-                # 2. Update existing
-                print(f"- {taxonomy[:-1].capitalize()} exists: {term['name']}. Updating...")
+        parent_id = sector_map[parent_slug]
+        for child in children:
+            child["parent"] = parent_id # Assign parent ID
+            _create_or_update_term(wp, "categories", child)
+
+
+    # --- 3. Tags ---
+    tags = [
+        # Layers (Roadmap Layers)
+        {"name": "Regulation", "slug": "regulation", "description": "規制・法整備・政策"},
+        {"name": "Technology", "slug": "technology", "description": "技術開発・R&D"},
+        {"name": "Market", "slug": "market", "description": "市場・ビジネス・普及"},
+        
+        # Region (Roadmap Comparison)
+        {"name": "Global (General)", "slug": "global-general", "description": "世界全体の横断的トレンド"},
+        {"name": "US", "slug": "us", "description": "米国・北米市場"},
+        {"name": "Europe", "slug": "europe", "description": "欧州・EU市場 (AI法規制など)"},
+        {"name": "China", "slug": "china", "description": "中国市場・技術動向"},
+        {"name": "Asia (Ex-China)", "slug": "asia", "description": "インド・東南アジアなどの新興市場"},
+        {"name": "Japan", "slug": "japan", "description": "日本国内動向"},
+        
+        # Priority/Impact
+        {"name": "Hero Topic", "slug": "hero-topic", "description": "トップストーリー"},
+        {"name": "Strategic Asset", "slug": "strategic-asset", "description": "戦略的技術資産"},
+    ]
+
+    print("\n--- Creating Tags ---")
+    for tag in tags:
+        _create_or_update_term(wp, "tags", tag)
+
+
+def _create_or_update_term(wp, taxonomy, term_data):
+    """Helper to create or update terms."""
+    # term_data should have 'name', 'slug', 'description', and optional 'parent'
+    
+    try:
+        # 1. Try create
+        url = f"{wp.api_url}/{taxonomy}"
+        response = requests.post(url, json=term_data, auth=wp.auth)
+        
+        if response.status_code == 201:
+            print(f"✓ Created {taxonomy[:-1]}: {term_data['name']}")
+            return response.json()['id']
+            
+        elif response.status_code == 400 and "term_exists" in response.text:
+            # 2. Update existing
+            # First, we need to find the ID of the existing term.
+            # Unfortunately, the 400 error usually contains the ID, but it's cleaner to fetch by slug.
+            
+            get_url = f"{wp.api_url}/{taxonomy}"
+            params = {"slug": term_data['slug']}
+            get_res = requests.get(get_url, params=params, auth=wp.auth)
+            
+            if get_res.status_code == 200 and len(get_res.json()) > 0:
+                existing = get_res.json()[0]
+                term_id = existing['id']
                 
-                # Fetch ID
-                get_url = f"{wp.api_url}/{taxonomy}&slug={term['slug']}"
-                get_res = requests.get(get_url, auth=wp.auth)
+                print(f"- {taxonomy[:-1].capitalize()} exists: {term_data['name']} (ID: {term_id}). Updating...")
                 
-                if get_res.status_code == 200 and len(get_res.json()) > 0:
-                    term_id = get_res.json()[0]['id']
-                    update_url = f"{wp.api_url}/{taxonomy}/{term_id}"
-                    update_res = requests.post(update_url, json={'description': term['description']}, auth=wp.auth)
-                    
-                    if update_res.status_code == 200:
-                         print(f"  ✓ Updated description.")
-                    else:
-                         print(f"  ✗ Update failed: {update_res.text}")
+                # Prepare update data (excluding slug/name to avoid conflicts if case differs)
+                update_data = {"description": term_data.get('description', '')}
+                if 'parent' in term_data:
+                    update_data['parent'] = term_data['parent']
+                
+                update_url = f"{wp.api_url}/{taxonomy}/{term_id}"
+                update_res = requests.post(update_url, json=update_data, auth=wp.auth)
+                
+                if update_res.status_code == 200:
+                     print(f"  ✓ Updated.")
+                     return term_id
                 else:
-                    print(f"  ✗ ID lookup failed for {term['slug']}")
+                     print(f"  ✗ Update failed: {update_res.text}")
+                     return term_id # Return ID anyway
             else:
-                print(f"✗ Creation failed: {response.text}")
-                
-        except Exception as e:
-            print(f"✗ Error: {e}")
+                print(f"  ✗ ID lookup failed for {term_data['slug']}")
+                return None
+        else:
+            print(f"✗ Creation failed for {term_data['name']}: {response.text}")
+            return None
+            
+    except Exception as e:
+        print(f"✗ Error processing {term_data['name']}: {e}")
+        return None
 
 def main():
-    print("=== FinShift Taxonomy Setup ===\n")
+    print("=== TechShift Taxonomy Setup ===\n")
     try:
         wp = WordPressClient()
-        create_categories(wp)
-        create_tags(wp)
+        create_techshift_taxonomy(wp)
         print("\n✓ Setup complete!")
     except Exception as e:
         print(f"\n✗ Setup failed: {e}")

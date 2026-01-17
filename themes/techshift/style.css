@@ -2764,3 +2764,38 @@ section {
         margin-bottom: 12px;
     }
 }
+/* TechShift Impact Styles */
+/* Impact Colors */
+.accelerated, .impact-accelerated { color: var(--color-bull); }
+.delayed, .impact-delayed { color: var(--color-bear); }
+.neutral, .impact-neutral { color: var(--color-neutral); }
+
+/* Chips (Single Page) */
+.market-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: inline-block;
+    background-color: var(--color-bg-secondary);
+}
+
+.impact-label.accelerated { 
+    background-color: #ecfdf5; /* emerald-50 */
+    color: var(--color-bull);
+}
+.impact-label.delayed { 
+    background-color: #fef2f2; /* red-50 */
+    color: var(--color-bear);
+}
+
+/* Dashboard Metrics (Front Page) */
+.metric-value.impact-accelerated { color: var(--color-bull); font-weight: 700; }
+.metric-value.impact-delayed { color: var(--color-bear); font-weight: 700; }
+.metric-value.impact-neutral { color: var(--color-neutral); font-weight: 700; }
+
+.techshift-impact-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}

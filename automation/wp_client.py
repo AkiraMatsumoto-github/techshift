@@ -243,7 +243,7 @@ class WordPressClient:
         Retrieve popular posts from custom endpoint.
         """
         try:
-            url = f"{self.wp_url}/?rest_route=/finshift/v1/popular-posts"
+            url = f"{self.wp_url}/?rest_route=/techshift/v1/popular-posts"
             params = {
                 "days": days,
                 "limit": limit

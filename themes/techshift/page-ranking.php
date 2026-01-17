@@ -3,7 +3,7 @@
  * Template Name: Ranking Page
  * The template for displaying the ranking page
  *
- * @package FinShift
+ * @package TechShift
  */
 
 get_header();
@@ -14,9 +14,9 @@ get_header();
 	<!-- Ranking Header -->
 	<section class="archive-hero">
 		<div class="container">
-			<h1 class="archive-title"><?php esc_html_e( '人気記事ランキング', 'finshift' ); ?></h1>
+			<h1 class="archive-title"><?php esc_html_e( '人気記事ランキング', 'techshift' ); ?></h1>
 			<div class="archive-description">
-				<?php esc_html_e( 'FinShiftで最も読まれている記事をランキング形式でご紹介します。', 'finshift' ); ?>
+				<?php esc_html_e( 'TechShiftで最も読まれている記事をランキング形式でご紹介します。', 'techshift' ); ?>
 			</div>
 		</div>
 	</section>
@@ -27,16 +27,16 @@ get_header();
 			<!-- Time Period Tabs -->
 			<div class="region-filter-tabs ranking-tabs" style="justify-content: center; margin-bottom: 40px;">
 				<button class="region-tab active" data-period="7">
-					<?php esc_html_e( '7日間', 'finshift' ); ?>
+					<?php esc_html_e( '7日間', 'techshift' ); ?>
 				</button>
 				<button class="region-tab" data-period="14">
-					<?php esc_html_e( '14日間', 'finshift' ); ?>
+					<?php esc_html_e( '14日間', 'techshift' ); ?>
 				</button>
 				<button class="region-tab" data-period="30">
-					<?php esc_html_e( '30日間', 'finshift' ); ?>
+					<?php esc_html_e( '30日間', 'techshift' ); ?>
 				</button>
 				<button class="region-tab" data-period="60">
-					<?php esc_html_e( '60日間', 'finshift' ); ?>
+					<?php esc_html_e( '60日間', 'techshift' ); ?>
 				</button>
 			</div>
 
@@ -54,14 +54,14 @@ get_header();
 				<div class="ranking-block" id="ranking-block-<?php echo esc_attr( $days ); ?>" style="display: <?php echo $display_style; ?>;">
 					
 					<p class="ranking-period-info" style="text-align: center; color: #888; margin-bottom: 20px; font-size: 0.9em;">
-						<?php printf( esc_html__( '集計期間: %s 〜 %s', 'finshift' ), $start_date, $end_date ); ?>
+						<?php printf( esc_html__( '集計期間: %s 〜 %s', 'techshift' ), $start_date, $end_date ); ?>
 					</p>
 
 					<div class="featured-grid">
 						<?php
-						if ( function_exists( 'finshift_get_popular_posts' ) ) {
+						if ( function_exists( 'techshift_get_popular_posts' ) ) {
 							// Get top 20 posts for this period
-							$popular_posts = finshift_get_popular_posts( $days, 20 );
+							$popular_posts = techshift_get_popular_posts( $days, 20 );
 
 							if ( ! empty( $popular_posts ) ) {
 								$rank = 1;
@@ -102,7 +102,7 @@ get_header();
 								endforeach;
 								wp_reset_postdata();
 							} else {
-								echo '<p style="text-align:center; width:100%;">' . esc_html__( '集計データがありません。', 'finshift' ) . '</p>';
+								echo '<p style="text-align:center; width:100%;">' . esc_html__( '集計データがありません。', 'techshift' ) . '</p>';
 							}
 						}
 						?>
