@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Article Relevance Scorer for FinShift
-Evaluates articles using Gemini API based on FinShift's persona (Market Strategist).
+Article Relevance Scorer for TechShift
+Evaluates articles using Gemini API based on TechShift's persona (TechShift Lead Analyst).
 """
 
 import argparse
@@ -15,32 +15,31 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from automation.gemini_client import GeminiClient
 
-# Editorial Persona and Scoring Criteria for FinShift
-SHARED_CRITERIA = """あなたは金融市場の戦略家「FinShiftチーフストラテジスト」です。
-ターゲット読者である「スイングトレーダー（数日〜数週間の短期売買）」にとって、以下の記事が有益かどうかを評価してください。
+# Editorial Persona and Scoring Criteria for TechShift
+SHARED_CRITERIA = """あなたは「TechShift Lead Analyst」です。
+未来の実践者 (Visionary Practitioner) と 未来への投資家 (Macro Investor) にとって、以下の記事が「未来のロードマップを変える重要なシグナル」かどうかを評価してください。
 
 【ターゲットペルソナ】
-- 属性: 個人投資家（兼業）、スイングトレーダー
-- 対象市場: 米国株、日本株、インド株、中国株、仮想通貨、コモディティ
-- ニーズ: 「今日買うべきか、売るべきか」の判断材料、トレンドの転換点、予兆
+- 属性: エンジニア、R&Dリーダー、VC、長期投資家
+- 関心領域: AI (AGI, Multi-Agent), Quantum (PQC), Green Tech (Fusion, Battery)
+- ニーズ: 「技術がいつ実用化されるか」「ロードマップがどう変わるか」「どの技術が勝つか」
 
 【評価基準】（合計100点）
-1. **価格への直接的インパクト** (0-40点)
-    - そのニュースで株価・指数・レートが動くか？
-    - 決算サプライズ、中央銀行の政策変更、大型M&A、規制強化などは高得点。
-    - 単なる「解説記事」や「アナリストの個人的見解」は低得点。
+1. **Technological Breakthrough (技術的確変)** (0-40点)
+    - 0->1の革新、または既存の限界を突破するスケーリングか？
+    - 単なる「新製品発表」ではなく、「アーキテクチャの進化」や「科学的発見」か。
+    - 論文、コード、ベンチマークなどの裏付けがあるか。
 
-2. **スイングトレード適性** (0-30点)
-    - 数日〜数週間のトレンドを作り出す材料か？
-    - デイトレ（数分）でも長期投資（数年）でもなく、「中間的な波」に乗れるか。
+2. **Roadmap Impact (ロードマップへの影響)** (0-30点)
+    - 「AGI登場」「全固体電池の実用化」などのマイルストーンを加速/遅延させるか？
+    - 既存の予測（例: 2029年）を覆す要素があるか。
 
-3. **地域・セクターの重要性** (0-20点)
-    - FinShiftの注力領域（インド、中国、テック、半導体、Crypto）に関連するか？
-    - グローバルな波及効果があるか（例: 米国の金利 -> 新興国通貨への影響）。
+3. **Cross-Domain Synergy (領域横断シナジー)** (0-20点)
+    - AIが科学（Green/Quantum）を加速させる、あるいはその逆のシナジーがあるか？
+    - 単一領域に留まらない波及効果。
 
-4. **具体性と新規性** (0-10点)
-    - 具体的な数値（売上高、EPS、目標株価）が含まれているか。
-    - 既知の事実の焼き直しではなく、新しい事実か。
+4. **Business/Social Implication (社会実装・コスト)** (0-10点)
+    - コスト1/10化、規制の壁の突破、主要プレイヤーの戦略転換など。
 """
 
 SCORING_PROMPT = SHARED_CRITERIA + """
@@ -53,7 +52,7 @@ SCORING_PROMPT = SHARED_CRITERIA + """
 以下のJSON形式で出力してください:
 {{
   "score": <0-100の整数>,
-  "reasoning": "<評価理由をトレーダー視点で2-3文で簡潔に>",
+  "reasoning": "<評価理由をアナリスト視点で2-3文で簡潔に。ロードマップへの影響を中心に>",
   "relevance": "<high/medium/low>"
 }}
 """
@@ -169,8 +168,8 @@ if __name__ == "__main__":
     # Test
     scorer = ArticleScorer()
     test_article = {
-        "title": "Fed likely to hold rates steady, signals patience",
-        "source": "CNBC",
-        "summary": "Powell emphasizes data dependency."
+        "title": "Google DeepMind unveils localized scaling laws for AGI",
+        "source": "TechCrunch AI",
+        "summary": "New paper suggests training compute can be reduced by 50% with new architecture."
     }
     print(json.dumps(scorer.score_article(test_article), indent=2, ensure_ascii=False))

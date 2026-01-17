@@ -1,33 +1,33 @@
-# FinShift System Architecture
+# TechShift System Architecture
 
 ## 1. System Overview
 
-本システムは、世界中の金融ニュース・市況データを自動収集し、AIによる分析・示唆を付加してWebメディアに公開する完全自動化パイプラインです。
-FinShiftでは、Logishiftの基盤を拡張し、**「国別デイリー・ブリーフィング（フロー）」** と **「重要ニュース個別深掘り（ストック）」** のハイブリッド戦略を採用します。
+本システムは、世界中の技術ニュースを自動収集し、技術ロードマップへの影響（Impact）を分析してWebメディアに公開する完全自動化パイプラインです。
+TechShiftでは、**「トピック別ロードマップ（ストック/親）」** と **「最新ニュース（フロー/子）」** のクラスター構造により、技術の現在地を動的に可視化します。
 
 ```mermaid
 graph TD
     subgraph "Data Sources (Global)"
-        S1[Global News<br/>(Reuters, Bloomberg, SCMP, Mint)] -->|RSS| RSSFetcher
-        S2[Market Data<br/>(Yahoo Finance)] -->|API| MarketData
-        S3[Sentiment/Events<br/>(CNN, Investing.com)] -->|Scraping| Scraper
+        S1[Tech Media<br/>(TechCrunch, VentureBeat, Nature)] -->|RSS/Scraping| Crawler
+        S2[Gov/Institutions<br/>(NASA, White House, METI)] -->|RSS| Crawler
+        S3[Corporate IR<br/>(NVIDIA, Toyota, IonQ)] -->|Monitoring| Crawler
     end
 
-    subgraph "Automation Core (Python)"
-        RSSFetcher & MarketData & Scraper --> RawDB[(Raw Data Store)]
-        RawDB --> Pipeline{Pipeline Orchestrator<br/>(Daily/Weekly/News)}
+    subgraph "Intelligence Automation (Phase 2: Future)"
+        Crawler --> RawDB[(Raw Data Store)]
+        RawDB --> Pipeline{Pipeline Orchestrator<br/>(Event-Driven)}
         
-        Pipeline -->|Analyze| Analyzer[AI Analyzer<br/>(Gemini)]
-        Analyzer -->|Generate Scenario| ScenarioGen[Scenario Generator]
-        Analyzer -->|Calc Sentiment| Sentiment[Sentiment Analyzer]
+        Pipeline -->|Fact Extraction| FactParser[Fact Parser]
+        FactParser -->|Impact Analysis| ImpactAnalyzer[Impact Analyzer<br/>(Gemini 3 Pro)]
+        ImpactAnalyzer -->|Logic Chain| LogicBuilder[Logic Build]
         
-        ScenarioGen & Sentiment --> Drafter[Article Drafter]
+        LogicBuilder --> Drafter[Article Drafter]
     end
 
     subgraph "Presentation (WordPress)"
-        Drafter -->|Post via API| WP[WordPress Site]
-        WP -->|Display| Page[Front Page / Market Page]
-        WP -->|Store| Meta[Custom Fields<br/>(Sentiment/Scenario)]
+        Drafter -->|Post & Update| WP[WordPress Site]
+        WP -->|Display| Page[Roadmap Page<br/>(Vertical Timeline)]
+        WP -->|Update| Meta[Custom Fields<br/>(Prediction Date/Phase)]
     end
 ```
 
@@ -35,91 +35,75 @@ graph TD
 
 ### 2.1. Collectors (`automation/collectors/`)
 外部データ収集を担当するモジュール群。
-- **`rss_fetcher.py`**: 
-    - 各国（US, CN, IN, JP, ID）の主要メディアRSSを取得。
-    - コンテンツ全文が取れない場合は、概要(Summary)のみを取得してAIに渡すフォールバック機能を実装。
-- **`scraper.py`**: 
-    - 特定サイト（恐怖指数、経済指標カレンダー）からのスクレイピング。
-    - RSSで取得できない独自ソース（中国現地サイト等）の補完。
-- **`market_data.py`**: 
-    - `yfinance` 等を利用し、各国の主要指数・為替・コモディティ価格を取得。
-    - **Risk Monitor用データ**: BTC, Gold, Oilについて「1日(1D), 1週間(1W), 1ヶ月(1M)」の騰落率を計算し、WP Options APIに保存。
-- **`market_ticker.yml`**:
-    - 各国市場の主要指数、為替、コモディティのティッカーシンボルと表示名を定義する設定ファイル。
+- **`collector.py`**: 
+    - 重点3トピックおよび全30カテゴリに関連するRSSフィードを巡回。
+    - **Filter**: 一般的なガジェットニュース（スマホのレビュー等）を除外し、「技術的進歩」に焦点を当ててフィルタリング。
+- **`url_reader.py`**: 
+    - 論文要旨やプレスリリースの本文抽出。
+    - **Anti-Bot**: 取得困難なサイトはRSS Summaryで代替するフォールバック機能。
 
 ### 2.2. AI Analysis (`automation/analysis/`)
-取得データに「金融的付加価値」を与えるコアロジック。
-- **`scenario_generator.py`**: 
-    - 入力: ニュース群 + 市況データ
-    - 出力: 「強気シナリオ」「弱気シナリオ」「横ばい」の3パターンとその発生確率。
-    - **Disclaimer**: 生成テキストに必ず投資助言ではない旨の免責を注入。
+取得データに「技術的付加価値」を与えるコアロジック。
+- **`impact_analyzer.py`** (Core): 
+    - **Input**: ニュース記事 + 既存ロードマップ情報
+    - **Process**:
+        1.  **Fact**: 「何が起きたか」を特定。
+        2.  **Analysis**: それが技術的ボトルネックの解消に繋がるか分析。
+        3.  **Impact**: ロードマップの予測時期（Floating）または達成確度（Fixed）を更新判定。
+    - **Output**: 構造化データ（JSON）と論理チェーン（Logic Chain）。
 - **`sentiment_analyzer.py`**:
-    - 入力: ニュースのトーン + VIX/Fear&Greed指数
-    - 出力: 市場センチメントスコア (0-100) および「Greed/Fear」のラベル。
-- **`scorer_legacy.py`**: 
-    - ニュースの重要度（Impact）を0-100で採点し、80点以上を「個別記事」候補とする。
+    - 技術トレンドに対する「過度な期待（Hype）」と「幻滅（Disillusionment）」を判定。
+- **`scorer.py`**: 
+    - ニュースの重要度を0-100で採点し、ロードマップ更新のトリガーとするかを決定。
 
 ### 2.3. Tools (`automation/tools/`)
-- **`batch_generate_2025.py`**: SEOキーワードリストに基づき、ストック型記事（解説記事など）を一括生成する手動ツール。
+- **`setup_taxonomy.py`**: WordPress上にTechShift用のカテゴリ構造（30トピック）を自動構築。
 
 ## 3. Workflow & Pipeline
 
-### 3.1. Daily Briefing (Regional)
-国・地域ごとに1日1回実行されるメインフロー。
-- **Trigger**: 各市場のクローズ後 (Cronでスケジュール)。
+### 3.1. Pipeline Execution
+- **Trigger**: 6時間ごとの定期実行 + 緊急ニュース検出時。
 - **Flow**:
-    1.  指定地域 (`--region india` 等) のニュースを収集。
-    2.  市況データ（指数、騰落率）を取得。
-    3.  AIが「本日の市況概況」と「注目ニュース3選」を要約。
-    4.  「明日のシナリオ」を生成。
-    5.  1本の記事としてWordPressに投稿。
+    1.  ニュース収集・重要度判定。
+    2.  重要ニュースの場合、記事（News Post）を生成。
+    3.  同時に `Impact Analyzer` が親トピックへの影響を計算。
+    4.  影響がある場合、親ページ（Roadmap Page）のメタデータ（予測時期、フェーズ）を更新。
+    5.  X (Twitter) へ "Shift Alert" を通知。
 
-### 3.2. Featured News (High Impact)
-スイングトレードに影響を与える重要ニュースの個別速報。
-- **Trigger**: 6時間ごとの定期ポーリング時に判定。
-- **Logic**: スコアリング > 80点 のニュースのみを対象に独立した記事を生成。デイリー記事から内部リンクされる。
-
-### 3.3. Weekly Summary
-週末に行う振り返りと来週の展望。
-- **Trigger**: 日曜夜。
-- **Flow**: 過去7日間のDBデータを利用し、週次のトレンド変化と翌週の「Watch List」を作成。
-
-## 4. WordPress Architecture (`themes/finshift`)
+## 4. WordPress Architecture (`themes/techshift`)
 
 ### 4.1. Theme Structure
-- **Design**: "Financial Terminal" スタイル。ダークモード推奨。
-- **`front-page.php`**: 
-    - **TradingView Widget**: ヘッダー下にGlobal Ticker。
-    - **Market Sentiment**: `automation` から送られたセンチメント値を表示。
-    - **Daily Compass**: 各国の最新ブリーフィングへのナビゲーション。
-- **`page-market.php`**: `page-india.php` 等、国別のランディングページ。
-- **`single.php`**: 記事詳細。関連銘柄のミニチャートをWidget表示。
+- **Design**: "Intelligent Reality" (信頼感のあるラボ/シンクタンク風)。
+- **`page-roadmap.php`** (核心): 
+    - **Vertical Timeline**: 縦型のガントチャートでマイルストーンを表示。
+    - **3-Layer View**: Regulation / Technology / Market の3層構造。
+    - **Drift View**: 「前回の予測（Ghost）」と「最新の予測（Real）」のズレを可視化。
+- **`single.php`**: 
+    - 記事詳細。冒頭に「ロードマップへの影響スコア」を表示。
 
 ### 4.2. Data Integration
 Automationとテーマの連携用データ。
-- **Custom Fields**:
-    - `scenario_summary`: トップページ表示用の3行要約。
-    - `bull_scenario` / `bear_scenario`: 記事内のタブ表示用詳細テキスト。
-- **Options API**:
-    - `finshift_market_sentiment`: 現在の市場センチメント値。
+- **Custom Fields (Roadmap Page)**:
+    - `current_phase`: 現在のフェーズ（例: Phase 2 - PoC）。
+    - `prediction_date`: 実用化予測時期（例: 2027-Q4）。
+    - `last_shift_reason`: 直近で予測変更が起きた理由（記事IDへのリンク）。
 
 ## 5. Directory Structure
 
 ```text
-/finshift
+/techshift
 ├── automation/
-│   ├── collectors/         # RSS, Scraper, Market Data
-│   ├── analysis/           # Scenario, Sentiment, Scorer
-│   ├── tools/              # Manual SEO Batch Generator
-│   ├── workflows/          # GitHub Actions (Daily/Weekly)
+│   ├── collectors/
+│   ├── analysis/           # Impact Analyzer, Scorer
+│   ├── tools/              # Taxonomy Setup
 │   └── pipeline.py         # Main Entry Point
 ├── themes/
-│   └── finshift/           # Custom WP Theme
-│       ├── front-page.php
-│       ├── page-market.php
+│   └── techshift/          # Custom WP Theme
+│       ├── page-roadmap.php
+│       ├── single.php
 │       └── ...
 └── docs/
     ├── 00_project/         # Project Management
     ├── 01_architecture/    # System Design
-    └── 02_design/          # UI/Feature Specs
+    └── 00_meta/            # Operation Guidelines
 ```

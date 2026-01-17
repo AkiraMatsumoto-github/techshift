@@ -1,6 +1,6 @@
 # 自作テーマの本番環境デプロイガイド
 
-FinShiftテーマをローカル環境から本番サーバーのWordPressに反映させる方法を説明します。
+TechShiftテーマをローカル環境から本番サーバーのWordPressに反映させる方法を説明します。
 
 ## 📋 前提条件
 
@@ -13,31 +13,31 @@ FinShiftテーマをローカル環境から本番サーバーのWordPressに反
 ## 🚀 推奨デプロイフロー
 
 現在のリポジトリには`automation/`, `docs/`, `themes/`など複数のディレクトリが含まれていますが、
-**`themes/finshift`だけ**をサーバーにデプロイする3段階の方法を推奨します。
+**`themes/techshift`だけ**をサーバーにデプロイする3段階の方法を推奨します。
 
 ---
 
 ## ✅ 初回デプロイ: Git Sparse Checkout
 
-サーバー側で`themes/finshift`ディレクトリのみをチェックアウトします。
+サーバー側で`themes/techshift`ディレクトリのみをチェックアウトします。
 
 ### ワンライナーで実行（推奨）
 
 ```bash
 # ローカルから実行（サーバーに自動接続してセットアップ）
-ssh xserver-finshift << 'EOF'
-mkdir -p ~/finshift-repo
-cd ~/finshift-repo
+ssh xserver-techshift << 'EOF'
+mkdir -p ~/techshift-repo
+cd ~/techshift-repo
 git init
-git remote add origin https://github.com/AkiraMatsumoto-github/finshift.git
+git remote add origin https://github.com/AkiraMatsumoto-github/techshift.git
 git config core.sparseCheckout true
-echo "themes/finshift/" >> .git/info/sparse-checkout
+echo "themes/techshift/" >> .git/info/sparse-checkout
 git pull origin main
 # Xserverのパスに合わせて変更
-mkdir -p ~/finshift.net/public_html/wp-content/themes/finshift
-rsync -av --delete themes/finshift/ ~/finshift.net/public_html/wp-content/themes/finshift/
+mkdir -p ~/techshift.net/public_html/wp-content/themes/techshift
+rsync -av --delete themes/techshift/ ~/techshift.net/public_html/wp-content/themes/techshift/
 # Xserverでは通常ユーザー権限で動作するためchownは不要、または制限される場合があります
-chmod -R 755 ~/finshift.net/public_html/wp-content/themes/finshift/
+chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift/
 # NginxのリロードはXserverではユーザー権限でできないため省略（自動反映されるか、管理画面で操作）
 echo "✅ 初回デプロイ完了！"
 EOF
@@ -47,34 +47,33 @@ EOF
 
 ```bash
 # サーバーにSSH接続
-# サーバーにSSH接続
-ssh xserver-finshift
+ssh xserver-techshift
 
 # 作業ディレクトリを作成
-mkdir -p ~/finshift-repo
-cd ~/finshift-repo
+mkdir -p ~/techshift-repo
+cd ~/techshift-repo
 
 # リポジトリを初期化（ファイルはまだダウンロードしない）
 git init
-git remote add origin https://github.com/AkiraMatsumoto-github/finshift.git
+git remote add origin https://github.com/AkiraMatsumoto-github/techshift.git
 
 # Sparse Checkoutを有効化
 git config core.sparseCheckout true
 
-# チェックアウトするディレクトリを指定（themes/finshift のみ）
-echo "themes/finshift/" >> .git/info/sparse-checkout
+# チェックアウトするディレクトリを指定（themes/techshift のみ）
+echo "themes/techshift/" >> .git/info/sparse-checkout
 
 # 指定したディレクトリのみをプル
 git pull origin main
 
 # テーマディレクトリが存在することを確認
-ls -la themes/finshift/
+ls -la themes/techshift/
 
 # WordPressのテーマディレクトリに同期 (Xserverのパス例)
-rsync -av --delete themes/finshift/ ~/finshift.net/public_html/wp-content/themes/finshift/
+rsync -av --delete themes/techshift/ ~/techshift.net/public_html/wp-content/themes/techshift/
 
 # パーミッション設定
-chmod -R 755 ~/finshift.net/public_html/wp-content/themes/finshift/
+chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift/
 
 # キャッシュクリア
 sudo systemctl reload nginx
@@ -99,7 +98,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'themes/finshift/**'  # このディレクトリが変更された時だけ実行
+      - 'themes/techshift/**'  # このディレクトリが変更された時だけ実行
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
@@ -111,15 +110,15 @@ jobs:
       uses: actions/checkout@v3
       with:
         sparse-checkout: |
-          themes/finshift
+          themes/techshift
         sparse-checkout-cone-mode: false
     
     - name: Deploy to server via rsync
       uses: burnett01/rsync-deployments@5.2
       with:
         switches: -avz --delete
-        path: themes/finshift/
-        remote_path: /var/www/html/wp-content/themes/finshift/
+        path: themes/techshift/
+        remote_path: /var/www/html/wp-content/themes/techshift/
         remote_host: ${{ secrets.SERVER_HOST }}
         remote_user: ${{ secrets.SERVER_USER }}
         remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -133,22 +132,9 @@ jobs:
         port: 10022
         script: |
           # Xserver用パス
-          rsync -av --delete themes/finshift/ ~/finshift.net/public_html/wp-content/themes/finshift/
-          chmod -R 755 ~/finshift.net/public_html/wp-content/themes/finshift
+          rsync -av --delete themes/techshift/ ~/techshift.net/public_html/wp-content/themes/techshift/
+          chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift
           echo "✅ デプロイ完了！"
-```
-
-<!-- ### ステップ2: SSH鍵を作成（まだない場合）
-
-```bash
-# ローカルで実行
-ssh-keygen -t ed25519 -C "github-actions@finshift.net" -f ~/.ssh/finshift_deploy
-
-# 公開鍵をサーバーに追加
-ssh-copy-id -i ~/.ssh/finshift_deploy.pub tarunosuke@finshift.net
-
-# 秘密鍵の内容を表示（GitHub Secretsに貼り付ける）
-cat ~/.ssh/finshift_deploy -->
 ```
 
 ### ステップ3: GitHub Secretsを設定
@@ -159,9 +145,9 @@ GitHubリポジトリの **Settings** → **Secrets and variables** → **Action
 
 | Name | Value |
 |------|-------|
-| `SERVER_HOST` | `sv15718.xserver.jp` |
-| `SERVER_USER` | `xs937213` |
-| `SSH_PRIVATE_KEY` | 上記で表示された秘密鍵の内容全体 |
+| `SERVER_HOST` | `sv15718.xserver.jp` (例) |
+| `SERVER_USER` | `xs937213` (例) |
+| `SSH_PRIVATE_KEY` | 秘密鍵の内容全体 |
 
 ### ステップ4: 使い方
 
@@ -170,10 +156,10 @@ GitHubリポジトリの **Settings** → **Secrets and variables** → **Action
 cd /Users/matsumotoakira/Documents/Private_development/media
 
 # テーマを編集
-# themes/finshift/style.css などを変更
+# themes/techshift/style.css などを変更
 
 # Gitにコミット＆プッシュ
-git add themes/finshift/
+git add themes/techshift/
 git commit -m "Update theme design"
 git push origin main
 
@@ -191,49 +177,49 @@ GitHub Actionsが使えない場合や、即座にデプロイしたい場合の
 
 ```bash
 # ローカルで実行（すべて自動）
-cd /Users/matsumotoakira/Documents/Private_development/finshift && \
-git archive --format=tar.gz --prefix=finshift/ HEAD:themes/finshift > finshift-theme.tar.gz && \
-scp finshift-theme.tar.gz tarunosuke@finshift.net:~/ && \
-ssh tarunosuke@finshift.net "cd /var/www/html/wp-content/themes && \
-sudo tar -czf ~/finshift-backup-\$(date +%Y%m%d-%H%M%S).tar.gz finshift/ 2>/dev/null; \
-sudo tar -xzf ~/finshift-theme.tar.gz && \
-sudo chown -R www-data:www-data finshift/ && \
-sudo chmod -R 755 finshift/ && \
+cd /Users/matsumotoakira/Documents/Private_development/techshift && \
+git archive --format=tar.gz --prefix=techshift/ HEAD:themes/techshift > techshift-theme.tar.gz && \
+scp techshift-theme.tar.gz tarunosuke@techshift.net:~/ && \
+ssh tarunosuke@techshift.net "cd /var/www/html/wp-content/themes && \
+sudo tar -czf ~/techshift-backup-\$(date +%Y%m%d-%H%M%S).tar.gz techshift/ 2>/dev/null; \
+sudo tar -xzf ~/techshift-theme.tar.gz && \
+sudo chown -R www-data:www-data techshift/ && \
+sudo chmod -R 755 techshift/ && \
 sudo systemctl reload nginx && \
-rm ~/finshift-theme.tar.gz && \
+rm ~/techshift-theme.tar.gz && \
 echo '✅ 緊急デプロイ完了！'" && \
-rm finshift-theme.tar.gz
+rm techshift-theme.tar.gz
 ```
 
 ### 手動で実行する場合
 
 ```bash
 # ステップ1: ローカルでアーカイブ作成
-cd /Users/matsumotoakira/Documents/Private_development/finshift
-git archive --format=tar.gz --prefix=finshift/ HEAD:themes/finshift > finshift-theme.tar.gz
+cd /Users/matsumotoakira/Documents/Private_development/techshift
+git archive --format=tar.gz --prefix=techshift/ HEAD:themes/techshift > techshift-theme.tar.gz
 
 # ステップ2: サーバーにアップロード
-scp finshift-theme.tar.gz tarunosuke@finshift.net:~/
+scp techshift-theme.tar.gz tarunosuke@techshift.net:~/
 
 # ステップ3: サーバーで解凍・適用
-ssh tarunosuke@finshift.net
+ssh tarunosuke@techshift.net
 
 # バックアップ作成
 cd /var/www/html/wp-content/themes
-sudo tar -czf ~/finshift-backup-$(date +%Y%m%d-%H%M%S).tar.gz finshift/ 2>/dev/null
+sudo tar -czf ~/techshift-backup-$(date +%Y%m%d-%H%M%S).tar.gz techshift/ 2>/dev/null
 
 # 新テーマを解凍
-sudo tar -xzf ~/finshift-theme.tar.gz
+sudo tar -xzf ~/techshift-theme.tar.gz
 
 # パーミッション設定
-sudo chown -R www-data:www-data finshift/
-sudo chmod -R 755 finshift/
+sudo chown -R www-data:www-data techshift/
+sudo chmod -R 755 techshift/
 
 # キャッシュクリア
 sudo systemctl reload nginx
 
 # 一時ファイル削除
-rm ~/finshift-theme.tar.gz
+rm ~/techshift-theme.tar.gz
 
 echo "✅ 緊急デプロイ完了！"
 ```
@@ -273,7 +259,7 @@ echo "✅ 緊急デプロイ完了！"
 
 1. WordPress管理画面にログイン
 2. **外観** → **テーマ**に移動
-3. **FinShift**テーマを見つける
+3. **TechShift**テーマを見つける
 4. **有効化**をクリック
 
 #### 方法B: WP-CLI（コマンドライン）
@@ -286,7 +272,7 @@ ssh username@your-server.com
 cd /var/www/html
 
 # テーマを有効化
-wp theme activate finshift
+wp theme activate techshift
 
 # テーマ一覧を確認
 wp theme list
@@ -298,12 +284,12 @@ wp theme list
 
 ```bash
 # テーマディレクトリのパーミッション確認
-ls -la /var/www/html/wp-content/themes/finshift/
+ls -la /var/www/html/wp-content/themes/techshift/
 
 # 正しいパーミッション設定
-sudo chown -R www-data:www-data /var/www/html/wp-content/themes/finshift/
-sudo find /var/www/html/wp-content/themes/finshift/ -type d -exec chmod 755 {} \;
-sudo find /var/www/html/wp-content/themes/finshift/ -type f -exec chmod 644 {} \;
+sudo chown -R www-data:www-data /var/www/html/wp-content/themes/techshift/
+sudo find /var/www/html/wp-content/themes/techshift/ -type d -exec chmod 755 {} \;
+sudo find /var/www/html/wp-content/themes/techshift/ -type f -exec chmod 644 {} \;
 ```
 
 **パーミッションの説明:**
@@ -341,7 +327,7 @@ sudo systemctl reload apache2
 
 ```bash
 # 本番環境のバックアップ（デプロイ前）
-ssh username@your-server.com "cd /var/www/html/wp-content/themes && tar -czf finshift-backup-$(date +%Y%m%d).tar.gz finshift/"
+ssh username@your-server.com "cd /var/www/html/wp-content/themes && tar -czf techshift-backup-$(date +%Y%m%d).tar.gz techshift/"
 ```
 
 ---
@@ -356,7 +342,7 @@ ssh username@your-server.com "cd /var/www/html/wp-content/themes && tar -czf fin
 # ========================================
 
 # 1. テーマのバージョンを更新
-cd /Users/matsumotoakira/Documents/Private_development/finshift/themes/finshift
+cd /Users/matsumotoakira/Documents/Private_development/techshift/themes/techshift
 # style.cssの Version: 1.0.0 → 1.0.1 に変更
 
 # 2. Gitにコミット
@@ -365,45 +351,45 @@ git commit -m "Update theme to v1.0.1 - Add new features"
 git push origin main
 
 # 3. テーマを圧縮
-cd /Users/matsumotoakira/Documents/Private_development/finshift
-tar -czf finshift-theme-v1.0.1.tar.gz themes/finshift/
+cd /Users/matsumotoakira/Documents/Private_development/techshift
+tar -czf techshift-theme-v1.0.1.tar.gz themes/techshift/
 
 # ========================================
 # サーバー環境での作業
 # ========================================
 
 # 4. サーバーにアップロード
-scp finshift-theme-v1.0.1.tar.gz username@finshift.net:~/
+scp techshift-theme-v1.0.1.tar.gz username@techshift.net:~/
 
 # 5. サーバーにSSH接続
-ssh username@finshift.net
+ssh username@techshift.net
 
 # 6. 既存テーマをバックアップ
 cd /var/www/html/wp-content/themes
-sudo tar -czf finshift-backup-$(date +%Y%m%d-%H%M%S).tar.gz finshift/
-sudo mv finshift-backup-*.tar.gz ~/backups/
+sudo tar -czf techshift-backup-$(date +%Y%m%d-%H%M%S).tar.gz techshift/
+sudo mv techshift-backup-*.tar.gz ~/backups/
 
 # 7. 既存テーマを削除（または名前変更）
-sudo mv finshift finshift.old
+sudo mv techshift techshift.old
 
 # 8. 新しいテーマを解凍
-sudo tar -xzf ~/finshift-theme-v1.0.1.tar.gz
+sudo tar -xzf ~/techshift-theme-v1.0.1.tar.gz
 
 # 9. パーミッション設定
-sudo chown -R www-data:www-data finshift/
-sudo find finshift/ -type d -exec chmod 755 {} \;
-sudo find finshift/ -type f -exec chmod 644 {} \;
+sudo chown -R www-data:www-data techshift/
+sudo find techshift/ -type d -exec chmod 755 {} \;
+sudo find techshift/ -type f -exec chmod 644 {} \;
 
 # 10. キャッシュクリア
 wp cache flush
 sudo systemctl reload nginx  # または apache2
 
 # 11. 動作確認
-curl -I https://finshift.net
+curl -I https://techshift.net
 
 # 12. 問題なければ古いテーマを削除
-sudo rm -rf finshift.old
-rm ~/finshift-theme-v1.0.1.tar.gz
+sudo rm -rf techshift.old
+rm ~/techshift-theme-v1.0.1.tar.gz
 ```
 
 ---
@@ -426,7 +412,7 @@ rm ~/finshift-theme-v1.0.1.tar.gz
 wp theme list
 
 # 有効なテーマを確認
-wp theme status finshift
+wp theme status techshift
 
 # エラーログを確認
 sudo tail -f /var/log/nginx/error.log  # Nginxの場合
@@ -438,7 +424,7 @@ sudo tail -f /var/log/apache2/error.log  # Apacheの場合
 ```bash
 # ページの読み込み速度を確認
 # ページの読み込み速度を確認
-curl -w "@curl-format.txt" -o /dev/null -s https://finshift.net
+curl -w "@curl-format.txt" -o /dev/null -s https://techshift.net
 
 # curl-format.txt の内容:
 # time_namelookup:  %{time_namelookup}\n
@@ -460,11 +446,11 @@ curl -w "@curl-format.txt" -o /dev/null -s https://finshift.net
 **解決策:**
 ```bash
 # パーミッションを再設定
-sudo chown -R www-data:www-data /var/www/html/wp-content/themes/finshift/
-sudo chmod -R 755 /var/www/html/wp-content/themes/finshift/
+sudo chown -R www-data:www-data /var/www/html/wp-content/themes/techshift/
+sudo chmod -R 755 /var/www/html/wp-content/themes/techshift/
 
 # style.cssの確認
-head -20 /var/www/html/wp-content/themes/finshift/style.css
+head -20 /var/www/html/wp-content/themes/techshift/style.css
 ```
 
 ---
@@ -484,7 +470,7 @@ sudo systemctl reload nginx
 
 # style.cssのバージョンを確認
 # style.cssのバージョンを確認
-grep "Version:" /var/www/html/wp-content/themes/finshift/style.css
+grep "Version:" /var/www/html/wp-content/themes/techshift/style.css
 
 # ブラウザで強制リロード: Cmd+Shift+R (Mac) / Ctrl+Shift+R (Windows)
 ```
@@ -500,10 +486,10 @@ grep "Version:" /var/www/html/wp-content/themes/finshift/style.css
 **解決策:**
 ```bash
 # 画像ディレクトリのパーミッション確認
-ls -la /var/www/html/wp-content/themes/finshift/assets/images/
+ls -la /var/www/html/wp-content/themes/techshift/assets/images/
 
 # パーミッション修正
-sudo chmod -R 644 /var/www/html/wp-content/themes/finshift/assets/images/*
+sudo chmod -R 644 /var/www/html/wp-content/themes/techshift/assets/images/*
 ```
 
 ---
@@ -552,9 +538,9 @@ sudo tail -50 /var/log/nginx/error.log
 ```bash
 # バックアップから復元
 cd /var/www/html/wp-content/themes
-sudo rm -rf finshift
-sudo tar -xzf ~/backups/finshift-backup-YYYYMMDD-HHMMSS.tar.gz
-sudo chown -R www-data:www-data finshift/
+sudo rm -rf techshift
+sudo tar -xzf ~/backups/techshift-backup-YYYYMMDD-HHMMSS.tar.gz
+sudo chown -R www-data:www-data techshift/
 wp cache flush
 ```
 
@@ -563,7 +549,7 @@ wp cache flush
 ## 📚 関連ドキュメント
 
 - [git_partial_deploy.md](./git_partial_deploy.md) - Gitリポジトリから特定ディレクトリのみデプロイする詳細ガイド
-- [theme_deploy_quick.md](./theme_deploy_quick.md) - finshift.net専用クイックガイド
+- [theme_deploy_quick.md](./theme_deploy_quick.md) - techshift.net専用クイックガイド
 - [production_deployment_guide.md](./production_deployment_guide.md) - 記事自動投稿の本番環境デプロイ
 - [quick_start_production.md](./quick_start_production.md) - クイックスタートガイド
 - [development_guidelines.md](./development_guidelines.md) - 開発ガイドライン
@@ -577,7 +563,7 @@ wp cache flush
 ```
 1️⃣ 初回デプロイ（1回のみ）
    └─ Git Sparse Checkout
-      └─ themes/finshift のみをサーバーにクローン
+      └─ themes/techshift のみをサーバーにクローン
 
 2️⃣ 日常の開発（自動化）
    └─ GitHub Actions
@@ -599,7 +585,7 @@ wp cache flush
 ### 重要なポイント
 
 - ✅ **リポジトリ構成**: `automation/`, `docs/`, `themes/`を含むモノレポでOK
-- ✅ **部分デプロイ**: `themes/finshift`だけをサーバーに反映
+- ✅ **部分デプロイ**: `themes/techshift`だけをサーバーに反映
 - ✅ **自動化**: GitHub Actionsで完全自動デプロイ
 - ✅ **バックアップ**: デプロイ時に自動でバックアップ作成
 - ✅ **パーミッション**: 自動で正しく設定（755/644）
@@ -611,15 +597,15 @@ wp cache flush
 ### 1. 初回デプロイを実行
 
 ```bash
-ssh tarunosuke@finshift.net << 'EOF'
-mkdir -p ~/finshift-repo && cd ~/finshift-repo
-git init && git remote add origin https://github.com/AkiraMatsumoto-github/finshift.git
+ssh tarunosuke@techshift.net << 'EOF'
+mkdir -p ~/techshift-repo && cd ~/techshift-repo
+git init && git remote add origin https://github.com/AkiraMatsumoto-github/techshift.git
 git config core.sparseCheckout true
-echo "themes/finshift/" >> .git/info/sparse-checkout
+echo "themes/techshift/" >> .git/info/sparse-checkout
 git pull origin main
-sudo rsync -av --delete themes/finshift/ /var/www/html/wp-content/themes/finshift/
-sudo chown -R www-data:www-data /var/www/html/wp-content/themes/finshift/
-sudo chmod -R 755 /var/www/html/wp-content/themes/finshift/
+sudo rsync -av --delete themes/techshift/ /var/www/html/wp-content/themes/techshift/
+sudo chown -R www-data:www-data /var/www/html/wp-content/themes/techshift/
+sudo chmod -R 755 /var/www/html/wp-content/themes/techshift/
 sudo systemctl reload nginx
 echo "✅ 初回デプロイ完了！"
 EOF
@@ -631,9 +617,4 @@ EOF
 
 ### 3. WordPress管理画面でテーマを有効化
 
-https://finshift.net/wp-admin → **外観** → **テーマ** → **FinShift** を有効化
-
----
-
-**質問やトラブルがあれば、関連ドキュメントを参照してください。**
-
+https://techshift.net/wp-admin → **外観** → **テーマ** → **TechShift** を有効化

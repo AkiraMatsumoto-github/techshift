@@ -6,8 +6,8 @@ Use the following text when applying for the X Developer Platform or describing 
 
 > **Question:** Describe how you plan to use Twitter data and/or API.
 
-I am developing a news automation bot for my financial media website, "FinShift". The purpose of this bot is to automatically post summaries of financial market analysis and news articles that are generated on my website.
-This helps my audience (swing traders and investors) stay updated with the latest market trends (US stocks, Forex, Crypto) in real-time.
+I am developing a technology news automation bot for my tech intelligence media website, "TechShift". The purpose of this bot is to automatically post updates about technology roadmaps and milestones (e.g., Space, AI, Green Tech) that are analyzed and published on my website.
+This helps my audience (CTOs, PdMs, and tech investors) stay updated with the latest technological shifts and future predictions in real-time.
 The system is read-only regarding Twitter content; it primarily uses the "Write" endpoint to post tweets. I do not plan to analyze Twitter data or track user metrics.
 
 ---
@@ -17,7 +17,8 @@ The system is read-only regarding Twitter content; it primarily uses the "Write"
 > **Question:** Will your app use Tweet, Retweet, Like, Follow, or Direct Message functionality?
 
 Yes, the app will use the "Tweet" functionality.
-When a new article or market briefing is published on my website (FinShift), the system will automatically generate a short summary (under 280 characters) with a link to the full article and post it to my X account.
+When a new article is published or a technology roadmap is updated on my website (TechShift), the system will automatically generate a short summary (under 280 characters) with a link to the relevant page and post it to my X account.
+For example: "🚨 Market Shift: Solid-State Battery mass production forecast moved to 2027 Q4. Read more: [Link]"
 The posting frequency will be approximately 2-5 times per day.
 The app will NOT perform any automated Retweeting, Liking, Following, or Direct Messaging. All interactions other than posting updates will be done manually by me using the standard Twitter client.
 

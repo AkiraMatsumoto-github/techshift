@@ -1,77 +1,56 @@
-# FinShift デザインガイドライン
+# TechShift デザインガイドライン
 
 ## 1. デザインコンセプト
-**「Reliable & Progressive (信頼と先進)」**
-物流という堅実な産業をベースに、DXやテクノロジーによる未来志向を感じさせるデザインを目指します。
+**「Intelligent Reality (知性ある現実)」**
+
+TechShiftは、単なるニュースメディアでも、無機質なデータベースでもありません。
+「未来の地図（Roadmap）」を動的に描き直す、**未来のナビゲーション・コンソール**です。
+ユーザーが「今、歴史のどの地点にいるのか」を直感的に把握できる、没入感と知性を兼ね備えたUIを目指します。
+
+*   **Keywords**: Immersive, Temporal (時間軸), Structured.
 
 ## 2. カラーパレット
 
-### プライマリーカラー (Brand Identity)
-- **Navy Blue (`#0A192F`)**:
-    - 役割: ヘッダー、フッター、主要なテキスト、強調背景。
-    - 印象: 信頼、プロフェッショナル、深み。
-- **Tech Blue (`#00B4D8`)**:
-    - 役割: アクセント、リンク、ボタン、アイコン。
-    - 印象: テクノロジー、知性、未来、清潔感。
+### Brand Identity
+*   **Deep Space (`#020617` - Slate 950)**:
+    *   背景のベースカラー。無限の宇宙や未知の領域を表現。
+*   **TechShift Blue (`#38BDF8` - Sky 400)**:
+    *   アクセントカラー。知性とテクノロジーの象徴。
+*   **Timeline Gray (`#334155` - Slate 700)**:
+    *   ロードマップの軸線やコネクターに使用。
 
-### セカンダリーカラー (Functional)
-- **White (`#FFFFFF`)**: 背景、カードのベース。
-- **Light Gray (`#F8F9FA`)**: サイト全体の背景、セクションの区切り。
-- **Dark Gray (`#333333`)**: 本文テキスト。
-- **Medium Gray (`#666666`)**: 補足テキスト、日付など。
-- **Border Gray (`#E0E0E0`)**: 境界線、カードの枠線。
+### Impact Colors (Timeline Dynamics)
+ニュースがロードマップに与える「力」を色で表現します。
+*   **Accelerate (加速)**: `#10B981` (Emerald 500) - Vivid Green.
+*   **Delay (遅延)**: `#F43F5E` (Rose 500) - Vivid Red.
+*   **Neutral (不変)**: `#94A3B8` (Slate 400).
 
-### カラー使用ルール
-- **グラデーション廃止**: フラットデザイン徹底のため、原則として単色塗り（Solid Color）を使用する。
-- テキストは真っ黒 (`#000`) を避け、`#333` を使用して可読性を高める。
-- アクションを促す要素（CTA）には必ず `Tech Blue` を使用する。
+### Text Colors
+*   **Primary**: `#F8FAFC` (Slate 50) - 純白に近い白。
+*   **Secondary**: `#CBD5E1` (Slate 300) - 読みやすいグレー。
+*   **Muted**: `#64748B` (Slate 500) - タイムスタンプなどのメタ情報。
 
 ## 3. タイポグラフィ
 
-### フォントファミリー
-- **日本語**: `Noto Sans JP` (Google Fonts)
-    - ウェイト: 400 (Regular), 500 (Medium), 700 (Bold)
-- **欧文**: `Inter` (Google Fonts)
-    - ウェイト: 400 (Regular), 600 (SemiBold), 700 (Bold)
+### Font Family
+*   **English (Headings / Numbers)**: `Outfit` (Google Fonts)
+    *   モダンでジオメトリックなサンセリフ。未来的な印象を与える。
+*   **Japanese (Body)**: `Noto Sans JP`
+    *   可読性重視。
 
-### フォントサイズスケール (remベース)
-- **H1**: 2.5rem (40px) - ページタイトル
-- **H2**: 2.0rem (32px) - セクション見出し
-- **H3**: 1.75rem (28px) - カードタイトル、中見出し
-- **H4**: 1.5rem (24px) - 小見出し
-- **Body**: 1.0rem (16px) - 本文
-- **Small**: 0.875rem (14px) - メタ情報、注釈
+### Hierarchy
+*   **Display (Roadmap Nodes)**: 1.25rem ~ 2rem (Bold). タイムライン上のマイルストーン。
+*   **H1 (Article Title)**: 2.5rem (Bold).
+*   **Body**: 1rem (16px). 行間は広め (1.8) に取り、知的な余白を持たせる。
+*   **Data (Impact Score)**: 等幅フォント (`JetBrains Mono` or `Roboto Mono`) を使用し、計測機器のような精密さを演出。
 
-### 行間 (Line Height)
-- **見出し**: 1.4 (タイトに)
-- **本文**: 1.8 (読みやすく)
+## 4. スペーシング & 構造
 
-## 4. スペーシング & シェイプ
+### Vertical Rhythm
+TechShiftのUIは「時間軸（縦方向の流れ）」が支配します。
+*   **Timeline Axis**: 画面中央（モバイルでは左端）に一本の「軸」を通し、全てのコンテンツがその軸に紐づくレイアウトを採用。
+*   **Connectors**: カードと軸を繋ぐラインを明示的に描画する。
 
-### スペーシング (余白)
-一貫性のある余白を保つため、8の倍数を基本としたスケールを使用します。
-- **xs**: 4px
-- **sm**: 8px
-- **md**: 16px
-- **lg**: 24px
-- **xl**: 32px
-- **2xl**: 48px
-- **3xl**: 64px
-- **section**: 80px - 120px (セクション間の余白)
-
-### シェイプ (形状)
-- **角丸 (Border Radius)**: `4px` - `8px` (Small/Medium) を基本とし、Pill型（50px~）は使用しない。
-- **シャドウ (Shadows)**: `none`。要素の浮き上がり表現は廃止し、ボーダーと背景色で階層を表現する。
-
-## 5. レイアウト
-
-- **モバイルファースト**: スマホ表示を最優先とする。
-- **コンテナ幅**: 最大 `1200px` (PC時)。SP時は左右パディング `16px`。
-- **グリッド**: 
-    - PC: 12カラムグリッド or カードグリッド
-    - SP: シングルカラム（1カラム）stack layout
-
-- **ブレークポイント**:
-    - Mobile: ~767px
-    - Tablet: 768px ~ 1023px
-    - Desktop: 1024px ~
+### Glassmorphism (Minimal)
+*   カードやパネルには、ごく薄い背景色 (`rgba(30, 41, 59, 0.7)`) と `backdrop-filter: blur(10px)` を適用。
+*   背景の「Deep Space」が透けて見えることで、奥行きと先進性を表現。

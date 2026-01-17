@@ -1,6 +1,6 @@
 # 本番環境への記事自動投稿ガイド
 
-このドキュメントでは、FinShiftの記事自動生成システムを本番環境のWordPressに適用する方法を説明します。
+このドキュメントでは、TechShiftの記事自動生成システムを本番環境のWordPressに適用する方法を説明します。
 
 ## 目次
 
@@ -33,7 +33,7 @@
 1. WordPress管理画面にログイン
 2. **ユーザー** → **プロフィール**に移動
 3. 下部の「**アプリケーションパスワード**」セクションを見つける
-4. 新しいアプリケーション名を入力（例: `FinShift Automation`）
+4. 新しいアプリケーション名を入力（例: `TechShift Automation`）
 5. **新しいアプリケーションパスワードを追加**をクリック
 6. 生成されたパスワードをコピー（**スペースを含めてコピー**、または**スペースを除去**）
 
@@ -74,7 +74,7 @@ WP_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 | 変数名 | 説明 | 例 |
 |--------|------|-----|
 | `GEMINI_API_KEY` | Google AI StudioのAPIキー | `AIzaSy...` |
-| `WP_URL` | 本番WordPressのURL（**HTTPSが必須**） | `https://finshift.net` |
+| `WP_URL` | 本番WordPressのURL（**HTTPSが必須**） | `https://techshift.net` |
 | `WP_USER` | WordPress管理者ユーザー名 | `admin` |
 | `WP_APP_PASSWORD` | Application Password（スペース含む/なし両方OK） | `xxxx xxxx xxxx xxxx` |
 
@@ -84,16 +84,15 @@ WP_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 
 #### 方法A: サーバー上で直接セットアップ
 
-```bash
 # サーバーにSSH接続
 ssh user@your-server.com
 
 # プロジェクトディレクトリを作成
-mkdir -p ~/finshift-automation
-cd ~/finshift-automation
+mkdir -p ~/techshift-automation
+cd ~/techshift-automation
 
 # ファイルをアップロード（ローカルから実行）
-scp -r automation/ user@your-server.com:~/finshift-automation/
+scp -r automation/ user@your-server.com:~/techshift-automation/
 
 # サーバー上で仮想環境を作成
 python3 -m venv venv
@@ -125,10 +124,10 @@ CMD ["python", "pipeline.py"]
 EOF
 
 # Dockerイメージをビルド
-docker build -t finshift-automation .
+docker build -t techshift-automation .
 
 # 環境変数を渡して実行
-docker run --env-file automation/.env finshift-automation
+docker run --env-file automation/.env techshift-automation
 ```
 
 ---
@@ -242,10 +241,10 @@ python automation/pipeline.py --dry-run
 crontab -e
 
 # 以下を追加（毎日午前9時に実行）
-0 9 * * * cd ~/finshift-automation && source venv/bin/activate && python automation/pipeline.py --limit 1 >> ~/finshift-automation/logs/cron.log 2>&1
+0 9 * * * cd ~/techshift-automation && source venv/bin/activate && python automation/pipeline.py --limit 1 >> ~/techshift-automation/logs/cron.log 2>&1
 
 # 週に3回（月・水・金の午前9時）
-0 9 * * 1,3,5 cd ~/finshift-automation && source venv/bin/activate && python automation/pipeline.py --limit 2 >> ~/finshift-automation/logs/cron.log 2>&1
+0 9 * * 1,3,5 cd ~/techshift-automation && source venv/bin/activate && python automation/pipeline.py --limit 2 >> ~/techshift-automation/logs/cron.log 2>&1
 ```
 
 #### Cron時刻の書式:
@@ -260,7 +259,7 @@ crontab -e
 #### ログディレクトリの作成:
 
 ```bash
-mkdir -p ~/finshift-automation/logs
+mkdir -p ~/techshift-automation/logs
 ```
 
 ---
@@ -272,23 +271,23 @@ mkdir -p ~/finshift-automation/logs
 #### サービスファイルの作成:
 
 ```bash
-# /etc/systemd/system/finshift-automation.service
-sudo nano /etc/systemd/system/finshift-automation.service
+# /etc/systemd/system/techshift-automation.service
+sudo nano /etc/systemd/system/techshift-automation.service
 ```
 
 ```ini
 [Unit]
-Description=FinShift Article Automation
+Description=TechShift Article Automation
 After=network.target
 
 [Service]
 Type=oneshot
 User=your-username
-WorkingDirectory=/home/your-username/finshift-automation
-Environment="PATH=/home/your-username/finshift-automation/venv/bin"
-ExecStart=/home/your-username/finshift-automation/venv/bin/python automation/pipeline.py --limit 1
-StandardOutput=append:/home/your-username/finshift-automation/logs/automation.log
-StandardError=append:/home/your-username/finshift-automation/logs/automation.log
+WorkingDirectory=/home/your-username/techshift-automation
+Environment="PATH=/home/your-username/techshift-automation/venv/bin"
+ExecStart=/home/your-username/techshift-automation/venv/bin/python automation/pipeline.py --limit 1
+StandardOutput=append:/home/your-username/techshift-automation/logs/automation.log
+StandardError=append:/home/your-username/techshift-automation/logs/automation.log
 
 [Install]
 WantedBy=multi-user.target
@@ -297,14 +296,14 @@ WantedBy=multi-user.target
 #### タイマーファイルの作成:
 
 ```bash
-# /etc/systemd/system/finshift-automation.timer
-sudo nano /etc/systemd/system/finshift-automation.timer
+# /etc/systemd/system/techshift-automation.timer
+sudo nano /etc/systemd/system/techshift-automation.timer
 ```
 
 ```ini
 [Unit]
-Description=FinShift Article Automation Timer
-Requires=finshift-automation.service
+Description=TechShift Article Automation Timer
+Requires=techshift-automation.service
 
 [Timer]
 OnCalendar=daily
@@ -319,11 +318,11 @@ WantedBy=timers.target
 
 ```bash
 # タイマーを有効化
-sudo systemctl enable finshift-automation.timer
-sudo systemctl start finshift-automation.timer
+sudo systemctl enable techshift-automation.timer
+sudo systemctl start techshift-automation.timer
 
 # ステータス確認
-sudo systemctl status finshift-automation.timer
+sudo systemctl status techshift-automation.timer
 
 # 次回実行時刻を確認
 sudo systemctl list-timers
@@ -510,10 +509,10 @@ python automation/pipeline.py --limit 1
 
 ```bash
 # ログファイルをリアルタイムで監視
-tail -f ~/finshift-automation/logs/cron.log
+tail -f ~/techshift-automation/logs/cron.log
 
 # エラーのみ抽出
-grep -i "error\|failed" ~/finshift-automation/logs/cron.log
+grep -i "error\|failed" ~/techshift-automation/logs/cron.log
 ```
 
 ### 3. バックアップ
@@ -523,7 +522,7 @@ grep -i "error\|failed" ~/finshift-automation/logs/cron.log
 tar -czf backup-$(date +%Y%m%d).tar.gz automation/generated_articles/
 
 # 定期的なバックアップ（Cronに追加）
-0 2 * * 0 tar -czf ~/backups/finshift-$(date +\%Y\%m\%d).tar.gz ~/finshift-automation/automation/generated_articles/
+0 2 * * 0 tar -czf ~/backups/techshift-$(date +\%Y\%m\%d).tar.gz ~/techshift-automation/automation/generated_articles/
 ```
 
 ---

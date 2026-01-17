@@ -37,7 +37,7 @@ GitHubリポジトリの設定で以下のシークレットを追加する必�
 | シークレット名 | 説明 | 例 |
 |--------------|------|-----|
 | `GEMINI_API_KEY` | Gemini APIキー | `AIza...` |
-| `WP_URL` | WordPress サイトURL | `https://finshift.net` |
+| `WP_URL` | WordPress サイトURL | `https://techshift.net` |
 | `WP_USER` | WordPress ユーザー名 | `admin` |
 | `WP_APP_PASSWORD` | WordPress アプリケーションパスワード | `xxxx xxxx xxxx xxxx` |
 

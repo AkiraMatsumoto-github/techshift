@@ -6,53 +6,52 @@ from datetime import datetime, timedelta
 from dateutil import parser as date_parser
 import time
 
-# Default RSS Sources
+# TechShift RSS Sources
+# Focus: AI (Multi-Agent, LLM), Quantum (PQC), Green (Battery, Fusion)
 DEFAULT_SOURCES = {
-    # --- Global News (Base) ---
-    "yahoo_finance_top": "https://finance.yahoo.com/news/rssindex",
-    "cnbc_world": "https://www.cnbc.com/id/100727362/device/rss/rss.html",
-    # "wsj_markets": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", # RSS Empty
+    # --- Top Tier Tech (General) ---
+    "techcrunch_ai": "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "wired_science": "https://www.wired.com/feed/category/science/latest/rss",
+    "mit_tech_review": "https://www.technologyreview.com/feed/",
+    "venturebeat_ai": "https://venturebeat.com/category/ai/feed/",
 
-    # --- Asia Strategy (Source of Competitive Advantage) ---
-    # China (Native Sources - Deep Dive)
-    "scmp_china": "https://www.scmp.com/rss/91/feed", # SCMP China Business (Active 2026)
-    # "sina_finance_focus": "http://rss.sina.com.cn/news/allnews/finance.xml", # XML Error
-    # "china_daily_biz": "http://www.chinadaily.com.cn/rss/bizchina_rss.xml", # XML Error
-    # "xinhua_biz": "http://english.news.cn/rss/business.xml", # XML Error
-
-    # India 
-    # "mint_top": "https://www.livemint.com/rss/news", # Fallback only
-    # "mint_markets": "https://www.livemint.com/rss/markets", # Fallback only
-    "economictimes": "https://economictimes.indiatimes.com/rssfeedsdefault.cms", # SUCCESS
-
-    # Indonesia
-    "antara_news_biz": "https://en.antaranews.com/rss/business-investment.xml", # SUCCESS
-    # "jakarta_globe": "https://jakartaglobe.id/rss/news", # XML Error
+    # --- Deep Tech / Research ---
+    # Note: Some corporate blogs might not have simple RSS, using proxies or aggregators if needed.
+    # For MVP, we stick to accessible feeds.
     
-    # --- Japan Market ---
-    "yahoo_jp_business": "https://news.yahoo.co.jp/rss/categories/business.xml", # SUCCESS
-    
-    # --- Crypto & Assets (Strategic Indicators) ---
-    "coindesk": "https://www.coindesk.com/arc/outboundfeeds/rss/", # SUCCESS
-    # "cointelegraph": "https://cointelegraph.com/rss", # Fallback only
-    "bitcoin_magazine": "https://bitcoinmagazine.com/.rss/full/",
+    # AI & Compute
+    "nvidia_blog": "https://blogs.nvidia.com/feed/", 
+    "google_ai": "https://blog.google/technology/ai/rss/",
+    "microsoft_ai": "https://blogs.microsoft.com/ai/feed/",
+    "huggingface_blog": "https://huggingface.co/blog/feed.xml",
+
+    # Quantum & Computing
+    "quantum_daily": "https://thequantuminsider.com/feed/", 
+    # "quanta_magazine": "https://www.quantamagazine.org/feed/", # Excellent for foundation
+
+    # Green & Energy (Batteries, Fusion)
+    "cleantechnica": "https://cleantechnica.com/feed/",
+    "green_car_congress": "https://www.greencarcongress.com/atom.xml", # Deep tech on batteries
+    "ieee_spectrum_energy": "https://spectrum.ieee.org/feeds/topic/energy-power",
+
+    # --- Startups &VC ---
+    "y_combinator": "https://blog.ycombinator.com/feed/",
 }
 
-# Region to Source Mapping
+# Domain Mapping
 REGION_MAPPING = {
-    "US": ["yahoo_finance_top", "cnbc_world"],
-    "JP": ["yahoo_jp_business"],
-    "CN": ["scmp_china"],
-    "IN": ["economictimes"],
-    "ID": ["antara_news_biz"],
-    "Crypto": ["coindesk", "bitcoin_magazine"],
-    "Global": ["yahoo_finance_top", "cnbc_world"] # Global fallback
+    # We repurpose "Region" as "Technology Domain" for TechShift
+    "AI": ["techcrunch_ai", "venturebeat_ai", "nvidia_blog", "google_ai", "microsoft_ai", "huggingface_blog", "y_combinator"],
+    "Quantum": ["quantum_daily", "wired_science", "mit_tech_review"], # MIT/Wired cover quantum often
+    "Green": ["cleantechnica", "green_car_congress", "ieee_spectrum_energy"],
+    "General": ["mit_tech_review", "wired_science"]
 }
 
 def fetch_rss(url, source_name, days=None, hours=None):
     """Fetches and parses an RSS feed."""
     print(f"Fetching {source_name} from {url}...")
     try:
+        # User-Agent handling might be needed for some sites
         feed = feedparser.parse(url)
     except Exception as e:
         print(f"Error fetching {url}: {e}")
@@ -62,7 +61,6 @@ def fetch_rss(url, source_name, days=None, hours=None):
     
     if feed.bozo:
         print(f"Warning: Error parsing feed {source_name}: {feed.bozo_exception}")
-        # Continue anyway as feedparser often returns usable data even with errors
 
     for entry in feed.entries:
         # Parse published date
@@ -78,48 +76,49 @@ def fetch_rss(url, source_name, days=None, hours=None):
              except:
                 pass
         
-        # Filter by date (last 24 hours) - Optional, can be a flag
-        # For now, let's just collect everything and let the scorer/filter handle it, 
-        # or maybe just last 48 hours to be safe.
         is_recent = False
         if published_parsed:
-             # Make offset-naive for comparison if needed, or handle timezones properly
-             # Simple check: if within last 2 days
+             # Make timezone-aware comparison
              if published_parsed.tzinfo is not None:
                  now = datetime.now(published_parsed.tzinfo)
              else:
                  now = datetime.now()
                  
-             # Determine cutoff
              if hours:
                  cutoff = timedelta(hours=hours)
              elif days:
                  cutoff = timedelta(days=days)
              else:
-                 cutoff = timedelta(days=2) # Default to 2 days
+                 cutoff = timedelta(days=2) # Default
 
              if (now - published_parsed) <= cutoff:
                  is_recent = True
         else:
-            # If no date, assume it's recent enough or skip? Let's include for now.
+            # If no date, include cautiously or skip. Including for now.
             is_recent = True
 
         if is_recent:
+            # Determine primary domain
+            domain = "General"
+            for d, sources in REGION_MAPPING.items():
+                if source_name in sources:
+                    domain = d
+                    break
+            
             articles.append({
                 "title": entry.title,
                 "url": entry.link,
                 "published": str(published_parsed) if published_parsed else "Unknown",
                 "source": source_name,
                 "summary": entry.summary if hasattr(entry, 'summary') else "",
-                # Guess region based on source if not provided, basically the source map knows it
-                "region": next((r for r, srcs in REGION_MAPPING.items() if source_name in srcs), "Global")
+                "region": domain # Mapping "Region" field to Domain for schema compatibility
             })
             
     return articles
 
 def collect_articles(region=None, days=None, hours=None):
     """
-    Collect articles for a specific region or all.
+    Collect articles for a specific domain (region) or all.
     """
     targets = {}
     if region and region in REGION_MAPPING:
@@ -130,23 +129,21 @@ def collect_articles(region=None, days=None, hours=None):
     elif region == "all" or region is None:
         targets = DEFAULT_SOURCES
     else:
-        # Try to find by keys directly? or just return empty
-        print(f"Region {region} not found in mapping.")
+        print(f"Domain/Region {region} not found in mapping.")
         return []
         
     all_articles = []
     for name, url in targets.items():
         articles = fetch_rss(url, name, days=days, hours=hours)
         all_articles.extend(articles)
-        time.sleep(1)
+        time.sleep(1) # Polite delay
         
     return all_articles
 
 def main():
     parser = argparse.ArgumentParser(description="Collect articles from RSS feeds.")
     parser.add_argument("--source", type=str, help="Comma-separated list of source keys or 'all'", default=None)
-    parser.add_argument("--region", type=str, help="Region code (US, JP, CN, IN, ID, Crypto) or 'all'", default="all")
-    parser.add_argument("--dry-run", action="store_true", help="Print results to stdout instead of saving (currently only prints)")
+    parser.add_argument("--region", type=str, help="Domain (AI, Quantum, Green) or 'all'", default="all")
     parser.add_argument("--days", type=int, help="Filter articles published within last N days")
     parser.add_argument("--hours", type=int, help="Filter articles published within last N hours")
 
@@ -155,7 +152,6 @@ def main():
     all_articles = []
     
     if args.source:
-        # Source mode (Legacy/Direct)
         target_sources = {}
         if args.source == "all":
             target_sources = DEFAULT_SOURCES
@@ -172,10 +168,8 @@ def main():
             time.sleep(1)
             
     else:
-        # Region mode (New)
         all_articles = collect_articles(args.region, days=args.days, hours=args.hours)
 
-    # Output results
     print(f"\nFound {len(all_articles)} articles.")
     print(json.dumps(all_articles, indent=2, ensure_ascii=False))
 

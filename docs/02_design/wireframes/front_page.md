@@ -1,58 +1,60 @@
-# Wireframe: Front Page (Dashboard) - Phase 1
+# Front Page Wireframe (Global Dashboard)
 
-## 概要
-- **ファイル名**: `front-page.php`
-- **役割**: "Pocket Bloomberg" - 一目で市場センチメントと今日のシナリオへのアクセスを提供する。
-- **デザインコンセプト**: Dark Mode, High Density, Financial Terminal Style.
-
-## Layout (Mobile First)
+**Device**: Mobile (iPhone 15 Pro size assumed)
+**Role**: Global Command Center
 
 ```text
-+--------------------------------------------------+
-| [Header (Sticky)]                                |
-| [≡]  FINSHIFT  [🔍]                              |
-| ------------------------------------------------ |
-| [Global Ticker Widget (TradingView)]             |
-| S&P500: 4,780 (+0.5%) | NK225: 38,500 (-0.2%) ...|
-+--------------------------------------------------+
-| [Hero Section: Market Pulse]                     |
-|                                                  |
-|  [ Global Sentiment Meter ]                      |
-|  FEAR <-------[ 75 GREED ]------->               |
-|  "Risk-On Environment"                           |
-|                                                  |
-|  [ Today's Scenarios (Latest Briefings) ]        |
-|  +--------------------------------------------+  |
-|  | �� US Briefing (Jan 01)                [>] |  |
-|  | Risk-Off | Sentiment: Neutral              |  |
-|  +--------------------------------------------+  |
-|  | 🇯🇵 JP Briefing (Jan 01)                [>] |  |
-|  | Risk-On  | Sentiment: Greed                |  |
-|  +--------------------------------------------+  |
-|  | ₿ Crypto Briefing (Jan 01)             [>] |  |
-|  | Neutral  | Sentiment: Fear                 |  |
-|  +--------------------------------------------+  |
-+--------------------------------------------------+
-| [Latest News Stream (Tabs)]                      |
-| [ All ] [ Stocks ] [ Crypto ] [ FX ]             |
-|                                                  |
-| 20:30  [US] 米雇用統計、予想上回る強い数字       |
-| 18:15  [Crypto] ビットコイン、節目をブレイク     |
-| 15:00  [JP] 海外勢の買い越し幅が拡大             |
-| ...                                              |
-| [View All News >]                                |
-+--------------------------------------------------+
-| [Footer]                                         |
-| [Terms] [Privacy] [Disclaimer]                   |
-+--------------------------------------------------+
++-----------------------------+
+| [=] TechShift      [Search] |  <-- Header: Logo + Menu/Search
++-----------------------------+
+|                             |
+|   TODAY'S SHIFT (Highlite)  |  <-- Hero: "What changed today?"
+| +-------------------------+ |
+| | ⚡️ AGI Roadmap           | |  <-- 1. Subject
+| | **ACCELERATED BY 1 YR** | |  <-- 2. The Impact (Big Font)
+| |                         | |
+| | "New reasoning model    | |  <-- 3. The Reason
+| |  breaks bottlenecks."   | |
+| +-------------------------+ |
+|                             |
+|  [Latest Ticker Info...]    |
++-----------------------------+
++-----------------------------+
++-----------------------------+
+|   SECTOR OVERVIEW (Cards)   |
+|                             |
+| [ 1. Space & Aero ]         |
+| +-------------------------+ |
+| | 🚀 Next: Mars Sample Rx | |  <-- 1. Next Milestone
+| | 📅 2028 Q3  [==80%==] | |  <-- 2. Date & Confidence
+| +-------------------------+ |
+| � Latest: NASA awards...   |  <-- 3. Latest Article
+|                             |
+| [ 2. Advanced AI ]          |
+| +-------------------------+ |
+| | 🧠 Next: AGI Protocol   | |
+| | 📅 2027 Q1  [==40%==] | |
+| +-------------------------+ |
+| 📰 Latest: Anthropic...     |
+|                             |
+| [ 3. Quantum Tech ]         |
+| ...                         |
+|                             |
+| > Load All Sectors          |
++-----------------------------+
+|                             |
+|   GLOBAL IMPACT FEED        |
+|  .  🚨 AGI: +1yr (Major)    |
+|  .  ⚡️ Battery: -6mo       |
++-----------------------------+
+|                             |
++-----------------------------+
+| [Topics] [Alerts] [Menu]    |  <-- Sticky Bottom Nav (Optional)
++-----------------------------+
 ```
 
-## Desktop Layout (> 768px)
-- **2 Column Layout**:
-    - **Main (Left/Center)**: Hero Section (Sentiment + Scenarios) & News Stream.
-    - **Sidebar (Right)**:
-        - **Market Movers / Watchlist Link**: (Phase 2 feature placeholer)
-        - **AdSense / Affiliate Banners**.
-- **Visuals**:
-    - Dark background (`#0F172A`).
-    - Use Red/Green colors only for data changes.
+## Requirements
+1.  **Today's Shift**: ユーザーが一番知りたいのは「今日、未来が近づいたのか？」という点。最もインパクトの大きかった変更（または「変化なし」という事実）をトップで宣言する。
+2.  **Sector Cards**: 複雑なヒートマップではなく、セクターごとにカード化して整理する。
+3.  **Speed**: 重い画像を避け、テキストとCSSシェイプ主体で構成する。
+4.  **Scalability**: 30トピックあってもカード形式なら縦スクロールで自然に閲覧可能。

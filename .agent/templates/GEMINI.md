@@ -1,10 +1,10 @@
-# Gemini Operational Manifesto for FinShift (Vibe Coding Edition)
+# Gemini Operational Manifesto for TechShift (Vibe Coding Edition)
 
 > [!IMPORTANT]
 > **CRITICAL INSTRUCTIONS (絶対遵守ルール)**
-0.このファイルを読み込んだら”GEMINI.mdを読み込みました”と宣言して
+> 0. このファイルを読み込んだら”GEMINI.mdを読み込みました”と宣言して
 > 1.  **All Outputs in Japanese**: 会話、思考プロセス、アーティファクト（計画書・タスクリスト）、コミットメッセージなど、全ての出力を**日本語**で行うこと。
->     - **Task Artifact**: タスク管理には必ず `.agent/templates/task_ja.md` を使用する。
+>     - **Task Artifact**: タスク管理には必ず `task.md` を使用する。
 > 2.  **Immediate Cleanup**: 検証用に作成したスクリプトや一時ファイルは、検証完了後・報告前に**必ず削除**する。リポジトリを汚さないこと。
 > 3.  **Context Awareness**: このファイルはあなたの「長期記憶」である。ここに記載された振る舞いを常に優先する。
 
@@ -21,8 +21,8 @@
 
 ### ✨ Quality First (品質至上主義)
 - **"It works" is not enough**: 動くだけでは不十分。コードは読みやすく、保守しやすく、拡張性があるべきである。
-- **Aesthetic Excellence**: UI/UXにおいては「プレミアム感」と「使い心地」を最優先する。安っぽいデザインは許容しない。
-- **No Broken Windows (割れ窓理論)**: 修正対象外の箇所にバグや不整合を見つけた場合、**勝手に修正せずに必ずユーザーに報告・提案**する（2次的被害の防止）。
+- **Aesthetic Excellence**: UI/UXにおいては「プレミアム感 (Intelligent Reality)」を最優先する。安っぽいデザインは許容しない。
+- **No Broken Windows (割れ窓理論)**: 修正対象外の箇所にバグや不整合を見つけた場合、**勝手に修正せずに必ずユーザーに報告・提案**する。
 
 ### 🔗 Consistency & Integrity (整合性)
 - **全体を見る**: 一箇所を変更したら、それがシステム全体（フロントエンド、バックエンド、ドキュメント）にどう影響するかを確認する。
@@ -30,13 +30,14 @@
 
 ---
 
-## 2. プロジェクト概要: FinShift
+## 2. プロジェクト概要: TechShift
 
-- **Vision**: 世界中の金融情報を集約し、スイングトレーダーに「勝てるシナリオ」を提供する最高品質のマーケットメディア。
-- **Target**: 初心者〜中級者のスイングトレーダー。
+- **Vision**: テクノロジーの進化を可視化し、未来への羅針盤となる「Dynamic Navigation Chart」。
+- **Target**: Visionary Practitioner (未来を実装する実務者), Macro Investor (大局を見通す投資家)。
 - **Core Value**:
-    - **Speed & Depth**: 速報性と深い分析の両立。
-    - **Scenario Planning**: 「上がった/下がった」ではなく「もしこうなったらこう動く」というシナリオ提示。
+    - **Vertical Timeline**: テクノロジーの現在地と未来を縦型タイムラインで可視化。
+    - **Impact Analysis**: ニュースがロードマップを「どう加速/遅延させるか」を論理的に分析。
+    - **Logic Chain**: 単なる結論ではなく、そこに至る論理構造を提供する。
 
 ## 3. ワークフロー・プロトコル
 
@@ -49,22 +50,21 @@
 4.  **Report (報告)**: 何を行い、何を確認したかを簡潔に報告する。
 
 ### 技術スタック & ルール
-- **Backend**: Python (Automation), WordPress (CMS)
-- **Frontend**: PHP, JS, CSS (Vanilla preferred for speed/control)
-- **Compliance**: 金商法に配慮し、投資助言と受け取られない表現を使用する。
+- **Backend**: Python (Impact Analysis, Automation), WordPress (CMS)
+- **Frontend**: PHP, JS (Vanilla/Chart.js), CSS (Tailwind/Vanilla)
+- **AI Engine**: Gemini 2.0 Flash (Filter), Gemini 3 Pro (Deep Analysis)
 
 ---
 
 ## 4. 運用・保守
 - **GEMINI.md**: あなた自身のルールブック。プロジェクトが進むにつれて、このファイル自体も最適化・更新していくこと。
 - **Development Guidelines**: 詳細なコーディング・開発ルールは [docs/00_meta/development_guidelines.md](../../docs/00_meta/development_guidelines.md) を参照すること。
+- **Design Docs**: `docs/02_design/` 配下の仕様書を常に正（Source of Truth）とする。
 - **Project README**: コマンドの使い方やトラブルシューティングは [README.md](../../README.md) を参照すること。
 
 ## 5. 基本的な指示（プロンプト）の例
 
-- **シナリオ生成:**
-  `現在の米雇用統計データとVIX指数を基に、来週のドル円相場の「強気シナリオ」と「弱気シナリオ」をそれぞれ生成し、発生確率を推定してください。`
-- **銘柄分析:**
-  `インド株の「TATA Motors」について、最新の決算情報と競合状況をまとめ、日本の個人投資家が購入する方法を解説してください。`
-- **タイトル作成:**
-  `「〇〇（銘柄名）」の記事タイトル案を、スイングトレーダーがクリックしたくなるような「転換点」や「予兆」という言葉を使って5つ作成してください。`
+- **インパクト分析:**
+  `この記事が「AGIロードマップ」に与える影響（加速/遅延）を-5〜+5で評価し、その理由をLogic Chainとして出力してください。`
+- **ロードマップ更新:**
+  `「全固体電池」のフェーズ定義を見直し、現在の技術成熟度（TRL）に基づいて次のマイルストーンを再設計してください。`
