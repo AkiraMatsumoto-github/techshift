@@ -108,7 +108,7 @@ class GeminiClient:
             # [Topic Deep Dive] Single article focus.
             "topic-focus": textwrap.dedent(f"""
             {context_section}あなたは専門技術アナリスト（Tech Analyst）です。
-            特定の技術トピック（{keyword}）について、ロードマップへの影響を深掘りする解説記事を執筆してください。
+            特定の技術トピック（{keyword}）について、その技術の影響を深掘りする解説記事を執筆してください。
             
             キーワード: {keyword}
             
@@ -119,18 +119,32 @@ class GeminiClient:
             - 単に「実用化」だけでなく、「技術的絶対条件 (Prerequisites)」の達成度にフォーカスする。
             - 例: "全固体電池の実用化" ではなく "電解質伝導率 10mS/cm の達成" に注目。
             
-            ## 構成案
-            1. **Impact Assessment (影響評価)**:
-               - このニュースはロードマップを「加速」させたか、「遅延」させたか、それとも「維持」か。
-               - 結論を最初に提示。
-            2. **Technical Deep Dive (技術的詳細)**:
-               - 具体的に何のスペックが向上したのか（精度、速度、コスト、耐久性）。
-               - 従来技術（SOTA）との比較。
-            3. **Bottleneck Analysis (ボトルネック分析)**:
-               - 次に残されている課題は何か（量産性、法規制、電力消費など）。
-            4. **Revised Timeline (予測修正)**:
-               - この成果により、実用化予想時期がどう変動するか。
-               - "2028 Q3" のように具体的に記述。
+            ## 構成案 (TechShift Standard)
+            
+            1. **インパクト要約 (The Shift)**:
+               - 単なるニュースの要約ではなく、「この技術登場の前後で、世界（ルール）がどう変わったか」を対比させる。
+               - Format: 「これまではXが限界だったが、YによってZが可能になった」
+            
+            2. **技術的特異点 (Technical Catalyst)**:
+               - なぜそれが可能になったのか？（Why Now?）
+               - 既存技術(SOTA)との決定的な違い（アーキテクチャ、素材、手法）をエンジニア視点で解説。
+            
+            3. **次なる課題 (The Next Wall)**:
+               - 一つの課題が解決されると、必ず新しいボトルネックが出現する。
+               - 「精度は解決したが、推論コストが課題」「実験室では成功したが、量産プロセスが未確立」など、次に直面するリアリティのある課題を指摘する。
+            
+            4. **今後の注目ポイント (Strategic Signal)**:
+               - 投資家やエンジニアが、来週・来月・来年チェックすべき具体的な指標（KPI）。
+               - 抽象的な「期待」ではなく、「どの数値が改善されたらGOサインか」を提示。
+
+            5. **結論 (Verdict)**:
+               - 結局、この技術は「買い」なのか「待ち」なのか、あるいは「何待ち」なのか。
+               - 読者が取るべきアクションを示唆して締めくくる。
+            
+            ## 執筆トーン
+            - **Insightful**: 事実の羅列ではなく、点と点を線で結ぶ解釈を加える。
+            - **Professional**: 煽り文句は不要。冷徹な分析と熱量のあるビジョンを両立させる。
+               
             
             ## 執筆ルール
             - **一次情報主義**: 論文や公式リリースに基づく事実のみを扱う。噂レベルは除外。
@@ -138,13 +152,20 @@ class GeminiClient:
             
             ## フォーマット
             - Markdown形式
-            - 3000文字程度
+            - 4000文字程度
             - 技術仕様はテーブルで比較
             - HTMLタグ使用禁止
             
-            ## タイトル作成ルール
-            - **形式**: [技術名] [動詞/状態]：[影響]
-            - **例**: 全固体電池の電解質劣化問題を解決：2027年量産への道筋
+            ## タイトル作成ルール (SEO Optimized)
+            - **目的**: 検索流入の最大化 (High CTR & Search Volume)。
+            - **ルール1 (キーワード配置)**: 検索されやすい「メインキーワード」を必ず**文頭**に置く。
+            - **ルール2 (サジェスト意識)**: 「仕組み」「いつ」「課題」「ロードマップ」「将来性」など、よく検索されるサジェストワードを含める。
+            - **形式**: [メインキーワード]＋[検索意図を満たす具体的な内容]
+            - **悪い例**: 「今回のブレイクスルーにより全固体電池が進化」 (キーワードが後ろ)
+            - **良い例**: 
+              - 「全固体電池の量産はいつ？最新ロードマップと2つの技術的課題」
+              - 「AIエージェントの仕組みとは？自律動作の原理と3つの実用例」
+              - 「核融合発電のメリット・デメリットを徹底解説｜2030年の実用化予測」
             """)
         }
         
@@ -615,9 +636,6 @@ class GeminiClient:
             return None
 
     # --- Daily Briefing Methods ---
-
-
-
     def check_relevance_batch(self, articles):
         """
         Check relevance for a batch of articles (list of dicts).
@@ -702,43 +720,52 @@ class GeminiClient:
 
     def analyze_tech_impact(self, context_news_list, market_data_str, economic_events_str, region, extra_context=""):
         """
-        Analyze tech news AND market data to generate "Future Insight" (Evolution Phase & Timeline Impact).
-        Returns: JSON with evolution_phase, timeline_impact, hero_topic, scenarios.
+        Analyze tech news AND market data to generate "TechShift Insight" (The Shift, Catalyst, Next Wall).
+        Returns: JSON with shift_analysis, hero_topic, etc.
         """
         news_text = "\n".join([f"- [{art['published_at']}] {art['title']}: {art['summary'][:200]}" for art in context_news_list])
         
         prompt = textwrap.dedent(f"""
-        You are the "Future Foresight Engine" for TechShift. Analyze the provided data for the **{region}** region.
+        You are the "Shift Intelligence Engine" for TechShift. Analyze the provided data for the **{region}** region.
         
         ## Input Data
         
-        ### 1. Macro Context (Investment Climate)
+        ### 1. Macro Context
         - Market/Econ Data: {market_data_str}
-        - Note: Use this to judge "VC Funding Environment" or "Cost of Capital" for Deep Tech.
         
         ### 2. Tech News (Last 24h)
         {news_text}
         
         ### 3. Context & Continuity
         {extra_context}
+
+        **CRITICAL INSTRUCTION**:
+        If "Today's Deep Dives" are provided in the Context above, you MUST prioritize them.
+        - If a Deep Dive article matches the most significant shift, selecting it as the **Hero Topic** is highly recommended.
+        - If it is important but secondary, it MUST be included in **Tech Radar**.
+        - You must assume the reader wants to know about these specific deep dives.
         
         ## Analysis Tasks
-        1. **Evolution Phase**: Define the current global tech phase in **Japanese**.
-           - Examples: "生成AIの幻滅期入り", "量子技術の実用化前夜", "宇宙開発の商業化加速".
-        2. **Timeline Impact**: 0 (Severe Delay) to 100 (Massive Acceleration). 50 is Neutral.
-        3. **Hero Topic**: What single technology/topic is most critical today?
-           - **Consistency Check**: Reference "Context". Is this a follow-up to yesterday's breakthrough?
+        1. **Hero Topic**: Identify the single most overarching structural change (The "Lead Story").
         
-        4. **Scenarios (The TechShift Logic)**:
-           - **Main Scenario (Base Case)**: Most likely timeline evolution.
-             - **Format**: "Event -> Impact on Roadmap".
-             - **Example**: "OpenAIの新モデル発表 -> エージェント開発が加速し、2025年の実用化予測を維持".
-           - **Accelerated Case (Bull)**: What could speed things up?
-             - **Example**: "規制緩和が早期に実現 -> ドローン配送の全国展開が1年前倒し".
-           - **Delayed Case (Bear)**: What are the risks/bottlenecks?
-             - **Example**: "GPU供給不足が長期化 -> 大規模モデルの学習が停滞し、AGI到達が遅延".
-           
-           - **Probability**: Assign stats (Must sum to 100%).
+        2. **Category Classification (Official Taxonomy)**:
+           - Classify provided news into these 6 Sectors:
+             - **Advanced AI** (LLM, Agent, Edge AI)
+             - **Robotics & Mobility** (Humanoid, AV, Drone, Spatial Comp)
+             - **Quantum & Tech** (Quantum, Semi, Materials)
+             - **Green Tech** (Fusion, Battery, Climate)
+             - **Life Science** (AI Drug Disc, Genome, MedTech)
+             - **Space & Aero** (Rocket, Satellite, Moon)
+           - *Note*: If no significant news exists for a sector, mark as "None".
+
+        3. **Cross-Sector Impact (Synergy)**:
+           - Analyze how updates in one sector affect another (e.g., "AI demand driving Energy breakthrough").
+
+        4. **The Shift (Hero Analysis)**:
+           - **The Shift**: "Rule X -> Rule Y".
+           - **Catalyst**: "Why Now?".
+           - **Next Wall**: "New Bottleneck".
+           - **Signal**: "What to Watch".
         
         5. **AI Structured Summary**:
            - **summary**: Concise summary in **Japanese**.
@@ -746,35 +773,28 @@ class GeminiClient:
 
         ## Output JSON
         {{
-            "evolution_phase": "AI実装フェーズ (Implementation Phase)",
-            "timeline_impact": 75, # 0-100 Impact Score (High = Acceleration)
-            "impact_label": "Accelerated", # Label (Accelerated/Delayed/Neutral)
-            "hero_topic": "...", # Hero Topic (formerly primary_driver)
-            "scenarios": {{
-                "review": "Verification of yesterday's view. e.g., 'The bottleneck identified yesterday is resolving...'",
-                "main": {{ 
-                    "condition": "Main timeline projection", 
-                    "probability": "60%"
-                }},
-                "bull": {{ 
-                    "condition": "Acceleration scenario", 
-                    "probability": "20%"
-                }},
-                "bear": {{ 
-                    "condition": "Delay/Bottleneck scenario", 
-                    "probability": "20%"
-                }},
-                "mid_term": {{ 
-                    "view": "Positive/Neutral/Negative", 
-                    "events": "CES 2026, SpaceX Launch", 
-                    "risk": "Regulatory Change" 
-                }}
+            "hero_topic": "...", 
+            "shift_score": 85,
+            "sector_updates": {{
+                "AI & Robot": [ {{ "title": "...", "significance": "..." }} ],
+                "Mobility & Space": [],
+                "Quantum & Semi": [],
+                "Climate & Energy": [],
+                "Bio & Health": [],
+                "Web3 & Economy": []
+            }},
+            "cross_sector_analysis": "...",
+            "shift_analysis": {{
+                "the_shift": "...",
+                "catalyst": "...",
+                "next_wall": "...",
+                "signal": "..."
             }},
             "ai_structured_summary": {{
                 "summary": "...",
                 "key_topics": ["...", "..."]
             }},
-            "reasoning": "Reasoning for the impact score"
+            "reasoning": "..."
         }}
         """)
         
@@ -801,7 +821,7 @@ class GeminiClient:
     def write_briefing(self, analysis_result, region, context_news=None, market_data_str=None, events_str=None, date_str=None, internal_links_context=None):
         """
         [Daily Briefing Pipeline]
-        Write the final Daily Briefing article in Markdown based on the analysis and raw context.
+        Write the final Daily Briefing article in Markdown based on the TechShift Standard.
         """
         # Prepare context strings
         news_text = ""
@@ -813,7 +833,7 @@ class GeminiClient:
         
         ## Input Data
         
-        ### 1. Future Insight (AI Strategy)
+        ### 1. Shift Insight (Core Analysis)
         {json.dumps(analysis_result, ensure_ascii=False, indent=2)}
         
         ### 2. Macro Context (Raw Data)
@@ -826,55 +846,59 @@ class GeminiClient:
         {internal_links_context if internal_links_context else "N/A"}
         
         ## Goal
-        Create a **Visionary, Insightful, and Logic-Driven** report.
-        Focus on "Connecting Dots" (Line) rather than just reporting news (Point).
+        Create a **Navigation Chart** for the future. 
+        Do NOT write a generic news summary. Write a strategic analysis of "Structural Changes".
         
         ## Tone & Style
-        - **Visionary & Sharp**: "Wired" meets "McKinsey Report".
-        - **Japanese Language**: High-quality, professional Japanese.
-        - **Data-Backed**: Cite specs, funding amounts, and dates.
-        
+        - **Insightful**: Connect the dots.
+        - **Japanese Language**: Professional, crisp, and visionary.
+        - **No Fluff**: Avoid "We hope", "Expected to". Use "The data suggests", "The barrier is".
         ## Output Structure (Japanese Headers)
         
         1. **Title**: Generated based on rules below.
         
-        2. **【The Shift】 (今日の結論)**
-           - Define how the "Humanity's Timeline" shifted today.
-           - e.g., "AGI is 6 months closer," "Fusion power hits a cost wall."
-           - **Bold** the key conclusion.
+        2. **【Today's Landscape】 (本日の重要ポイント)**
+           - High-level summary of the day's tectonic shifts.
+           - Bullet points of top 3 takeaways.
+
+        3. **【Sector Updates】 (分野別動向)**
+           - **Rule**: Only include sectors with significant updates (Torutsume).
+           - **Mandatory**: If a "Deep Dive Article" exists for a sector (Context 4), you MUST introduce it here with a link.
+           - Official Sectors:
+             - **Advanced AI**
+             - **Robotics & Mobility**
+             - **Quantum & Tech**
+             - **Green Tech**
+             - **Life Science**
+             - **Space & Aero**
         
-        3. **【Hero Topic: {analysis_result.get('hero_topic', analysis_result.get('primary_driver', 'Top Story'))}】**
-           - Deep dive into the most important topic.
-           - **Logic Chain**: Fact -> Analysis -> Future Impact.
-           - Use `### 昨日のシナリオ検証` (Verification) here to check continuity if relevant.
-        
-        4. **【Cross-Sector Signals】 (他分野への波及)**
-           - How does today's hero topic affect other sectors?
-           - e.g., "AI improvement -> Robotics training acceleration."
-           - Use bullet points.
-        
-        5. **【Reality Check】 (実態検証)**
-           - **Bottleneck Analysis**: What stops this from happening tomorrow? (Cost, Law, Energy).
-           - **Cost of Capital**: Mention Macro Environment (Interest rates) influence on VC/Deep Tech if relevant.
-        
-        6. **【Scenarios】 (未来予測)**
-           - **Scenarios Table**: Create a Markdown table comparing Main, Accelerated, and Delayed scenarios.
-           - **Mid-term Outlook**: Next big events (Conferences, Keep Launches).
+        4. **【Cross-Sector Impact】 (複合的影響)**
+           - Discuss how these shifts affect each other (Synergy).
+           - e.g., "Quantum advancements accelerating Bio-simulation."
+
+        5. **【Strategic Signal】 (今後の注目点)**
+           - What to watch next week/month.
+           - Specific KPIs or Events.
+
+        6. **【Verdict】 (結論)**
+           - Final thought on the overall market direction.
         
         ## Internal Linking
-        - Integrate relevant links from "Internal Links Context" naturally into the text.
+        - **MANDATORY**: Embed links to "Today's Featured Articles" naturally within the relevant Sector Update.
         - Format: `[Title](URL)`
         
-        ## Title Rules
-        1. **Format**: 【Daily Shift】[Hero Topic]が変えた未来｜[Sub-Title]
-        2. **Keywords**: Concrete names (OpenAI, Toyota, Starship).
-        3. **Example**: 「【Daily Shift】GPT-5が創薬を2年加速｜「実験室」から「データセンター」へ」
-        
-        ## Format Rules
-        - Markdown, approx 4000 chars.
-        - **First line MUST be Title** (with #).
-        - No HTML.
-        - Use Japanese headers (e.g., ## 【The Shift】).
+        ## Title Rules (Pure SEO)
+        1. **Goal**: Maximize Click-Through Rate (CTR) and Search Volume.
+        2. **Format**: [Hero Keyword] + [Impact/Action]
+        3. **Rules**:
+           - **NO** "Daily Shift" or Date prefix.
+           - Start with the most important Keyword (e.g., "全固体電池", "GPT-5").
+           - Include "Impact", "Roadmap", "Future", or "Industry Shift".
+           - Limit to 32 characters (Google Search Snippet limit).
+        4. **Good Examples**:
+           - 「全固体電池の量産はいつ？最新ロードマップと課題」
+           - 「AIエージェントが変える仕事の未来と6つの業界動向」
+           - 「核融合発電の現状と2026年の注目ポイント」
         """)
         
         try:

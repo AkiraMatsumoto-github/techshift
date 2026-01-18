@@ -1,17 +1,17 @@
-# FinShift - 金融市場分析・投資情報メディア
+# TechShift - 未来予測メディア
 
-世界の金融市場（株式、為替、コモディティ、暗号資産）の情報を収集し、スイングトレーダー向けに「市場分析」と「シナリオ」を提供する情報メディアです。
-Gemini APIを活用した高度な自動生成システムにより、客観的な市場分析と投資シナリオを迅速に配信します。
+世界のテクノロジー進化（AI, Quantum, Green Tech等）を追跡し、スイングトレーダーやビジョナリー向けに「未来への羅針盤 (Dynamic Navigation Chart)」を提供する情報メディアです。
+Gemini APIを活用した高度な自動生成システムにより、客観的な技術インパクト分析と投資シナリオを迅速に配信します。
 
 ## プロジェクト構成
 
 ```
 .
-├── themes/finshift/           # WordPressテーマ（独自開発）
+├── themes/techshift/          # WordPressテーマ（独自開発）
 ├── automation/                # 自動化システム
-│   ├── collectors/            # データ収集モジュール (News, Market Data, Calendar)
-│   ├── daily_briefing.py      # デイリーブリーフィング生成 (Main)
-│   ├── pipeline.py            # 記事生成パイプライン (Traditional)
+│   ├── collectors/            # データ収集モジュール (News Streams)
+│   ├── daily_briefing.py      # デイリーブリーフィング生成 (TechShift Domains)
+│   ├── pipeline.py            # 記事生成パイプライン (Topic Focus)
 │   ├── gemini_client.py       # Gemini APIクライアント
 │   └── ...
 ├── docs/                      # プロジェクトドキュメント
@@ -22,7 +22,7 @@ Gemini APIを活用した高度な自動生成システムにより、客観的�
 
 ## 1. Automation System
 
-FinShiftの自動化システムは、ニュース収集から市場分析、記事生成、WordPress投稿までを一貫して行います。
+TechShiftの自動化システムは、ニュース収集からインパクト分析、記事生成、WordPress投稿までを一貫して行います。
 
 ### セットアップ (ローカル)
 
@@ -44,7 +44,8 @@ FinShiftの自動化システムは、ニュース収集から市場分析、記
     `automation/.env` を作成:
     ```bash
     GEMINI_API_KEY=your_apiKey
-    WORDPRESS_URL=http://localhost:8002
+    WORDPRESS_URL=http://localhost:8003 # or https://techshift.net
+    # WP_USER / WP_APP_PASSWORD
     WORDPRESS_USERNAME=admin
     WORDPRESS_APP_PASSWORD=your_appPassword
     ```
@@ -52,28 +53,22 @@ FinShiftの自動化システムは、ニュース収集から市場分析、記
 ### 実行ガイド
 
 #### A. デイリーブリーフィング (`daily_briefing.py`)
-毎日の市場分析記事を生成するメインスクリプトです。各国のニュースと市場データを分析し、シナリオを作成します。
+TechShiftの主要4ドメイン（AI, Quantum, Green, General）のニュースを分析し、ブリーフィング記事を生成します。
 
 ```bash
-# 基本実行 (全リージョン、収集から分析・投稿まで)
-python automation/daily_briefing.py
+# 全ドメインの分析・生成 (AI, Quantum, Green, General)
+python automation/daily_briefing.py --region all --phase analyze
 
-# 特定フェーズのみ実行
-# phase 1: データ収集のみ
-python automation/daily_briefing.py --phase collect
-# phase 2: 分析・記事生成のみ (収集済みデータを使用)
-python automation/daily_briefing.py --phase analyze
+# ドライラン (投稿・保存なし、ログ出力のみ)
+python automation/daily_briefing.py --region all --phase analyze --dry-run
 
-# リージョン指定 (US, JP, CN, IN, Crypto など)
-python automation/daily_briefing.py --region US
-
-# オプション
---hours 24       # ニュース収集の過去遡り時間 (デフォルト: 24)
---dry-run        # 投稿・DB保存を行わず、ログ出力のみ (テスト用)
+# 特定ドメインのみ実行
+python automation/daily_briefing.py --region AI --phase analyze
+python automation/daily_briefing.py --region Green --phase analyze
 ```
 
 #### B. 汎用記事パイプライン (`pipeline.py`)
-キーワードベースや従来のパイプライン処理を行います。
+特定のトピック深掘り記事を生成します。
 
 ```bash
 # 基本実行
@@ -81,20 +76,13 @@ python automation/pipeline.py --hours 12 --threshold 75 --limit 2
 
 # 全ソースから収集
 python automation/collector.py --source all > articles.json
-
-# 特定ソースのみ (例: TechCrunch)
-python automation/collector.py --source techcrunch --days 3
 ```
 
-**Phase 2: スコアリング (`scorer.py`)**
-```bash
-# ファイル入力でスコアリング
-python automation/scorer.py --input articles.json --threshold 80 --output scored.json
-```
+#### C. タクソノミー同期 (`setup_taxonomy.py`)
+WordPressのカテゴリ・タグ設定を同期します。環境セットアップ時に実行してください。
 
-**Phase 3: 固定ページ生成 (`generate_static_pages.py`)**
 ```bash
-python automation/generate_static_pages.py --all
+python automation/setup_taxonomy.py
 ```
 
 ---
@@ -103,23 +91,24 @@ python automation/generate_static_pages.py --all
 
 ### サーバー運用
 
-#### gcloud 認証ができてない
+#### gcloud 認証
 ```bash 
 gcloud auth application-default login
 ```
 
-#### パーミッションエラーでテーマが反映されない
+#### パーミッションエラー修正
 ```bash
-ssh -p 10022 xs937213@sv16718.xserver.jp
-chmod -R 755 ~/finshift.net/public_html/wp-content/themes/finshift
+ssh -p 10022 [user]@[host]
+chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift
 ```
 
 #### GitHub Actions のデプロイ失敗
 GitHub Secrets (`Settings > Secrets`) を確認してください：
-- `SERVER_HOST`: sv16718.xserver.jp
-- `SERVER_USER`: xs937213
+- `SERVER_HOST`: (Server Host)
+- `SERVER_USER`: (User)
 - `SSH_PORT`: 10022
-- `SSH_PRIVATE_KEY`: (正しい秘密鍵か)
+- `WP_URL`: (WordPress URL)
+- `GEMINI_API_KEY`: (API Key)
 
 ### ローカル開発
 #### 環境立ち上げ
@@ -127,9 +116,6 @@ GitHub Secrets (`Settings > Secrets`) を確認してください：
 source automation/venv/bin/activate
 export GOOGLE_CLOUD_LOCATION=global   
 ```
-
-#### 記事が生成されない (スコア不足)
-`pipeline.py` の `--threshold` デフォルト値(85)が高すぎる可能性があります。`--threshold 60` 程度に下げてお試しください。
 
 ## 関連ドキュメント
 - [テーマデプロイガイド](docs/00_meta/theme_deployment_guide.md)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SEO Optimizer for FinShift Articles
+SEO Optimizer for TechShift Articles
 
 Generates SEO metadata including:
 - Meta descriptions (150-160 characters)
@@ -40,13 +40,17 @@ class SEOOptimizer:
 
 タイトル: {title}
 キーワード: {keyword}
-本文（抜粋）: {content[:500]}
+本文（抜粋）: {content[:1000]}
+
+【TechShiftのトーン＆マナー】
+- 未来予測（Foresight）と技術的インパクト（Impact）を重視する。
+- 投資家やビジョナリーに向けて、この記事が「なぜ重要か」を伝える。
 
 【要件】
 - 文字数: 150-160文字（厳守）
-- 検索ユーザーのクリックを誘う魅力的な文章
+- 検索ユーザー（投資家・技術者）のクリックを誘う知的で魅力的な文章
 - キーワードを自然に含める
-- 記事の核心的な価値を伝える
+- 「〜とは？」のような初心者向け解説ではなく、インサイトを強調する
 
 メタディスクリプションのみを出力してください（前置きや説明は不要）。
 """
@@ -69,7 +73,7 @@ class SEOOptimizer:
     
     def _generate_fallback_description(self, title, keyword):
         """Generate a simple fallback meta description."""
-        return f"{keyword}について解説。{title}をわかりやすく説明します。金融市場・投資戦略の最新情報をお届けします。"[:160]
+        return f"{keyword}の最新技術動向と社会的インパクトを解説。{title}がもたらす未来の変革と投資シナリオについて、TechShift独自の視点でお届けします。"[:160]
     
     def create_json_ld(self, article_data, schema_type="Article"):
         """
@@ -88,14 +92,14 @@ class SEOOptimizer:
             "headline": article_data.get("title", ""),
             "author": {
                 "@type": "Organization",
-                "name": "FinShift編集部"
+                "name": "TechShift編集部"
             },
             "publisher": {
                 "@type": "Organization",
-                "name": "FinShift",
+                "name": "TechShift",
                 "logo": {
                     "@type": "ImageObject",
-                    "url": article_data.get("site_logo", "https://finshift.net/logo.png")
+                    "url": article_data.get("site_logo", "https://techshift.net/logo.png")
                 }
             },
             "datePublished": article_data.get("date_published", datetime.now().isoformat()),
@@ -138,7 +142,7 @@ class SEOOptimizer:
             "og:type": "article",
             "og:title": title,
             "og:description": description,
-            "og:site_name": "FinShift",
+            "og:site_name": "TechShift",
             "og:locale": "ja_JP",
             
             # Twitter Card
@@ -189,21 +193,24 @@ if __name__ == "__main__":
     # Test
     optimizer = SEOOptimizer()
     
-    test_title = "米為替市場の動向と今後：FRB金利政策から読むドル円戦略"
-    test_keyword = "ドル円 FRB"
-    test_content = "今週の為替市場において、ドル円はFRBの金利政策の影響を強く受け..."
+    test_title = "TechShift: 全固体電池の量産化がもたらすエネルギー革命"
+    test_keyword = "全固体電池 エネルギー"
+    test_content = "トヨタと出光興産が全固体電池の量産パイロットラインを稼働。EV市場のゲームチェンジャーとなるか。TechShift独自の分析によるインパクト予測..."
     
     # Test meta description
-    meta_desc = optimizer.generate_meta_description(test_title, test_content, test_keyword)
-    print(f"Meta Description ({len(meta_desc)} chars):")
-    print(meta_desc)
-    print()
-    
+    try:
+        meta_desc = optimizer.generate_meta_description(test_title, test_content, test_keyword)
+        print(f"Meta Description ({len(meta_desc)} chars):")
+        print(meta_desc)
+        print()
+    except Exception as e:
+        print(f"Meta generation failed (likely no API key in env): {e}")
+
     # Test JSON-LD
     article_data = {
         "title": test_title,
-        "url": "https://finshift.net/article",
-        "date_published": "2025-11-27T10:00:00+09:00"
+        "url": "https://techshift.net/article/solid-state-battery",
+        "date_published": "2026-05-20T10:00:00+09:00"
     }
     json_ld = optimizer.create_json_ld(article_data)
     print("JSON-LD:")

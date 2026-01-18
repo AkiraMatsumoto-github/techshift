@@ -137,6 +137,29 @@ class DBClient:
         res = self._get("articles", params)
         return res if res else []
 
+    def get_todays_generated_articles(self, region=None):
+        """
+        Fetch articles that have been generated and posted today (have article_url).
+        """
+        # We fetch articles from last 24h and filter for those with article_url
+        articles = self.get_articles(region=region, hours=24, limit=50)
+        generated = []
+        for art in articles:
+            # Check if it has a valid WordPress URL (TechShift domain)
+            url = art.get('url', '')
+            # If the URL is internal (TechShift), it's a generated article.
+            # Assuming 'techshift.jp' or similar from WP_URL env
+            # Or simplified: check if it matches self.wp_url domain
+            # But wait, original source URL is preserved in 'url' field usually?
+            # pipeline.py: 'article_url' field in DB is where the WP link is stored.
+            # get_articles returns raw fields. Does it return 'article_url'?
+            # checking collector.py / pipeline.py, 'article_url' is updated in 'save_article' (implied) or 'save_daily_analysis'.
+            # Actually, `pipeline.py` updates the article row in DB with `article_url` after posting.
+            # So looking for `article_url` field is correct.
+            if art.get('article_url'):
+                generated.append(art)
+        return generated
+
     def get_latest_market_snapshot(self):
         # Get list limit 1
         res = self._get("market-snapshots", {"limit": 1})

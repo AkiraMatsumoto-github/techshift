@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'themes/finshift/**'
+      - 'themes/techshift/**'
   workflow_dispatch:
 
 jobs:
@@ -22,8 +22,8 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
-        source: "themes/finshift/*"
-        target: "~/finshift.net/public_html/wp-content/themes/"
+        source: "themes/techshift/*"
+        target: "~/techshift.net/public_html/wp-content/themes/"
         strip_components: 1
         rm: true
     
@@ -35,5 +35,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          chmod -R 755 ~/finshift.net/public_html/wp-content/themes/finshift
+          chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift
           echo "✅ デプロイ完了！"

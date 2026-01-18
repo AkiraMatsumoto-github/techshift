@@ -18,7 +18,7 @@ except ImportError:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from automation.gemini_client import GeminiClient
 
-SUMMARIZATION_PROMPT = """あなたは金融メディア「FinShift」のシニア・マーケットアナリストです。
+SUMMARIZATION_PROMPT = """あなたはテクノロジーメディア「TechShift」のシニア・テックアナリストです。
 以下の記事（外部ソース）を要約し、投資家にとって重要な「市場へのインパクト」を抽出してください。
 
 【元記事】
@@ -34,7 +34,7 @@ SUMMARIZATION_PROMPT = """あなたは金融メディア「FinShift」のシニ�
     "具体的な企業名・銘柄コード",
     "市場の反応（織り込み済みか、サプライズか）"
   ],
-  "finshift_view": "アナリストとしての見解（150文字程度）。この記事が「買い材料」なのか「売り材料」なのか、どのセクターに影響があるかを投資家目線でコメントする。"
+  "finshift_view": "アナリストとしての見解（150文字程度）。この記事が「技術ロードマップ」や「産業構造」にどのような影響を与えるか（加速/破壊/停滞など）をコメントする。"
 }}
 
 【注意事項】

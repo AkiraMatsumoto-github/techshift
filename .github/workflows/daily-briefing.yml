@@ -40,8 +40,9 @@ jobs:
 
       # --- PHASE 2: Analysis & Generation (Sequential) ---
       
-      # 1. US Briefing
-      - name: Generate Briefing (US)
+      # 1. TechShift Briefing Generation (All Domains)
+      # Iterates: AI, Quantum, Green, General
+      - name: Generate Briefings (All Domains)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           WP_URL: ${{ secrets.WP_URL }}
@@ -50,43 +51,7 @@ jobs:
           GOOGLE_CLOUD_LOCATION: "global"
         run: |
           cd automation
-          python -u daily_briefing.py --region US --phase analyze
-
-      # 2. Japan Briefing
-      - name: Generate Briefing (JP)
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          WP_URL: ${{ secrets.WP_URL }}
-          WP_USER: ${{ secrets.WP_USER }}
-          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
-          GOOGLE_CLOUD_LOCATION: "global"
-        run: |
-          cd automation
-          python -u daily_briefing.py --region JP --phase analyze
-
-      # 3. Crypto Briefing
-      - name: Generate Briefing (Crypto)
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          WP_URL: ${{ secrets.WP_URL }}
-          WP_USER: ${{ secrets.WP_USER }}
-          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
-          GOOGLE_CLOUD_LOCATION: "global"
-        run: |
-          cd automation
-          python -u daily_briefing.py --region Crypto --phase analyze
-
-      # 4. China Briefing
-      - name: Generate Briefing (CN)
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          WP_URL: ${{ secrets.WP_URL }}
-          WP_USER: ${{ secrets.WP_USER }}
-          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
-          GOOGLE_CLOUD_LOCATION: "global"
-        run: |
-          cd automation
-          python -u daily_briefing.py --region CN --phase analyze
+          python -u daily_briefing.py --region all --phase analyze
 
       - name: Upload artifacts
         if: success() || failure() # Upload what we have even if one step fails

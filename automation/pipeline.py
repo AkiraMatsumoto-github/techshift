@@ -17,26 +17,6 @@ import subprocess
 from datetime import datetime
 import random
 
-# Source to Content Type Mapping
-SOURCE_TYPE_MAPPING = {
-    # Global Sources
-    "techcrunch": "global",
-    "wsj_logistics": "global",
-    "supply_chain_dive": "global",
-    "logistics_mgmt": "global",
-    "robot_report": "global",
-    "supply_chain_brain": "global",
-    "supply_chain_brain": "global",
-    "freightwaves": "global",
-    "robotics_automation_news": "global",
-    "36kr_japan": "global",
-    "pandaily": "global",
-    
-    # Domestic Sources
-    "lnews": "news",
-    "logistics_today": "news",
-    "logi_biz": "news",
-}
 
 def run_command(command):
     """Run a shell command and return output."""
@@ -265,7 +245,7 @@ def main():
         }
         
         # Context Generation
-        if article_type in ["news", "global", "market-analysis", "featured-news", "strategic-assets"]:
+        if article_type in ["news", "global", "market-analysis", "featured-news", "strategic-assets", "topic-focus"]:
             print("\n--- Context-based generation (URL reading + summarization) ---")
             
             try:
