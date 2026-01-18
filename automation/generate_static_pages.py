@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Static Pages Generator for FinShift
+Static Pages Generator for TechShift
 
 Generate and publish static pages (privacy policy, about, contact) using Gemini API.
 """
@@ -112,7 +112,7 @@ def publish_page(wp_client, title, markdown_content, slug, dry_run=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate and publish static pages for FinShift"
+        description="Generate and publish static pages for TechShift"
     )
     parser.add_argument(
         "--page",

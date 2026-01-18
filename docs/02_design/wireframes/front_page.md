@@ -6,6 +6,12 @@
 ```text
 +-----------------------------+
 | [=] TechShift      [Search] |  <-- Header: Logo + Menu/Search
+|                             |
+| Menu (Pattern A):           |
+| 1. TIMELINES (Roadmaps)     |
+| 2. SECTORS (Index)          |
+| 3. IMPACTS (Analysis Feed)  |
+| 4. ABOUT (Philosophy)       |
 +-----------------------------+
 |                             |
 |   TODAY'S SHIFT (Highlite)  |  <-- Hero: "What changed today?"

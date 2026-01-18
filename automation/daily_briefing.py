@@ -20,6 +20,8 @@ from automation.db.client import DBClient
 from automation.gemini_client import GeminiClient
 from automation.wp_client import WordPressClient
 from automation.collectors.collector import collect_articles
+from automation.collectors.url_reader import extract_content
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from automation.internal_linker import InternalLinkSuggester
 
@@ -78,6 +80,23 @@ def phase_1_collection(args):
             batch = new_articles[i:i+batch_size]
             print(f" >> Sending Batch {i//batch_size + 1}/{(len(new_articles)-1)//batch_size + 1} ({len(batch)} articles)...")
             
+            # 0.5 Fetch Full Content (Parallel)
+            print(f"    Fetching full content for {len(batch)} articles...")
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                future_to_art = {executor.submit(extract_content, art['url'], art['source'], rss_summary=art.get('summary')): art for art in batch}
+                for future in as_completed(future_to_art):
+                    art = future_to_art[future]
+                    try:
+                        extracted = future.result()
+                        # Update summary with full content if available
+                        if extracted and extracted.get('content') and len(extracted.get('content')) > 200:
+                            # Truncate to reasonable length for Gemini (e.g. 3000 chars)
+                            # Enough for relevance check and analysis, but not too huge for DB
+                            art['summary'] = extracted['content'][:4000]
+                            # art['is_full_content'] = True # usage flag if needed
+                    except Exception as exc:
+                        print(f"    Content fetch failed for {art['title'][:20]}...: {exc}")
+
             # 1. Batch AI Check
             results_map = gemini.check_relevance_batch(batch)
             
@@ -128,7 +147,7 @@ def phase_2_analysis(args):
     
     # Define Target Regions (TechShift Domains)
     if args.region == "all":
-        target_regions = ["AI", "Quantum", "Green", "General"]
+        target_regions = ["AI", "Quantum", "Green", "Robotics", "General"]
     else:
         target_regions = [args.region]
         
@@ -364,8 +383,13 @@ def phase_2_analysis(args):
 
         if not args.dry_run:
             # Get Categories
-            cat_id = wp.get_category_id("market-analysis")
+            cat_id = wp.get_category_id("summary")
             tag_ids = []
+            
+            # Add 'Daily' tag
+            daily_tag = wp.get_tag_id("daily")
+            if daily_tag: tag_ids.append(daily_tag)
+            
             reg_tag = wp.get_tag_id(region)
             if reg_tag: tag_ids.append(reg_tag)
             

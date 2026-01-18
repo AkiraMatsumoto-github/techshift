@@ -60,13 +60,11 @@
 					<span class="icon-bar"></span>
 				</button>
 				<ul id="primary-menu" class="menu">
-					<li><a href="<?php echo esc_url( home_url( '/us/' ) ); ?>">US Market</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/japan/' ) ); ?>">JP Market</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/china/' ) ); ?>">China</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/india/' ) ); ?>">India</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/indonesia/' ) ); ?>">Indonesia</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/crypto/' ) ); ?>">Crypto</a></li>
-					<li><a href="<?php echo esc_url( home_url( '/category/investment-guide/' ) ); ?>">Guide</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/category/summary/' ) ); ?>">日次・週次まとめ</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/category/multi-agent-systems/' ) ); ?>">マルチエージェント</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/category/post-quantum-cryptography/' ) ); ?>">耐量子暗号 (PQC)</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/category/solid-state-batteries/' ) ); ?>">全固体電池</a></li>
+					<li><a href="<?php echo esc_url( home_url( '/category/autonomous-driving/' ) ); ?>">自動運転</a></li>
 				</ul>
 			</nav><!-- #site-navigation -->
 		</div>

@@ -34,12 +34,12 @@ SUMMARIZATION_PROMPT = """あなたはテクノロジーメディア「TechShift
     "具体的な企業名・銘柄コード",
     "市場の反応（織り込み済みか、サプライズか）"
   ],
-  "finshift_view": "アナリストとしての見解（150文字程度）。この記事が「技術ロードマップ」や「産業構造」にどのような影響を与えるか（加速/破壊/停滞など）をコメントする。"
+  "techshift_view": "アナリストとしての見解（150文字程度）。この記事が「技術ロードマップ」や「産業構造」にどのような影響を与えるか（加速/破壊/停滞など）をコメントする。"
 }}
 
 【注意事項】
 - key_factsは投資判断に直結する数値を優先する
-- finshift_viewは「様子見」だけでなく、具体的なシナリオ（〜なら買い、など）を提示する
+- techshift_viewは「様子見」だけでなく、具体的なシナリオ（〜なら買い、など）を提示する
 """
 
 
@@ -54,7 +54,7 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-flas
         client: GeminiClient instance (optional)
     
     Returns:
-        Dictionary with keys: summary, key_facts, finshift_view
+        Dictionary with keys: summary, key_facts, techshift_view
     """
     print(f"Summarizing article: {title[:50]}...")
     
@@ -66,7 +66,7 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-flas
             return {
                 "summary": f"要約生成に失敗しました: {str(e)}",
                 "key_facts": [],
-                "finshift_view": "分析できませんでした。"
+                "techshift_view": "分析できませんでした。"
             }
     
     prompt = SUMMARIZATION_PROMPT.format(
@@ -102,14 +102,14 @@ def summarize_article(content: str, title: str, model_name: str = "gemini-3-flas
         return {
             "summary": f"要約生成に失敗しました: {str(e)}",
             "key_facts": [],
-            "finshift_view": "分析できませんでした。"
+            "techshift_view": "分析できませんでした。"
         }
     except Exception as e:
         print(f"Error summarizing article: {e}")
         return {
             "summary": f"要約生成に失敗しました: {str(e)}",
             "key_facts": [],
-            "finshift_view": "分析できませんでした。"
+            "techshift_view": "分析できませんでした。"
         }
 
 

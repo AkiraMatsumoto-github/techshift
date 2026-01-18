@@ -24,12 +24,12 @@ def create_techshift_taxonomy(wp):
     # --- 1. Main Categories (Sectors) ---
     # Slug format: English slug derived from "Space & Aero" -> "space-aero"
     sectors = [
-        {"name": "宇宙・航空", "slug": "space-aero", "description": "Space & Aero: ロケット、衛星、月面開発などの宇宙技術および航空技術。"},
-        {"name": "量子技術", "slug": "quantum", "description": "Quantum: 量子コンピューティング、量子暗号、量子センシング。"},
-        {"name": "次世代知能", "slug": "advanced-ai", "description": "Advanced AI: LLM, 自律エージェント, エッジAIなどの次世代人工知能技術。"},
-        {"name": "ロボ・移動", "slug": "robotics", "description": "Robotics & Mobility: ヒューマノイド, 自動運転, BCI, 空間コンピューティング。"},
-        {"name": "生命・バイオ", "slug": "life-science", "description": "Life Science: AI創薬, ゲノム編集, 次世代医療技術。"},
-        {"name": "環境・エネルギー", "slug": "green-tech", "description": "Green Tech: 核融合, 全固体電池, DAC, 水素などの気候テック。"}
+        {"name": "宇宙・航空", "slug": "space-aero", "description": "Space & Aero: 再使用型ロケット、衛星コンステレーション、月面開発（アルテミス計画）を含む次世代宇宙ビジネスと、極超音速機・電動航空機(eVTOL)などの最先端航空技術の最新トレンドとインパクトを解説。"},
+        {"name": "量子技術", "slug": "quantum", "description": "Quantum: 量子コンピューティング（ゲート型・アニーリング）、耐量子暗号(PQC)、量子センシング、量子インターネットなど、物理法則の限界に挑む量子技術の産業応用と未来予測。"},
+        {"name": "次世代知能", "slug": "advanced-ai", "description": "Advanced AI: 大規模言語モデル(LLM)、マルチモーダルAI、自律エージェント、エッジAI、そしてAGI（汎用人工知能）への道筋。生成AIを超えた次世代人工知能技術の進化と社会への影響を分析。"},
+        {"name": "ロボ・移動", "slug": "robotics", "description": "Robotics & Mobility: テスラOptimusrなどのヒューマノイドロボット、レベル4/5自動運転、空飛ぶクルマ、ブレイン・コンピュータ・インターフェース(BCI)など、物理世界を拡張するモビリティとロボティクスの最前線。"},
+        {"name": "生命・バイオ", "slug": "life-science", "description": "Life Science: AlphaFoldによるAI創薬、CRISPRゲノム編集、合成生物学、老化制御（Longevity）、再生医療など、生命の設計図を書き換えるバイオテクノロジー革命の現在地。"},
+        {"name": "環境・エネルギー", "slug": "green-tech", "description": "Green Tech: 核融合発電、全固体電池、直接空気回収(DAC)、グリーン水素、SMR（小型モジュール炉）など、脱炭素社会を実現しエネルギー問題を根本解決するクライメートテックの技術革新。"}
     ]
 
     print("--- Creating Main Categories (Sectors) ---")
@@ -43,46 +43,46 @@ def create_techshift_taxonomy(wp):
     # Structure: parent_slug -> list of children
     topics = {
         "space-aero": [
-            {"name": "再使用型ロケット", "slug": "reusable-rockets", "description": "Reusable Rockets"},
-            {"name": "衛星コンステレーション", "slug": "mega-constellations", "description": "Mega Constellations"},
-            {"name": "月面開発・アルテミス計画", "slug": "lunar-exploration", "description": "Lunar Exploration"},
-            {"name": "軌道上サービス・宇宙デブリ", "slug": "osam-debris", "description": "OSAM / Debris"},
-            {"name": "超音速・極超音速技術", "slug": "supersonic-hypersonic", "description": "Supersonic / Hypersonic"},
+            {"name": "再使用型ロケット", "slug": "reusable-rockets", "description": "SpaceX StarshipやNew Glennに代表される、完全再使用型ロケット技術と打ち上げコスト破壊。"},
+            {"name": "衛星コンステレーション", "slug": "mega-constellations", "description": "Starlinkなどの低軌道衛星群による地球規模の通信インフラ構築と宇宙空間の混雑問題。"},
+            {"name": "月面開発・アルテミス計画", "slug": "lunar-exploration", "description": "NASAアルテミス計画、月面基地建設、月資源（水・ヘリウム3）の利用に向けた有人宇宙探査の最前線。"},
+            {"name": "軌道上サービス・宇宙デブリ", "slug": "osam-debris", "description": "軌道上での衛星修理・燃料補給(OSAM)技術と、ADR（アクティブデブリ除去）による持続可能な宇宙環境。"},
+            {"name": "超音速・極超音速技術", "slug": "supersonic-hypersonic", "description": "マッハ5を超える極超音速ミサイル技術や、静粛超音速旅客機(SST)の商用化に向けた開発動向。"},
         ],
         "quantum": [
-            {"name": "量子ゲート型コンピュータ", "slug": "quantum-gate-computing", "description": "Quantum Gate Computing"},
-            {"name": "量子アニーリング", "slug": "quantum-annealing", "description": "Quantum Annealing"},
-            {"name": "耐量子暗号 (PQC)", "slug": "post-quantum-cryptography", "description": "Post-Quantum Cryptography"},
-            {"name": "量子センシング", "slug": "quantum-sensing", "description": "Quantum Sensing"},
-            {"name": "量子通信・インターネット", "slug": "quantum-internet", "description": "Quantum Internet"},
+            {"name": "量子ゲート型コンピュータ", "slug": "quantum-gate-computing", "description": "超伝導、イオントラップ、光方式など、誤り耐性型量子コンピュータ(FTQC)実現に向けたハードウェア開発競争。"},
+            {"name": "量子アニーリング", "slug": "quantum-annealing", "description": "組合せ最適化問題に特化した量子アニーリング技術の物流、金融、創薬分野への産業応用事例。"},
+            {"name": "耐量子暗号 (PQC)", "slug": "post-quantum-cryptography", "description": "量子コンピュータによる暗号解読脅威に対抗する、NIST標準化PQCアルゴリズムとシステム移行ガイドライン。"},
+            {"name": "量子センシング", "slug": "quantum-sensing", "description": "ダイヤモンドNVセンタなどを用いた超高感度計測技術と、医療・GPS・資源探査への応用。"},
+            {"name": "量子通信・インターネット", "slug": "quantum-internet", "description": "量子もつれを利用した盗聴不可能な量子暗号通信(QKD)と、地球規模の量子インターネット構築構想。"},
         ],
         "advanced-ai": [
-            {"name": "基盤モデル (LLM/SLM)", "slug": "foundation-models", "description": "Foundation Models"},
-            {"name": "マルチエージェント自律システム", "slug": "multi-agent-systems", "description": "Multi-Agent Systems"},
-            {"name": "オンデバイス・エッジAI", "slug": "edge-ai", "description": "Edge AI"},
-            {"name": "AIネイティブ開発 (No-Code)", "slug": "ai-native-dev", "description": "AI-Native Dev"},
-            {"name": "デジタル・プロヴェナンス", "slug": "digital-provenance", "description": "Digital Provenance"},
+            {"name": "基盤モデル (LLM/SLM)", "slug": "foundation-models", "description": "GPT-4, Claude, Geminiなどの大規模言語モデル(LLM)と、特定領域に特化した小規模言語モデル(SLM)の進化と推論能力。"},
+            {"name": "マルチエージェント自律システム", "slug": "multi-agent-systems", "description": "複数のAIエージェントが協調して複雑なタスクを完遂する自律型AIシステムの設計と実装パターン。"},
+            {"name": "オンデバイス・エッジAI", "slug": "edge-ai", "description": "クラウドを介さずスマートフォンやPCローカルで動作するAIモデルの軽量化技術とプライバシー保護。"},
+            {"name": "AIネイティブ開発 (No-Code)", "slug": "ai-native-dev", "description": "自然言語等のプロンプトだけでアプリケーションを構築するAIネイティブ開発と、エンジニアリングの未来。"},
+            {"name": "デジタル・プロヴェナンス", "slug": "digital-provenance", "description": "C2PAなどのコンテンツ来歴証明技術による、生成AIコンテンツの真正性保証とディープフェイク対策。"},
         ],
         "robotics": [
-            {"name": "ヒューマノイドロボット", "slug": "humanoid-robots", "description": "Humanoid Robots"},
-            {"name": "レベル4 自動運転", "slug": "l4-autonomous-driving", "description": "L4 Autonomous Driving"},
-            {"name": "ラストワンマイル配送ロボ", "slug": "delivery-robots", "description": "Delivery Robots"},
-            {"name": "空間コンピューティング (XR)", "slug": "spatial-computing", "description": "Spatial Computing"},
-            {"name": "ブレイン・コンピュータ I/F (BCI)", "slug": "bci", "description": "BCI"},
+            {"name": "ヒューマノイドロボット", "slug": "humanoid-robots", "description": "工場労働から家事支援まで、人間の動作を模倣・代替する汎用人型ロボットのハードウェアと制御AIの進化。"},
+            {"name": "自動運転", "slug": "autonomous-driving", "description": "特定条件下での完全無人運転（レベル4）の商用化、Robotaxiの社会実装、法規制と安全性の課題。"},
+            {"name": "ラストワンマイル配送ロボ", "slug": "delivery-robots", "description": "物流の最終拠点を担う自動配送ロボット、ドローン配送の技術課題と都市インフラとの連携。"},
+            {"name": "空間コンピューティング (XR)", "slug": "spatial-computing", "description": "Vision Proに代表されるMR/ARデバイス、空間OS、デジタルツインによる物理とデジタルの融合体験。"},
+            {"name": "ブレイン・コンピュータ I/F (BCI)", "slug": "bci", "description": "Neuralinkなどの侵襲・非侵襲型BCIデバイスによる、脳とコンピュータの直接接続技術と医療応用。"},
         ],
         "life-science": [
-            {"name": "AI創薬", "slug": "ai-drug-discovery", "description": "AI Drug Discovery"},
-            {"name": "ゲノム編集・遺伝子治療", "slug": "gene-editing", "description": "Gene Editing"},
-            {"name": "タンパク質構造予測", "slug": "protein-structure", "description": "Protein Structure"},
-            {"name": "再生医療・オルガノイド", "slug": "regenerative-medicine", "description": "Regenerative Medicine"},
-            {"name": "老化制御・長寿研究", "slug": "longevity", "description": "Longevity"},
+            {"name": "AI創薬", "slug": "ai-drug-discovery", "description": "AlphaFoldなどの構造予測AIを活用した、新薬候補物質の探索・スクリーニング高速化と開発コスト削減。"},
+            {"name": "ゲノム編集・遺伝子治療", "slug": "gene-editing", "description": "CRISPR-Cas9などのゲノム編集技術を用いた難病治療、農作物改良、および倫理的課題。"},
+            {"name": "タンパク質構造予測", "slug": "protein-structure", "description": "アミノ酸配列からの3次元構造予測技術の進展と、酵素設計・ドラッグデザインへの応用。"},
+            {"name": "再生医療・オルガノイド", "slug": "regenerative-medicine", "description": "iPS細胞やオルガノイド（ミニ臓器）を用いた組織再生、移植医療、動物実験代替法の開発動向。"},
+            {"name": "老化制御・長寿研究", "slug": "longevity", "description": "老化を「治療可能な疾患」と捉えるLongevity研究、老化細胞除去、エピジェネティック時計の解析。"},
         ],
         "green-tech": [
-            {"name": "核融合発電", "slug": "fusion-energy", "description": "Fusion Energy"},
-            {"name": "全固体電池・次世代蓄電", "slug": "solid-state-batteries", "description": "Solid-State Batteries"},
-            {"name": "直接空気回収 (DAC)", "slug": "direct-air-capture", "description": "Direct Air Capture"},
-            {"name": "小型モジュール炉 (SMR)", "slug": "smr", "description": "SMR"},
-            {"name": "水素・次世代燃料", "slug": "hydrogen-new-fuels", "description": "Hydrogen & New Fuels"},
+            {"name": "核融合発電", "slug": "fusion-energy", "description": "「地上の太陽」を実現する核融合発電（トカマク型・レーザー型など）の点火実験進捗と商用炉ロードマップ。"},
+            {"name": "全固体電池・次世代蓄電", "slug": "solid-state-batteries", "description": "EVの航続距離と安全性を飛躍させる全固体電池、ナトリウムイオン電池などの次世代エネルギー貯蔵技術。"},
+            {"name": "直接空気回収 (DAC)", "slug": "direct-air-capture", "description": "大気中のCO2を直接回収・貯留するDAC技術のコスト削減、スケーリング、炭素除去クレジット市場。"},
+            {"name": "小型モジュール炉 (SMR)", "slug": "smr", "description": "安全性と経済性を高めた小型原子炉(SMR)の開発、次世代炉（高温ガス炉等）、分散型エネルギー源としての活用。"},
+            {"name": "水素・次世代燃料", "slug": "hydrogen-new-fuels", "description": "グリーン水素の製造・輸送チェーン、アンモニア燃料、e-fuelなどの脱炭素合成燃料の社会実装。"},
         ]
     }
 
@@ -98,8 +98,21 @@ def create_techshift_taxonomy(wp):
             _create_or_update_term(wp, "categories", child)
 
 
+    # --- 1.5. Special Categories (Formats) ---
+    formats = [
+        {"name": "日次・週次まとめ", "slug": "summary", "description": "日次・週次のテクノロジーニュースまとめ。主要セクターの重要ニュースを横断的に分析し、1日のトレンドを短時間で把握するための要約レポート。"},
+    ]
+
+    print("\n--- Creating Special Categories (Formats) ---")
+    for fmt in formats:
+        _create_or_update_term(wp, "categories", fmt)
+
     # --- 3. Tags ---
     tags = [
+        # Formats (Tags for Briefing)
+        {"name": "Daily", "slug": "daily", "description": "日次レポート"},
+        {"name": "Weekly", "slug": "weekly", "description": "週次レポート"},
+
         # Layers (Roadmap Layers)
         {"name": "Regulation", "slug": "regulation", "description": "規制・法整備・政策"},
         {"name": "Technology", "slug": "technology", "description": "技術開発・R&D"},

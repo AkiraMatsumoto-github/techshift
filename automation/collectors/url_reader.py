@@ -25,6 +25,11 @@ CONTENT_SELECTORS = {
         "title": "h1.article__title",
         "author": "div.article__byline",
     },
+    "techcrunch_transport": {
+        "content": "div.article-content, div.entry-content, article",
+        "title": "h1.article__title",
+        "author": "div.article__byline",
+    },
     "wired_science": {
         "content": "div.body__content, article.article, main",
         "title": "h1.content-header__row",
@@ -56,9 +61,9 @@ CONTENT_SELECTORS = {
         "author": "div.author",
     },
     "quantum_daily": {
-        "content": "div.entry-content, div.td-post-content",
-        "title": "h1.entry-title",
-        "author": "div.td-post-author-name",
+        "content": "div.entry-content, div.td-post-content, main, article",
+        "title": "h1.entry-title, h1",
+        "author": "div.td-post-author-name, span.author",
     },
     "cleantechnica": {
         "content": "div.entry-content, article, main",
@@ -76,9 +81,19 @@ CONTENT_SELECTORS = {
         "author": "div.widget__author",
     },
     "y_combinator": {
-        "content": "div.post-content, div.entry-content",
+        "content": "div.post-content, div.entry-content, article, div.content",
+        "title": "h1.entry-title, h1",
+        "author": "span.author, a.author",
+    },
+    "therobotreport": {
+        "content": "div.entry-content, article, div.post-content",
         "title": "h1.entry-title",
-        "author": "span.author",
+        "author": "span.author a",
+    },
+    "electrek": {
+        "content": "div.entry-content, div.post-content, article, main",
+        "title": "h1.entry-title, h1.post-title",
+        "author": "div.author-name, span.author",
     },
 }
 

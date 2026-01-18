@@ -10,10 +10,6 @@ get_header();
 ?>
 
 <main id="primary" class="site-main">
-
-	<!-- Global Ticker -->
-
-
 	<!-- Hero Section (Slider) - Kept as requested -->
 	<section class="hero-slider-section">
 		<div class="swiper hero-slider-container">
@@ -69,42 +65,18 @@ get_header();
 		</div>
 	</section>
 
-	<!-- Global Ticker -->
-	<div class="techshift-global-ticker">
-		<!-- TradingView Widget END -->
-		<div class="tradingview-widget-container">
-			<div class="tradingview-widget-container__widget"></div>
-			<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-			{
-			"symbols": [
-				{ "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-				{ "proName": "FOREXCOM:NSXUSD", "title": "US 100" },
-				{ "description": "Nikkei 225", "proName": "TVC:NI225" },
-				{ "description": "USD/JPY", "proName": "FX:USDJPY" },
-				{ "description": "Bitcoin", "proName": "BINANCE:BTCUSDT" }
-			],
-			"showSymbolLogo": true,
-			"isTransparent": false,
-			"displayMode": "adaptive",
-			"colorTheme": "dark",
-			"locale": "ja"
-			}
-			</script>
-		</div>
-	</div>
-
 	<!-- Market Pulse (Dashboard) -->
 	<section class="market-pulse-section">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title">Today's Market Scenarios <span style="font-size:0.6em; color:var(--color-text-secondary);"></span></h2>
+				<h2 class="section-title">Technology Pulse <span style="font-size:0.6em; color:var(--color-text-secondary);"></span></h2>
 			</div>
 			
 			<div class="article-grid dashboard-grid">
 				<?php
-				// Fetch Latest Market Analysis (Regardless of Region)
+				// Fetch Latest TechShift Briefings (Category: summary)
 				$dashboard_query = new WP_Query([
-					'category_name' => 'market-analysis',
+					'category_name' => 'summary',
 					'posts_per_page' => 4, // Show more
 					'orderby' => 'date',
 					'order' => 'DESC'
@@ -193,7 +165,7 @@ get_header();
 						array(
 							'taxonomy' => 'category',
 							'field'    => 'slug',
-							'terms'    => 'market-analysis',
+							'terms'    => 'summary',
 							'operator' => 'NOT IN',
 						),
 					),
@@ -282,15 +254,17 @@ get_header();
 	<section class="industry-tags-section" style="padding: var(--spacing-section) 0;">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( 'アセットクラス', 'techshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( '主要セクター (Tech Sectors)', 'techshift' ); ?></h2>
 			</div>
 
 			<?php
 			$industry_tags = array(
-				array( 'slug' => 'stock', 'name' => '株式 (Stock)' ),
-				array( 'slug' => 'crypto', 'name' => '暗号資産 (Crypto)' ),
-				array( 'slug' => 'forex', 'name' => '為替 (Forex)' ),
-				array( 'slug' => 'commodity', 'name' => '商品 (Commodity)' ),
+				array( 'slug' => 'advanced-ai', 'name' => 'Advanced AI' ),
+				array( 'slug' => 'robotics', 'name' => 'Robotics & Mobility' ),
+				array( 'slug' => 'quantum', 'name' => 'Quantum & Semi' ),
+				array( 'slug' => 'green-tech', 'name' => 'Green Tech' ),
+				array( 'slug' => 'life-science', 'name' => 'Life Science' ),
+				array( 'slug' => 'space-aero', 'name' => 'Space & Aero' ),
 			);
 			?>
 
@@ -314,7 +288,7 @@ get_header();
 						<div class="article-grid">
 							<?php
 							$ind_args = array(
-								'tag'            => $industry_tag['slug'],
+								'category_name'  => $industry_tag['slug'],
 								'posts_per_page' => 3,
 								'orderby'        => 'date',
 								'order'          => 'DESC',
@@ -322,7 +296,7 @@ get_header();
                                     array(
                                         'taxonomy' => 'category',
                                         'field'    => 'slug',
-                                        'terms'    => 'market-analysis',
+                                        'terms'    => 'summary',
                                         'operator' => 'NOT IN',
                                     ),
                                 ),
@@ -353,7 +327,7 @@ get_header();
 								wp_reset_postdata();
 							else:
 								?>
-								<p class="no-posts"><?php esc_html_e( '記事がまだありません。', 'techshift' ); ?></p>
+								<p class="no-posts"><?php esc_html_e( 'No Briefing Available.', 'techshift' ); ?></p>
 								<?php
 							endif;
 							?>
@@ -362,12 +336,12 @@ get_header();
 							<?php
 							$slugs = explode( ',', $industry_tag['slug'] );
 							$primary_slug = trim( $slugs[0] );
-							$term = get_term_by( 'slug', $primary_slug, 'post_tag' );
+							$term = get_term_by( 'slug', $primary_slug, 'category' );
 							if ( $term && ! is_wp_error( $term ) ) :
 								$term_link = get_term_link( $term );
 								if ( ! is_wp_error( $term_link ) ) :
 									?>
-									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'techshift' ), esc_html( $industry_tag['name'] ) ); ?> &rarr;</a>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( 'Explore %s', 'techshift' ), esc_html( $industry_tag['name'] ) ); ?> &rarr;</a>
 									<?php
 								endif;
 							endif;
@@ -383,17 +357,17 @@ get_header();
 	<section class="theme-tags-section" style="background-color: var(--color-bg-secondary);">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title"><?php esc_html_e( '注目テーマ・セクター', 'techshift' ); ?></h2>
+				<h2 class="section-title"><?php esc_html_e( '注目トピック (Deep Dives)', 'techshift' ); ?></h2>
 			</div>
 
 			<?php
 			$theme_tags = array(
-				array( 'slug' => 'tech-ai', 'name' => 'Tech & AI (ハイテク・AI)' ),
-				array( 'slug' => 'ev-auto', 'name' => 'EV & Auto (電気自動車)' ),
-				array( 'slug' => 'energy', 'name' => 'エネルギー (Energy)' ),
-				array( 'slug' => 'earnings', 'name' => '決算速報 (Earnings)' ),
-				array( 'slug' => 'macro,central-bank', 'name' => 'マクロ・金利 (Macro)' ),
-				array( 'slug' => 'geopolitics', 'name' => '地政学リスク (Geopolitics)' ),
+				array( 'slug' => 'foundation-models', 'name' => 'Foundation Models' ),
+				array( 'slug' => 'autonomous-driving', 'name' => 'Autonomous Driving' ),
+				array( 'slug' => 'fusion-energy', 'name' => 'Fusion Energy' ),
+				array( 'slug' => 'ai-drug-discovery', 'name' => 'AI Drug Discovery' ),
+				array( 'slug' => 'quantum-gate-computing', 'name' => 'Quantum Computing' ),
+				array( 'slug' => 'reusable-rockets', 'name' => 'Starship & Rocket' ),
 			);
 			?>
 
@@ -417,7 +391,7 @@ get_header();
 						<div class="article-grid">
 							<?php
 							$tag_args = array(
-								'tag'            => $theme_tag['slug'],
+								'category_name'  => $theme_tag['slug'],
 								'posts_per_page' => 3,
 								'orderby'        => 'date',
 								'order'          => 'DESC',
@@ -453,12 +427,12 @@ get_header();
 							<?php
 							$slugs = explode( ',', $theme_tag['slug'] );
 							$primary_slug = trim( $slugs[0] );
-							$term = get_term_by( 'slug', $primary_slug, 'post_tag' );
+							$term = get_term_by( 'slug', $primary_slug, 'category' );
 							if ( $term && ! is_wp_error( $term ) ) :
 								$term_link = get_term_link( $term );
 								if ( ! is_wp_error( $term_link ) ) :
 									?>
-									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( '%s一覧を見る', 'techshift' ), esc_html( $theme_tag['name'] ) ); ?> &rarr;</a>
+									<a href="<?php echo esc_url( $term_link ); ?>" class="text-link-arrow"><?php printf( esc_html__( 'Explore %s', 'techshift' ), esc_html( $theme_tag['name'] ) ); ?> &rarr;</a>
 									<?php
 								endif;
 							endif;
@@ -472,106 +446,7 @@ get_header();
 
 </main>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-	// 1. Global Trends Filter (Existing Logic)
-	const regionTabs = document.querySelectorAll('.global-trends-section .region-tab');
-	const globalArticles = document.querySelectorAll('.global-article');
-	const showMoreLink = document.querySelector('.global-show-more-link');
-	
-	function filterArticles(selectedRegion) {
-		let visibleCount = 0;
-		const isMobile = window.matchMedia("(max-width: 768px)").matches;
-		const limit = isMobile ? 3 : 999; 
 
-		globalArticles.forEach(article => {
-			const articleRegions = article.getAttribute('data-regions');
-			const shouldShow = (selectedRegion === 'all' || articleRegions.includes(selectedRegion));
-
-			if (shouldShow) {
-				if (visibleCount < limit) {
-					article.style.display = ''; 
-					visibleCount++;
-				} else {
-					article.style.display = 'none';
-				}
-			} else {
-				article.style.display = 'none';
-			}
-		});
-
-		if (showMoreLink) {
-			const activeTab = document.querySelector('.global-trends-section .region-tab[data-region="' + selectedRegion + '"]');
-			if (activeTab && activeTab.dataset.url) {
-				showMoreLink.href = activeTab.dataset.url;
-				showMoreLink.style.display = 'inline-block';
-			}
-		}
-	}
-
-	regionTabs.forEach(tab => {
-		tab.addEventListener('click', function() {
-			const selectedRegion = this.getAttribute('data-region');
-			regionTabs.forEach(t => t.classList.remove('active'));
-			this.classList.add('active');
-			filterArticles(selectedRegion);
-		});
-	});
-
-	filterArticles('all');
-
-	window.addEventListener('resize', function() {
-		const activeTab = document.querySelector('.global-trends-section .region-tab.active');
-		const selectedRegion = activeTab ? activeTab.getAttribute('data-region') : 'all';
-		filterArticles(selectedRegion);
-	});
-
-	// 2. Theme Tabs Logic (New)
-	const themeTabs = document.querySelectorAll('.theme-tabs .region-tab');
-	const themeBlocks = document.querySelectorAll('.theme-tag-block');
-
-	themeTabs.forEach(tab => {
-		tab.addEventListener('click', function() {
-			const selectedTheme = this.getAttribute('data-theme');
-
-			// Switch Tabs
-			themeTabs.forEach(t => t.classList.remove('active'));
-			this.classList.add('active');
-
-			// Switch Content
-			themeBlocks.forEach(block => {
-				if (block.id === 'theme-block-' + selectedTheme) {
-					block.style.display = 'block';
-				} else {
-					block.style.display = 'none';
-				}
-			});
-		});
-	});
-	// 3. Industry Tabs Logic (New)
-	const industryTabs = document.querySelectorAll('.industry-tabs .region-tab');
-	const industryBlocks = document.querySelectorAll('.industry-tag-block');
-
-	industryTabs.forEach(tab => {
-		tab.addEventListener('click', function() {
-			const selectedIndustry = this.getAttribute('data-industry');
-
-			// Switch Tabs
-			industryTabs.forEach(t => t.classList.remove('active'));
-			this.classList.add('active');
-
-			// Switch Content
-			industryBlocks.forEach(block => {
-				if (block.id === 'industry-block-' + selectedIndustry) {
-					block.style.display = 'block';
-				} else {
-					block.style.display = 'none';
-				}
-			});
-		});
-	});
-});
-</script>
 
 <?php
 get_footer();

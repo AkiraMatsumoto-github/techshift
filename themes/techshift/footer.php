@@ -14,29 +14,18 @@
 					<!-- About Column -->
 					<div class="footer-column">
 						<h3 class="footer-title">TechShift</h3>
-						<p class="footer-description">世界主要市場（US, JP, India, China）と重要資産（Crypto, Commodity）の「今」を読み解くマーケット・インテリジェンス・メディア。データとAIシナリオで、スイングトレーダーの意思決定を支援します。</p>
+						<p class="footer-description">未来を実装する実務者のためのテクノロジー・ロードマップ。AI、量子技術、宇宙開発などの最先端分野における技術革新と、それが社会に与えるインパクトを可視化します。</p>
 					</div>
 
-					<!-- Markets Column -->
+					<!-- Navigation Column -->
 					<div class="footer-column">
-						<h3 class="footer-title">Markets</h3>
+						<h3 class="footer-title">Navigation</h3>
 						<ul class="footer-links">
-							<li><a href="<?php echo esc_url( home_url( '/category/featured-news/' ) ); ?>">Featured News</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/us/' ) ); ?>">US Market</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/japan/' ) ); ?>">Japan Market</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/china/' ) ); ?>">China Market</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/india/' ) ); ?>">India Market</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/indonesia/' ) ); ?>">Indonesia Market</a></li>
-						</ul>
-					</div>
-
-					<!-- Assets Column -->
-					<div class="footer-column">
-						<h3 class="footer-title">Assets & Guide</h3>
-						<ul class="footer-links">
-							<li><a href="<?php echo esc_url( home_url( '/crypto/' ) ); ?>">Crypto</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/tag/commodity/' ) ); ?>">Commodities</a></li>
-							<li><a href="<?php echo esc_url( home_url( '/category/investment-guide/' ) ); ?>">Investment Guide</a></li>
+							<li><a href="<?php echo esc_url( home_url( '/category/summary/' ) ); ?>">日次・週次まとめ</a></li>
+							<li><a href="<?php echo esc_url( home_url( '/category/multi-agent-systems/' ) ); ?>">マルチエージェント</a></li>
+							<li><a href="<?php echo esc_url( home_url( '/category/post-quantum-cryptography/' ) ); ?>">耐量子暗号 (PQC)</a></li>
+							<li><a href="<?php echo esc_url( home_url( '/category/solid-state-batteries/' ) ); ?>">全固体電池</a></li>
+							<li><a href="<?php echo esc_url( home_url( '/category/autonomous-driving/' ) ); ?>">自動運転</a></li>
 						</ul>
 					</div>
 

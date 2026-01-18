@@ -36,8 +36,13 @@ DEFAULT_SOURCES = {
     "energy_storage_news": "https://energy-storage.news/feed", # Added for solid-state
     "ieee_spectrum_energy": "https://spectrum.ieee.org/feeds/topic/energy.rss", # Fixed URL
 
-    # --- Startups &VC ---
+    # --- Startups & Energy ---
     "y_combinator": "https://blog.ycombinator.com/feed/",
+    
+    # --- Robotics & Mobility (New) ---
+    "techcrunch_transport": "https://techcrunch.com/category/transportation/feed/",
+    "therobotreport": "https://www.therobotreport.com/feed/",
+    "electrek": "https://electrek.co/feed/",
 }
 
 # Domain Mapping
@@ -45,7 +50,8 @@ REGION_MAPPING = {
     # We repurpose "Region" as "Technology Domain" for TechShift
     "AI": ["techcrunch_ai", "venturebeat_ai", "nvidia_blog", "google_ai", "microsoft_ai", "huggingface_blog", "y_combinator"],
     "Quantum": ["quantum_daily", "wired_science", "mit_tech_review"], # MIT/Wired cover quantum often
-    "Green": ["cleantechnica", "ieee_spectrum_energy", "energy_storage_news"], # Added new sources
+    "Green": ["cleantechnica", "ieee_spectrum_energy", "energy_storage_news"], 
+    "Robotics": ["techcrunch_transport", "therobotreport", "electrek"], # New Domain
     "General": ["mit_tech_review", "wired_science"]
 }
 
