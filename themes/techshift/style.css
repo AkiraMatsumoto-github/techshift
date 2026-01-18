@@ -30,10 +30,14 @@ Text Domain: finshift
     /* Slate 400 */
 
     /* Accents */
-    --color-accent: #0284C7;
-    /* Sky 600 - Darker Blue for Light Mode */
-    --color-accent-hover: #0369A1;
-    /* Sky 700 */
+    /* Accents */
+    --color-accent: #2563EB;
+    /* Electric Indigo - Vibrant Blue */
+    --color-accent-hover: #1D4ED8;
+    /* Darker Indigo */
+    --color-glass-surface: rgba(255, 255, 255, 0.7);
+    /* Glassmorphism Surface */
+    --color-glass-border: rgba(255, 255, 255, 0.5);
 
     /* Market Data Colors */
     --color-bull: #059669;
@@ -109,7 +113,8 @@ h6 {
     color: var(--color-navy);
     margin-top: 0;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    /* Slightly tighter for modern feel */
 }
 
 a {
@@ -472,20 +477,24 @@ a:hover {
 
 .article-card {
     background-color: var(--color-bg-card);
-    border-radius: 16px;
+    border-radius: 12px;
+    /* Slightly tighter radius */
     overflow: hidden;
-    /* Base Flat Style: No shadow, solid border */
-    box-shadow: none;
-    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Soft shadow */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
     border: 1px solid var(--color-border-gray);
+    position: relative;
 }
 
 .article-card:hover {
-    transform: none;
-    box-shadow: none;
+    transform: translateY(-4px);
+    /* Lift effect */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
     border-color: var(--color-tech-blue);
+    z-index: 10;
 }
 
 .article-thumbnail {
@@ -919,6 +928,8 @@ section {
     padding: var(--spacing-3xl) 0;
     text-align: center;
     margin-bottom: var(--spacing-xl);
+    margin-top: var(--spacing-2xl);
+
 }
 
 .archive-title {
@@ -1356,7 +1367,6 @@ section {
     background: transparent;
     /* Remove wrapper background */
     padding: 0;
-    margin-bottom: var(--spacing-md);
 }
 
 .market-hero-chart {
@@ -2519,7 +2529,7 @@ section {
 
 /* Dashboard / Market Pulse Styles */
 .market-pulse-section {
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-2xl) 0;
     background-color: var(--color-bg-primary);
 }
 
@@ -2764,11 +2774,23 @@ section {
         margin-bottom: 12px;
     }
 }
+
 /* TechShift Impact Styles */
 /* Impact Colors */
-.accelerated, .impact-accelerated { color: var(--color-bull); }
-.delayed, .impact-delayed { color: var(--color-bear); }
-.neutral, .impact-neutral { color: var(--color-neutral); }
+.accelerated,
+.impact-accelerated {
+    color: var(--color-bull);
+}
+
+.delayed,
+.impact-delayed {
+    color: var(--color-bear);
+}
+
+.neutral,
+.impact-neutral {
+    color: var(--color-neutral);
+}
 
 /* Chips (Single Page) */
 .market-chip {
@@ -2780,22 +2802,811 @@ section {
     background-color: var(--color-bg-secondary);
 }
 
-.impact-label.accelerated { 
-    background-color: #ecfdf5; /* emerald-50 */
+.impact-label.accelerated {
+    background-color: #ecfdf5;
+    /* emerald-50 */
     color: var(--color-bull);
 }
-.impact-label.delayed { 
-    background-color: #fef2f2; /* red-50 */
+
+.impact-label.delayed {
+    background-color: #fef2f2;
+    /* red-50 */
     color: var(--color-bear);
 }
 
 /* Dashboard Metrics (Front Page) */
-.metric-value.impact-accelerated { color: var(--color-bull); font-weight: 700; }
-.metric-value.impact-delayed { color: var(--color-bear); font-weight: 700; }
-.metric-value.impact-neutral { color: var(--color-neutral); font-weight: 700; }
+.metric-value.impact-accelerated {
+    color: var(--color-bull);
+    font-weight: 700;
+}
+
+.metric-value.impact-delayed {
+    color: var(--color-bear);
+    font-weight: 700;
+}
+
+.metric-value.impact-neutral {
+    color: var(--color-neutral);
+    font-weight: 700;
+}
 
 .techshift-impact-meta {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: var(--color-glass-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+}
+
+/* Vertical Timeline for Daily Briefing */
+.timeline-section {
+    position: relative;
+}
+
+.timeline-connector {
+    position: absolute;
+    left: 24px;
+    /* Adjust based on card padding/layout */
+    top: 60px;
+    bottom: 40px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-tech-blue) 0%, var(--color-bg-tertiary) 100%);
+    z-index: 0;
+    display: none;
+    /* Hidden by default, enable for specific layouts if needed */
+}
+
+/* Enhancing Dashboard Grid for Timeline feel */
+.dashboard-grid {
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .dashboard-grid::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 20px;
+        bottom: 20px;
+        width: 1px;
+        background-color: var(--color-bg-tertiary);
+        transform: translateX(-50%);
+        display: block;
+        /* Central timeline axis for 2-column layout */
+        z-index: 0;
+    }
+
+    .dashboard-card {
+        z-index: 1;
+        /* Above timeline */
+    }
+}
+
+/* Modern Badges */
+.modern-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    /* Pill shape */
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.hero-cat-label {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 9999px;
+    padding: 6px 14px;
+}
+
+/* --- REDESIGN: Intelligent Navigation Card --- */
+
+/* Timeline Visibility Fix */
+.timeline-section {
+    position: relative;
+    padding-top: 8px;
+    /* Space for top line */
+    padding-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+    .dashboard-grid::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        /* Thicker */
+        background-color: #CBD5E1;
+        /* Darker Slate 300 */
+        transform: translateX(-50%);
+        display: block !important;
+        z-index: 0;
+        opacity: 0.8;
+    }
+
+    /* Timeline Dots */
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background-color: var(--color-tech-blue);
+        border: 2px solid #FFFFFF;
+        border-radius: 50%;
+        top: 24px;
+        z-index: 2;
+    }
+
+    /* Alternate Sides Logic */
+    .dashboard-card:nth-child(odd) {
+        margin-right: 50%;
+        margin-right: calc(50% + 30px);
+        transform-origin: right center;
+    }
+
+    .dashboard-card:nth-child(odd)::before {
+        right: -37px;
+        /* Position dot on line */
+        left: auto;
+    }
+
+    .dashboard-card:nth-child(even) {
+        margin-left: 50%;
+        margin-left: calc(50% + 30px);
+        transform-origin: left center;
+    }
+
+    .dashboard-card:nth-child(even)::before {
+        left: -37px;
+        /* Position dot on line */
+        right: auto;
+    }
+}
+
+/* New Card UI */
+.dashboard-card {
+    background: #FFFFFF;
+    border: 1px solid var(--color-border-gray);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-tech-blue);
+}
+
+/* Card Header: Sector & Date */
+.card-header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-bg-tertiary);
+    padding-bottom: 12px;
+}
+
+.sector-badge {
+    color: var(--color-tech-blue);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Signal Section: Impact Score */
+.card-signal-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: -4px;
+}
+
+.signal-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--font-heading);
+    letter-spacing: -0.05em;
+}
+
+.signal-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+/* Coloring */
+.signal-accelerated .signal-value {
+    color: var(--color-bull);
+}
+
+.signal-delayed .signal-value {
+    color: var(--color-bear);
+}
+
+.signal-neutral .signal-value {
+    color: var(--color-neutral);
+}
+
+/* Content */
+.dashboard-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.dashboard-title a:hover {
+    color: var(--color-tech-blue);
+}
+
+/* Phase Status */
+.phase-status-line {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background-color: var(--color-bg-secondary);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--color-tech-blue);
+}
+
+.phase-label-mini {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.phase-value-text {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+/* Footer Link */
+.card-footer-link {
+    margin-top: auto;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-tech-blue);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    transition: gap 0.2s;
+}
+
+.card-footer-link:hover {
+    gap: 8px;
+}
+
+.card-overlay-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+/* Ensure links inside are clickable */
+.dashboard-title a,
+.card-footer-link {
+    position: relative;
+    z-index: 2;
+}
+
+/* --- FIX: Timeline Layout Corrections --- */
+
+/* Override Grid System for Timeline */
+.dashboard-grid.timeline-section {
+    display: block;
+    /* Disable Grid to allow manual positioning */
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Clear floats if any (though we use margins) */
+.dashboard-grid.timeline-section::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media (min-width: 768px) {
+
+    /* Set Card Width to slightly less than 50% */
+    .dashboard-grid.timeline-section .dashboard-card {
+        width: 45%;
+        margin-bottom: 40px;
+        /* Vertical spacing between stack */
+        box-sizing: border-box;
+    }
+
+    /* Left Card (Odd) */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd) {
+        float: left;
+        margin-right: 0;
+        margin-left: 0;
+        text-align: right;
+        /* Content alignment optional, but usually timeline cards align to center */
+        /* Actually, keep text-align left for readability, maybe align header? */
+        text-align: left;
+        margin-right: 55%;
+        /* Push away from right? No. */
+        /* If we want it on the left: */
+        margin-right: 50%;
+        /* Clear the right side */
+        margin-right: calc(50% + 20px);
+        /* Leave gap for center line */
+        transform-origin: right center;
+    }
+
+    /* Right Card (Even) */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even) {
+        float: right;
+        margin-left: 0;
+        margin-top: 60px;
+        /* Offset for staggering effect */
+        /* If we want it on the right: */
+        margin-left: calc(50% + 20px);
+        transform-origin: left center;
+    }
+
+    /* Fix Dot Positioning based on new layout */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::before {
+        right: -32px;
+        /* (20px margin + 12px dot/2 + some offset) -> adjust visually */
+        right: -38px;
+        /* 20px gap + 1px line + ~17px... let's try -38px */
+        left: auto;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::before {
+        left: -38px;
+        right: auto;
+    }
+
+    /* Connectors (Line from card to dot) */
+    .dashboard-grid.timeline-section .dashboard-card::after {
+        content: '';
+        position: absolute;
+        top: 29px;
+        height: 2px;
+        width: 20px;
+        background: var(--color-bg-tertiary);
+        z-index: 1;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::after {
+        right: -20px;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::after {
+        left: -20px;
+    }
+}
+
+/* --- FIX: Timeline Spacing Optimization --- */
+@media (min-width: 768px) {
+
+    /* Widen cards to reduce gap */
+    .dashboard-grid.timeline-section .dashboard-card {
+        width: 46%;
+        /* Was 45%, reducing gap */
+    }
+
+    /* Left Card (Odd) - Bring closer to center */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd) {
+        margin-right: calc(50% + 40px);
+        /* Adjust gap from center */
+        margin-right: 50%;
+        /* Reset */
+        margin-right: 51%;
+        /* Push closer to left edge? No, we want closer to center. */
+        /* Logic: To be on left, we float left. To reduce gap, we increase width or reduce margin-right (if using margin for gap). */
+        /* Wait, float:left means it sticks to left. The gap is implied by width. */
+        /* If width is 45%, gap is 10%. If width is 48%, gap is 4%. */
+        width: 48%;
+        margin-right: 2%;
+        /* 48 + 2 = 50% */
+    }
+
+    /* Right Card (Even) - Bring closer to center */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even) {
+        margin-left: 50%;
+        margin-left: 52%;
+        /* Push from left by 52% -> Card starts at 52%. Center is 50%. Gap is 2%. */
+        margin-left: 52%;
+        /* Actually simpler: margin-left: 50% + gap. */
+        margin-left: 52%;
+        width: 48%;
+    }
+
+    /* Re-align Dots & Connectors for narrower gap */
+    /* Gap is approx 2% ~ 20px on 1000px container */
+
+    /* Left Dot */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::before {
+        right: -26px;
+        /* Tighter integration */
+    }
+
+    /* Right Dot */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::before {
+        left: -26px;
+    }
+
+    /* Connector Lines */
+    .dashboard-grid.timeline-section .dashboard-card::after {
+        width: 14px;
+        /* Shorter line */
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::after {
+        right: -14px;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::after {
+        left: -14px;
+    }
+}
+
+/* --- FIX: Timeline Vertical Staggering --- */
+@media (min-width: 768px) {
+
+    /* Right Card (Even) - Pull UP to reduce vertical gap */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even) {
+        margin-top: -100px;
+        /* Pull up significantly to overlap/stagger tightly */
+        /* If the card height is ~300px, -150px would put it halfway. */
+        /* Let's try -120px to start. */
+        margin-top: -120px;
+    }
+
+    /* Ensure the first card (odd) has no negative margin */
+    .dashboard-grid.timeline-section .dashboard-card:first-child {
+        margin-top: 0;
+    }
+
+    /* However, for subsequent odd cards (3rd, 5th), we also need to pull them up */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(n+3) {
+        margin-top: -120px;
+    }
+
+    /* But wait, if they are floating, margins affect flow. */
+    /* Since we cleared grid, using float. */
+    /* If float:left takes height X. Float:right starts at top 0 (usually). */
+    /* If clear:both is NOT used on cards, they might align top if there's space. */
+    /* BUT, usually floated elements stack. */
+
+    /* If we want a true alternating timeline where cards are dense: */
+    /* We might need to ensure they don't block each other. */
+
+    /* Let's try a different approach: Simple margins? */
+    /* With display:block and floats: */
+    /* Odd (Left): Float Left. Clear: Left? */
+    /* Even (Right): Float Right. Clear: Right? */
+    /* Then check vertical spacing. */
+
+    /* Current Fix: Just force the margin-top calculation. */
+    /* If we pull up -120px, it visually reduces the gap. */
+
+    .dashboard-grid.timeline-section .dashboard-card {
+        clear: both;
+        /* Reset to stack properly first? No, that prevents side-by-side. */
+        /* No clear. */
+    }
+
+    /* Actually, better logic for "dense" timeline: */
+    /* Odd: float left, clear left. */
+    /* Even: float right, clear right. */
+    /* Then use negative margin to pull the "next" item up. */
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd) {
+        clear: left;
+    }
+
+    /* Legacy negative margin code removed to prevent overlap */
+    /*
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even) {
+        clear: right;
+        margin-top: -150px;
+    }
+    
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd):nth-child(n+3) {
+        margin-top: -150px;
+    }
+    */
+
+}
+
+/* --- ENRICHMENT: Card Content Upgrade --- */
+
+.dashboard-card {
+    gap: 12px;
+    /* Tighter gap for denser feeling */
+}
+
+/* 1. Thumbnail Integration */
+.card-body-flex {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.card-content-side {
+    flex: 1;
+}
+
+.card-thumbnail-side {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+}
+
+.card-thumbnail-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 2. Summary Text */
+.card-summary {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 3. Impact Meter (Replaces raw score) */
+.impact-meter-container {
+    background: var(--color-bg-secondary);
+    height: 6px;
+    border-radius: 3px;
+    width: 100%;
+    position: relative;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.impact-meter-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--color-neutral);
+    /* Default */
+    width: 0%;
+    /* Set via inline style */
+    transition: width 1s ease-out;
+}
+
+.impact-meter-bar.accelerated {
+    background: var(--color-bull);
+}
+
+.impact-meter-bar.delayed {
+    background: var(--color-bear);
+}
+
+.impact-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.impact-score-display {
+    color: var(--color-text-primary);
+}
+
+/* --- FINAL FIX: Dual Independent Columns Layout --- */
+
+/* Clearfix for container */
+.dashboard-grid.timeline-section::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media (min-width: 768px) {
+
+    /* Reset Margins & Widths */
+    .dashboard-grid.timeline-section .dashboard-card {
+        width: 46%;
+        /* 46% width + 8% center gap */
+        margin: 0;
+        margin-bottom: 40px;
+        /* Vertical spacing in the stack */
+    }
+
+    /* Left Column (Odd Items) */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd) {
+        float: left;
+        clear: left;
+        /* Ensure it stacks under the previous odd item */
+        margin-top: 0;
+        margin-right: 0;
+    }
+
+    /* Right Column (Even Items) */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even) {
+        float: right;
+        clear: right;
+        /* Ensure it stacks under the previous even item */
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    /* Stagger the Right Column */
+    /* Push only the first item of the right column down. 
+       Subsequent items follow naturally. */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(2) {
+        margin-top: 80px;
+        /* Adjust visual stagger amount */
+    }
+
+    /* Ensure other items don't have residual negative margins from previous CSS */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(n+3) {
+        margin-top: 0;
+    }
+
+    /* Dots & Lines - Reaffirm positioning */
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::before {
+        right: -36px;
+        /* 4% gap is ~40px. Center line is at 50%. Card ends at 46%. 4% gap. */
+        left: auto;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::before {
+        left: -36px;
+        right: auto;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd)::after {
+        right: -20px;
+    }
+
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(even)::after {
+        left: -20px;
+    }
+}
+
+/* --- FINAL FIX: Diverging Impact Meter --- */
+
+.impact-section {
+    margin-top: 16px;
+}
+
+.impact-header-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.impact-title {
+    color: var(--color-text-secondary);
+}
+
+.impact-score-display {
+    color: var(--color-text-primary);
+    font-family: monospace;
+}
+
+.diverging-meter-container {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    /* Thicker for visibility */
+    background: var(--color-bg-tertiary);
+    /* Subtle track */
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.meter-center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-text-secondary);
+    opacity: 0.3;
+    z-index: 1;
+    transform: translateX(-50%);
+}
+
+.diverging-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: var(--color-neutral);
+    /* Default fallback */
+    border-radius: 2px;
+    transition: width 0.5s ease-out, left 0.5s ease-out;
+}
+
+.diverging-bar.accelerated {
+    background: #10B981;
+    /* Emerald 500 - Clear Positive */
+}
+
+.diverging-bar.delayed {
+    background: #EF4444;
+    /* Red 500 - Clear Negative */
+}
+
+.diverging-bar.neutral {
+    background: var(--color-text-secondary);
+    width: 2px !important;
+    /* Just a line if exactly 50 */
+}
+
+.meter-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+}
+
+.meter-axis-labels span:nth-child(2) {
+    /* Center "Neutral" */
+    text-align: center;
+}
+/* Force specificity override for safety */
+@media (min-width: 768px) {
+    .dashboard-grid.timeline-section .dashboard-card:nth-child(odd):nth-child(n+3) {
+        margin-top: 0 !important;
+    }
+}
+
+/* Mobile Optimization: Hide Thumbnail for cleaner look */
+@media (max-width: 767px) {
+    .card-thumbnail-side {
+        display: none !important;
+    }
 }

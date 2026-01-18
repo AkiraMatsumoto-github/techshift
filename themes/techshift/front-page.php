@@ -69,10 +69,10 @@ get_header();
 	<section class="market-pulse-section">
 		<div class="container">
 			<div class="section-header">
-				<h2 class="section-title">Technology Pulse <span style="font-size:0.6em; color:var(--color-text-secondary);"></span></h2>
+				<h2 class="section-title">Daily Report <span style="font-size:0.6em; color:var(--color-text-secondary); font-weight:400;"></span></h2>
 			</div>
 			
-			<div class="article-grid dashboard-grid">
+			<div class="article-grid dashboard-grid timeline-section">
 				<?php
 				// Fetch Latest TechShift Briefings (Category: summary)
 				$dashboard_query = new WP_Query([
@@ -87,55 +87,122 @@ get_header();
 						$phase = get_post_meta(get_the_ID(), '_techshift_phase', true);
 						$impact = get_post_meta(get_the_ID(), '_techshift_impact', true);
                         
-                        // Get Summary
-                        $summary_json = get_post_meta(get_the_ID(), '_ai_structured_summary', true);
-                        $summary_text = '';
-                        if ($summary_json) {
-                            $data = json_decode($summary_json, true);
-                            if (json_last_error() === JSON_ERROR_NONE && !empty($data['summary'])) {
-                                $summary_text = $data['summary'];
-                            }
-                        }
-
 						$i_val = intval($impact);
 						$i_class = ($i_val > 60) ? 'accelerated' : (($i_val < 40) ? 'delayed' : 'neutral');
                         
-                        // Get Region from Tag (First tag usually)
-                        $post_tags = get_the_tags();
-                        $region_label = ($post_tags) ? $post_tags[0]->name : 'Global';
+						// Get Correct Sector (Category)
+                        $categories = get_the_category();
+                        $sector_name = '';
+                        
+                        // 1. Try to find a Top-Level Category (e.g. AI, Energy)
+                        if (!empty($categories)) {
+                            foreach($categories as $cat) {
+                                if ($cat->slug !== 'summary' && $cat->parent == 0) {
+                                    $sector_name = $cat->name;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // 2. If no top-level found, use the first available non-summary category
+                        if (!$sector_name && !empty($categories)) {
+                            foreach($categories as $cat) {
+                                if ($cat->slug !== 'summary') {
+                                    $sector_name = $cat->name;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // 3. Last fallback
+                        if (!$sector_name) $sector_name = 'Technology';
+
+						// Get Summary (Re-added)
+						$summary_json = get_post_meta(get_the_ID(), '_ai_structured_summary', true);
+						$summary_text = '';
+						if ($summary_json) {
+							$data = json_decode($summary_json, true);
+							if (json_last_error() === JSON_ERROR_NONE && !empty($data['summary'])) {
+								// Limit length
+								$summary_text = mb_substr($data['summary'], 0, 80) . '...';
+							}
+						}
+                        
+                        // Impact Label Logic (Simplified Text)
+                        $impact_label_text = ($i_val > 50) ? '+' . ($i_val - 50) : (($i_val < 50) ? '-' . (50 - $i_val) : '±0');
+                        
+                        // Diverging Bar Logic
+                        // Center is 50%. 
+                        // If 80: Left 50%, Width 30%
+                        // If 20: Left 20%, Width 30%
+                        $bar_width = abs($i_val - 50); 
+                        $bar_left = ($i_val < 50) ? $i_val : 50;
+                        
+                        $meter_color_class = ($i_val >= 50) ? 'accelerated' : 'delayed';
+                        if ($i_val == 50) $meter_color_class = 'neutral';
 				?>
-				<article class="article-card dashboard-card">
+				<article class="dashboard-card">
                     <a href="<?php the_permalink(); ?>" class="card-overlay-link" aria-hidden="true" tabindex="-1"></a>
 					
-					<div class="dashboard-metrics">
-                        <!-- Region -->
-                        <div class="metric-box region-box">
-							<span class="metric-label">Region</span>
-							<span class="metric-value"><?php echo esc_html($region_label); ?></span>
-						</div>
-                        <!-- Phase (formerly Regime) -->
-						<div class="metric-box">
-							<span class="metric-label">Phase</span>
-							<span class="metric-value"><?php echo $phase ? esc_html($phase) : '-'; ?></span>
-						</div>
-                        <!-- Impact (formerly Sentiment) -->
-						<div class="metric-box">
-							<span class="metric-label">Impact</span>
-							<span class="metric-value impact-<?php echo $i_class; ?>"><?php echo $impact !== '' ? esc_html($impact) : '-'; ?></span>
-						</div>
-					</div>
-					
-					<h3 class="dashboard-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-					
-                    <?php if ($summary_text) : ?>
-                        <div class="dashboard-scenario-teaser">
-                            <span class="scenario-text"><?php echo esc_html($summary_text); ?></span>
-                        </div>
-                    <?php endif; ?>
+                    <!-- 1. Header: Sector & Date -->
+                    <div class="card-header-line">
+                        <span class="sector-badge">
+                            <span class="sector-icon">●</span> <?php echo esc_html($sector_name); ?>
+                        </span>
+                        <span class="date-label" style="font-family:var(--font-heading);"><?php echo get_the_date('Y.m.d'); ?></span>
+                    </div>
 
-                    <div class="dashboard-footer">
-                        <span class="date-badge"><?php echo get_the_date('m/d'); ?></span>
-                        <span class="read-briefing-text">Read Briefing &rarr;</span>
+                    <!-- 2. Body: Thumbnail + Content -->
+                    <div class="card-body-flex">
+                        <div class="card-content-side">
+                            <h3 class="dashboard-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                            <?php if ($summary_text): ?>
+                                <p class="card-summary"><?php echo esc_html($summary_text); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <?php if (has_post_thumbnail()): ?>
+                        <div class="card-thumbnail-side">
+                            <?php the_post_thumbnail('thumbnail'); ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+					
+                    <!-- 3. Footer: Phase & Diverging Impact Meter -->
+                    <div style="margin-top: auto;">
+                        <?php if ($phase) : ?>
+                            <div class="phase-status-line" style="margin-bottom: 12px;">
+                                <span class="phase-label-mini">Phase Shift (Before &rarr; After)</span>
+                                <span class="phase-value-text"><?php echo esc_html($phase); ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Diverging Impact Meter -->
+                        <div class="impact-section">
+                            <div class="impact-header-row">
+                                <span class="impact-title">Timeline Impact</span>
+                                <span class="impact-score-display"><?php echo $impact_label_text; ?></span>
+                            </div>
+                            
+                            <div class="diverging-meter-container">
+                                <!-- Center Line -->
+                                <div class="meter-center-line"></div>
+                                <!-- The Bar -->
+                                <div class="diverging-bar <?php echo $meter_color_class; ?>" 
+                                     style="left: <?php echo $bar_left; ?>%; width: <?php echo $bar_width; ?>%;">
+                                </div>
+                            </div>
+                            
+                            <div class="meter-axis-labels">
+                                <span>Delayed</span>
+                                <span>Neutral</span>
+                                <span>Accelerated</span>
+                            </div>
+                        </div>
+
+                        <!-- Link -->
+                        <div class="card-footer-link" style="margin-top: 12px;">
+                            Read Analysis <span class="arrow">&rarr;</span>
+                        </div>
                     </div>
 				</article>
 				<?php 
@@ -184,6 +251,12 @@ get_header();
 						</div>
 						<div class="article-content">
 							<div class="article-meta">
+								<?php
+								$categories = get_the_category();
+								if ( ! empty( $categories ) ) :
+									?>
+									<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
+								<?php endif; ?>
 								<span class="posted-on"><?php echo get_the_date(); ?></span>
 							</div>
 							<h3 class="article-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
@@ -228,6 +301,12 @@ get_header();
 								</div>
 								<div class="featured-content">
 									<div class="article-meta">
+										<?php
+										$categories = get_the_category( $post->ID );
+										if ( ! empty( $categories ) ) :
+											?>
+											<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
+										<?php endif; ?>
 										<span class="posted-on"><?php echo get_the_date( '', $post->ID ); ?></span>
 									</div>
 									<h3 class="featured-title"><a href="<?php echo get_permalink( $post->ID ); ?>"><?php echo get_the_title( $post->ID ); ?></a></h3>
@@ -259,12 +338,12 @@ get_header();
 
 			<?php
 			$industry_tags = array(
-				array( 'slug' => 'advanced-ai', 'name' => 'Advanced AI' ),
-				array( 'slug' => 'robotics', 'name' => 'Robotics & Mobility' ),
-				array( 'slug' => 'quantum', 'name' => 'Quantum & Semi' ),
-				array( 'slug' => 'green-tech', 'name' => 'Green Tech' ),
-				array( 'slug' => 'life-science', 'name' => 'Life Science' ),
-				array( 'slug' => 'space-aero', 'name' => 'Space & Aero' ),
+				array( 'slug' => 'advanced-ai', 'name' => '次世代知能' ),
+				array( 'slug' => 'robotics', 'name' => 'ロボ・移動' ),
+				array( 'slug' => 'quantum', 'name' => '量子技術' ),
+				array( 'slug' => 'green-tech', 'name' => '環境・エネルギー' ),
+				array( 'slug' => 'life-science', 'name' => '生命・バイオ' ),
+				array( 'slug' => 'space-aero', 'name' => '宇宙・航空' ),
 			);
 			?>
 
@@ -317,6 +396,12 @@ get_header();
 										</div>
 										<div class="article-content">
 											<div class="article-meta">
+												<?php
+												$categories = get_the_category();
+												if ( ! empty( $categories ) ) :
+													?>
+													<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
+												<?php endif; ?>
 												<span class="posted-on"><?php echo get_the_date(); ?></span>
 											</div>
 											<h3 class="article-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
@@ -362,12 +447,10 @@ get_header();
 
 			<?php
 			$theme_tags = array(
-				array( 'slug' => 'foundation-models', 'name' => 'Foundation Models' ),
-				array( 'slug' => 'autonomous-driving', 'name' => 'Autonomous Driving' ),
-				array( 'slug' => 'fusion-energy', 'name' => 'Fusion Energy' ),
-				array( 'slug' => 'ai-drug-discovery', 'name' => 'AI Drug Discovery' ),
-				array( 'slug' => 'quantum-gate-computing', 'name' => 'Quantum Computing' ),
-				array( 'slug' => 'reusable-rockets', 'name' => 'Starship & Rocket' ),
+				array( 'slug' => 'multi-agent-systems', 'name' => 'マルチエージェント' ),
+				array( 'slug' => 'post-quantum-cryptography', 'name' => '耐量子暗号 (PQC)' ),
+				array( 'slug' => 'solid-state-batteries', 'name' => '全固体電池' ),
+				array( 'slug' => 'autonomous-driving', 'name' => '自動運転' ),
 			);
 			?>
 
@@ -412,6 +495,12 @@ get_header();
 										</div>
 										<div class="article-content">
 											<div class="article-meta">
+												<?php
+												$categories = get_the_category();
+												if ( ! empty( $categories ) ) :
+													?>
+													<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
+												<?php endif; ?>
 												<span class="posted-on"><?php echo get_the_date(); ?></span>
 											</div>
 											<h3 class="article-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>

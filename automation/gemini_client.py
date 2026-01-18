@@ -743,14 +743,25 @@ class GeminiClient:
            - Analyze how updates in one sector affect another (e.g., "AI demand driving Energy breakthrough").
 
         4. **The Shift (Hero Analysis)**:
-           - **The Shift**: "Rule X -> Rule Y".
-           - **Catalyst**: "Why Now?".
-           - **Next Wall**: "New Bottleneck".
-           - **Signal**: "What to Watch".
+           - **The Shift**: Describe the structural change in **JAPANESE**.
+             - Format: "Before State -> After State" (e.g. "孤立した自動化 -> 重層的な身体性AI").
+             - **CRITAL**: Must be short (max 40 chars) for Card UI display.
+           - **Catalyst**: "Why Now?". In Japanese.
+           - **Next Wall**: "New Bottleneck". In Japanese.
+           - **Signal**: "What to Watch". In Japanese.
         
         5. **AI Structured Summary**:
            - **summary**: Concise summary in **Japanese**.
            - **key_topics**: List of 3-5 tech keywords in **Japanese**.
+
+        6. **Shift Score Calculation**:
+           - **Concept**: Impact on the "Timeline to Implementation" of roadmap milestones.
+           - **Score (0-100)**:
+             - **80-100 (Accelerated)**: Major breakthrough, timeline pulled forward by years/months.
+             - **60-79 (Positive)**: Steady progress, minor acceleration.
+             - **40-59 (Neutral)**: On track, no major change.
+             - **20-39 (Delayed)**: Technical setback, regulations, or funding freeze.
+             - **0-19 (Critical Failure)**: Project cancellations, fundamental theory disproven.
 
         ## Output JSON
         {{
