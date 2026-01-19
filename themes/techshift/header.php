@@ -45,11 +45,15 @@
 				endif;
 				?>
 				<?php
+				// Description removed from header as per user request
+				/*
 				$techshift_description = get_bloginfo( 'description', 'display' );
 				if ( $techshift_description || is_customize_preview() ) :
 					?>
 					<p class="site-description"><?php echo $techshift_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
-				<?php endif; ?>
+				<?php endif; 
+				*/
+				?>
 			</div><!-- .site-branding -->
 
 			<nav id="site-navigation" class="main-navigation">
