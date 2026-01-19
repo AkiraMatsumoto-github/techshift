@@ -23,7 +23,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         source: "themes/techshift/*"
-        target: "~/techshift.net/public_html/wp-content/themes/"
+        target: "~/techshift.jp/public_html/wp-content/themes/"
         strip_components: 1
         rm: true
     
@@ -35,5 +35,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          chmod -R 755 ~/techshift.net/public_html/wp-content/themes/techshift
+          chmod -R 755 ~/techshift.jp/public_html/wp-content/themes/techshift
           echo "✅ デプロイ完了！"
