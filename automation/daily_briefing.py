@@ -179,10 +179,6 @@ def phase_2_analysis(args):
             
         # 2. Analyze
         print("Analyzing Market...")
-        market_data_str = "N/A (Market Data Module Removed)"
-        
-        # Format Events Strings
-        events_str = "No Economic Events Data"
         recent_events_str = ""
 
         # Format Previous Analysis Context
@@ -227,10 +223,9 @@ def phase_2_analysis(args):
         # Add to extra_context for Analysis
         full_context = recent_events_str + "\n" + prev_context_str + "\n" + created_articles_str
 
+        # Call Generic Analysis Method
         analysis = gemini.analyze_tech_impact(
             news, 
-            market_data_str, 
-            events_str, 
             region, 
             extra_context=full_context
         )
@@ -239,17 +234,7 @@ def phase_2_analysis(args):
             print("Analysis failed.")
             continue
             
-        # --- Map TechShift Analysis to DB Schema ---
-        # DB expects: timeline_impact, evolution_phase, scenarios (json)
-        # New Output: shift_score, shift_analysis {the_shift, catalyst, next_wall, signal}
-        
-        timeline_impact = analysis.get('shift_score', 50)
-        # Evolution Phase -> "The Shift" textual summary
-        evolution_phase = analysis.get('shift_analysis', {}).get('the_shift', 'N/A')
-        # Scenarios -> Full Shift Analysis JSON
-        scenarios_data = analysis.get('shift_analysis', {})
-        
-        print(f"Analysis Complete. Shift Score: {timeline_impact}")
+        print(f"Analysis Complete (Hero Topic: {analysis.get('hero_topic', 'N/A')})")
         
         # 2.5 Internal Linking Suggestions
         internal_links_context = ""
@@ -280,8 +265,6 @@ def phase_2_analysis(args):
             analysis, 
             region, 
             context_news=news, 
-            market_data_str=market_data_str, 
-            events_str=events_str,
             date_str=today_str,
             internal_links_context=internal_links_context + full_links_context_addendum
         )
@@ -372,12 +355,6 @@ def phase_2_analysis(args):
         shift_analysis = analysis.get("shift_analysis", {})
         
         post_meta = {
-            "_techshift_impact": timeline_impact,
-            "_techshift_phase": evolution_phase[:255],
-            # Mapping Scenarios to Shift Structure for Frontend Display
-            "_techshift_scenario_main": f"[The Shift] {shift_analysis.get('the_shift', '')}",
-            "_techshift_scenario_bull": f"[Next Wall] {shift_analysis.get('next_wall', '')}",
-            "_techshift_scenario_bear": f"[Signal] {shift_analysis.get('signal', '')}",
             "_ai_structured_summary": json.dumps(analysis.get("ai_structured_summary", {}), ensure_ascii=False)
         }
 

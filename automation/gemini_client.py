@@ -699,10 +699,72 @@ class GeminiClient:
                 }
             return fallback_map
 
-    def analyze_tech_impact(self, context_news_list, market_data_str, economic_events_str, region, extra_context=""):
+    def analyze_single_article_impact(self, title, content):
         """
-        Analyze tech news AND market data to generate "TechShift Insight" (The Shift, Catalyst, Next Wall).
-        Returns: JSON with shift_analysis, hero_topic, etc.
+        Analyze a SINGLE article to generate "The Shift" and "Impact Score".
+        Optimized for individual article generation without macro context.
+        """
+        prompt = textwrap.dedent(f"""
+        You are the "Shift Intelligence Engine". Analyze this specific article to determine its "TechShift Impact".
+
+        ## Target Article
+        Title: {title}
+        Content Summary:
+        {content[:1500]}
+
+        ## Analysis Tasks
+        1. **The Shift**: Describe the structural change in **JAPANESE**.
+           - Format: "Before State -> After State" (e.g. "孤立した自動化 -> 重層的な身体性AI").
+           - **CRITICAL**: Must be short (max 40 chars) for Card UI display.
+           - **Catalyst**: "Why Now?". In Japanese.
+           - **Next Wall**: "New Bottleneck". In Japanese.
+           - **Signal**: "What to Watch". In Japanese.
+
+        2. **Shift Score Calculation**:
+           - **Concept**: Impact on the "Timeline to Implementation".
+           - **Score (0-100)**:
+             - **80-100 (Accelerated)**: Major breakthrough, timeline pulled forward significantly.
+             - **60-79 (Positive)**: Steady progress, minor acceleration.
+             - **40-59 (Neutral)**: On track, no major change.
+             - **20-39 (Delayed)**: Technical setback, regulator/funding freeze.
+             - **0-19 (Critical Failure)**: Cancellation or disproven theory.
+
+        ## Output JSON
+        {{
+            "shift_score": 0,
+            "shift_analysis": {{
+                "the_shift": "...",
+                "catalyst": "...",
+                "next_wall": "...",
+                "signal": "..."
+            }}
+        }}
+        """)
+
+        try:
+            response = self._retry_request(
+                self.client.models.generate_content,
+                model='gemini-2.0-flash', # Faster model is sufficient for single article
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            result = json.loads(response.text)
+            if isinstance(result, list):
+                if len(result) > 0:
+                    return result[0]
+                else:
+                    return {}
+            return result
+        except Exception as e:
+            print(f"Error in analyze_single_article_impact: {e}")
+            return None
+
+    def analyze_tech_impact(self, context_news_list, region, extra_context=""):
+        """
+        Analyze tech news to generate content structure (Hero Topic, Sectors, etc).
+        (Generic Batch Analysis - Market Data removed as it belongs in writing phase)
         """
         news_text = "\n".join([f"- [{art['published_at']}] {art['title']}: {art['summary'][:200]}" for art in context_news_list])
         
@@ -711,13 +773,10 @@ class GeminiClient:
         
         ## Input Data
         
-        ### 1. Macro Context
-        - Market/Econ Data: {market_data_str}
-        
-        ### 2. Tech News (Last 24h)
+        ### 1. Tech News (Last 24h)
         {news_text}
         
-        ### 3. Context & Continuity
+        ### 2. Context & Continuity
         {extra_context}
 
         **CRITICAL INSTRUCTION**:
@@ -741,32 +800,14 @@ class GeminiClient:
 
         3. **Cross-Sector Impact (Synergy)**:
            - Analyze how updates in one sector affect another (e.g., "AI demand driving Energy breakthrough").
-
-        4. **The Shift (Hero Analysis)**:
-           - **The Shift**: Describe the structural change in **JAPANESE**.
-             - Format: "Before State -> After State" (e.g. "孤立した自動化 -> 重層的な身体性AI").
-             - **CRITAL**: Must be short (max 40 chars) for Card UI display.
-           - **Catalyst**: "Why Now?". In Japanese.
-           - **Next Wall**: "New Bottleneck". In Japanese.
-           - **Signal**: "What to Watch". In Japanese.
         
-        5. **AI Structured Summary**:
+        4. **AI Structured Summary**:
            - **summary**: Concise summary in **Japanese**.
            - **key_topics**: List of 3-5 tech keywords in **Japanese**.
-
-        6. **Shift Score Calculation**:
-           - **Concept**: Impact on the "Timeline to Implementation" of roadmap milestones.
-           - **Score (0-100)**:
-             - **80-100 (Accelerated)**: Major breakthrough, timeline pulled forward by years/months.
-             - **60-79 (Positive)**: Steady progress, minor acceleration.
-             - **40-59 (Neutral)**: On track, no major change.
-             - **20-39 (Delayed)**: Technical setback, regulations, or funding freeze.
-             - **0-19 (Critical Failure)**: Project cancellations, fundamental theory disproven.
 
         ## Output JSON
         {{
             "hero_topic": "...", 
-            "shift_score": 85,
             "sector_updates": {{
                 "AI & Robot": [ {{ "title": "...", "significance": "..." }} ],
                 "Mobility & Space": [],
@@ -776,12 +817,6 @@ class GeminiClient:
                 "Web3 & Economy": []
             }},
             "cross_sector_analysis": "...",
-            "shift_analysis": {{
-                "the_shift": "...",
-                "catalyst": "...",
-                "next_wall": "...",
-                "signal": "..."
-            }},
             "ai_structured_summary": {{
                 "summary": "...",
                 "key_topics": ["...", "..."]
@@ -810,7 +845,7 @@ class GeminiClient:
             print(f"Tech Impact Analysis failed: {e}")
             return None
 
-    def write_briefing(self, analysis_result, region, context_news=None, market_data_str=None, events_str=None, date_str=None, internal_links_context=None):
+    def write_briefing(self, analysis_result, region, context_news=None, date_str=None, internal_links_context=None):
         """
         [Daily Briefing Pipeline]
         Write the final Daily Briefing article in Markdown based on the TechShift Standard.
@@ -828,13 +863,10 @@ class GeminiClient:
         ### 1. Shift Insight (Core Analysis)
         {json.dumps(analysis_result, ensure_ascii=False, indent=2)}
         
-        ### 2. Macro Context (Raw Data)
-        {market_data_str if market_data_str else "N/A"}
-        
-        ### 3. Key Tech News
+        ### 2. Key Tech News
         {news_text if news_text else "N/A"}
         
-        ### 4. Internal Links (Reference)
+        ### 3. Internal Links (Reference)
         {internal_links_context if internal_links_context else "N/A"}
         
         ## Goal

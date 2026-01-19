@@ -230,12 +230,27 @@ class WordPressClient:
                 
             response = requests.get(url, params=params, auth=self.auth)
             response.raise_for_status()
+            response.raise_for_status()
             return response.json()
             
         except Exception as e:
             print(f"Error fetching posts: {e}")
             if hasattr(e, 'response') and e.response is not None:
                 print(f"Response content: {e.response.text}")
+            return None
+
+    def get_post(self, post_id):
+        """
+        Retrieve a single post by ID.
+        """
+        try:
+            url = f"{self.api_url}/posts/{post_id}"
+            params = {"context": "edit"} # 'edit' context returns all meta fields
+            response = requests.get(url, params=params, auth=self.auth)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Error fetching post {post_id}: {e}")
             return None
 
     def get_popular_posts(self, days=30, limit=20):

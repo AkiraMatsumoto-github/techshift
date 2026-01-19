@@ -30,19 +30,19 @@ function techshift_register_post_meta_rest_fields() {
         'auth_callback' => '__return_true'
     ) );
 
-    // 4. Article Scenarios (Main/Bull/Bear)
-    $scenario_keys = [
-        '_techshift_scenario_main',
-        '_techshift_scenario_bull',
-        '_techshift_scenario_bear'
+    // 4. TechShift Analysis Detail (Catalyst, Next Wall, Signal)
+    $analysis_keys = [
+        '_techshift_catalyst',
+        '_techshift_next_wall',
+        '_techshift_signal'
     ];
 
-    foreach ( $scenario_keys as $key ) {
+    foreach ( $analysis_keys as $key ) {
         register_post_meta( 'post', $key, array(
             'show_in_rest' => true,
             'single'       => true,
             'type'         => 'string',
-            'auth_callback' => function() { return current_user_can( 'edit_posts' ); } // stricter auth for scenarios
+            'auth_callback' => '__return_true'
         ) );
     }
 }

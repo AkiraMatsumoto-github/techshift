@@ -172,10 +172,6 @@ class DBClient:
             # foreach ($results as $row) { $row->data_json = json_decode( $row->data_json ); }
             # So JSON response has `data_json` as an object/dict.
             
-            # Legacy code expected what?
-            # daily_briefing.py: 
-            # market_data_str = json.dumps(market_snap['data_json']) if market_snap and 'data_json' in market_snap else "No Data"
-            
             # Since requests .json() decodes the whole response, `res[0]['data_json']` will be a dict.
             # So `json.dumps(res[0]['data_json'])` will work.
             return res[0]

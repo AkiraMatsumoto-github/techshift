@@ -36,7 +36,7 @@ get_header();
 				if ( $hero_query->have_posts() ) :
 					while ( $hero_query->have_posts() ) :
 						$hero_query->the_post();
-						$thumb_url = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : get_template_directory_uri() . '/assets/images/hero-bg.png';
+						$thumb_url = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : get_template_directory_uri() . '/assets/images/no-image.png';
 						$categories = get_the_category();
 						$cat_name = ! empty( $categories ) ? $categories[0]->name : 'TECHSHIFT';
 						?>
@@ -176,6 +176,7 @@ get_header();
                             </div>
                         <?php endif; ?>
 
+                        <?php if ($impact !== '') : ?>
                         <!-- Diverging Impact Meter -->
                         <div class="impact-section">
                             <div class="impact-header-row">
@@ -198,6 +199,7 @@ get_header();
                                 <span>Accelerated</span>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- Link -->
                         <div class="card-footer-link" style="margin-top: 12px;">
@@ -238,6 +240,7 @@ get_header();
 					),
 				]);
 				
+
 				if ( $news_query->have_posts() ) :
 					while ( $news_query->have_posts() ) : $news_query->the_post();
 				?>
@@ -386,25 +389,97 @@ get_header();
 								while ( $ind_query->have_posts() ) :
 									$ind_query->the_post();
 									?>
-									<article id="post-<?php the_ID(); ?>" <?php post_class( 'article-card' ); ?>>
-										<div class="article-thumbnail">
-											<?php if ( has_post_thumbnail() ) : ?>
-												<a href="<?php the_permalink(); ?>"><?php the_post_thumbnail( 'medium' ); ?></a>
-											<?php else : ?>
-												<a href="<?php the_permalink(); ?>"><div class="no-image"></div></a>
+									<?php
+									// Metadata for Dashboard Card
+									$phase = get_post_meta(get_the_ID(), '_techshift_phase', true);
+									$impact = get_post_meta(get_the_ID(), '_techshift_impact', true);
+									$i_val = intval($impact);
+									
+									// Summary logic
+									$summary_json = get_post_meta(get_the_ID(), '_ai_structured_summary', true);
+									$summary_text = '';
+									if ($summary_json) {
+										$data = json_decode($summary_json, true);
+										if (json_last_error() === JSON_ERROR_NONE && !empty($data['summary'])) {
+											$summary_text = mb_substr($data['summary'], 0, 80) . '...';
+										}
+									}
+									if (!$summary_text) {
+										$summary_text = get_the_excerpt(); 
+									}
+
+									// Meter Visual Logic
+									$impact_label_text = ($i_val > 50) ? '+' . ($i_val - 50) : (($i_val < 50) ? '-' . (50 - $i_val) : '±0');
+									$bar_width = abs($i_val - 50); 
+									$bar_left = ($i_val < 50) ? $i_val : 50;
+									$meter_color_class = ($i_val >= 50) ? 'accelerated' : 'delayed';
+									if ($i_val == 50) $meter_color_class = 'neutral';
+									?>
+
+									<article id="post-<?php the_ID(); ?>" class="dashboard-card">
+										<a href="<?php the_permalink(); ?>" class="card-overlay-link" aria-hidden="true" tabindex="-1"></a>
+										
+										<!-- 1. Header: Sector & Date -->
+										<div class="card-header-line">
+											<span class="sector-badge">
+												<span class="sector-icon">●</span> <?php echo esc_html($industry_tag['name']); ?>
+											</span>
+											<span class="date-label" style="font-family:var(--font-heading);"><?php echo get_the_date('Y.m.d'); ?></span>
+										</div>
+
+										<!-- 2. Body: Thumbnail + Content -->
+										<div class="card-body-flex">
+											<div class="card-content-side">
+												<h3 class="dashboard-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+												<?php if ($summary_text): ?>
+													<p class="card-summary"><?php echo esc_html($summary_text); ?></p>
+												<?php endif; ?>
+											</div>
+											<?php if (has_post_thumbnail()): ?>
+											<div class="card-thumbnail-side">
+												<?php the_post_thumbnail('thumbnail'); ?>
+											</div>
 											<?php endif; ?>
 										</div>
-										<div class="article-content">
-											<div class="article-meta">
-												<?php
-												$categories = get_the_category();
-												if ( ! empty( $categories ) ) :
-													?>
-													<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
-												<?php endif; ?>
-												<span class="posted-on"><?php echo get_the_date(); ?></span>
+										
+										<!-- 3. Footer: Phase & Diverging Impact Meter -->
+										<div style="margin-top: auto;">
+											<?php if ($phase) : ?>
+												<div class="phase-status-line" style="margin-bottom: 12px;">
+													<span class="phase-label-mini">Phase Shift (Before &rarr; After)</span>
+													<span class="phase-value-text"><?php echo esc_html($phase); ?></span>
+												</div>
+											<?php endif; ?>
+
+											<?php if ($impact !== '') : ?>
+											<!-- Diverging Impact Meter -->
+											<div class="impact-section">
+												<div class="impact-header-row">
+													<span class="impact-title">Timeline Impact</span>
+													<span class="impact-score-display"><?php echo $impact_label_text; ?></span>
+												</div>
+												
+												<div class="diverging-meter-container">
+													<!-- Center Line -->
+													<div class="meter-center-line"></div>
+													<!-- The Bar -->
+													<div class="diverging-bar <?php echo $meter_color_class; ?>" 
+														 style="left: <?php echo $bar_left; ?>%; width: <?php echo $bar_width; ?>%;">
+													</div>
+												</div>
+												
+												<div class="meter-axis-labels">
+													<span>Delayed</span>
+													<span>Neutral</span>
+													<span>Accelerated</span>
+												</div>
 											</div>
-											<h3 class="article-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+											<?php endif; ?>
+
+											<!-- Link -->
+											<div class="card-footer-link" style="margin-top: 12px;">
+												Read Analysis <span class="arrow">&rarr;</span>
+											</div>
 										</div>
 									</article>
 									<?php
@@ -485,25 +560,98 @@ get_header();
 								while ( $tag_query->have_posts() ) :
 									$tag_query->the_post();
 									?>
-									<article id="post-<?php the_ID(); ?>" <?php post_class( 'article-card' ); ?>>
-										<div class="article-thumbnail">
-											<?php if ( has_post_thumbnail() ) : ?>
-												<a href="<?php the_permalink(); ?>"><?php the_post_thumbnail( 'medium' ); ?></a>
-											<?php else : ?>
-												<a href="<?php the_permalink(); ?>"><div class="no-image"></div></a>
+									<?php
+									// Metadata for Dashboard Card
+									$phase = get_post_meta(get_the_ID(), '_techshift_phase', true);
+									$impact = get_post_meta(get_the_ID(), '_techshift_impact', true);
+									$i_val = intval($impact);
+									
+									// Summary logic
+									$summary_json = get_post_meta(get_the_ID(), '_ai_structured_summary', true);
+									// Reuse logic or keep simple. Let's reuse.
+									$summary_text = '';
+									if ($summary_json) {
+										$data = json_decode($summary_json, true);
+										if (json_last_error() === JSON_ERROR_NONE && !empty($data['summary'])) {
+											$summary_text = mb_substr($data['summary'], 0, 80) . '...';
+										}
+									}
+									if (!$summary_text) {
+										$summary_text = get_the_excerpt(); 
+									}
+
+									// Meter Visual Logic
+									$impact_label_text = ($i_val > 50) ? '+' . ($i_val - 50) : (($i_val < 50) ? '-' . (50 - $i_val) : '±0');
+									$bar_width = abs($i_val - 50); 
+									$bar_left = ($i_val < 50) ? $i_val : 50;
+									$meter_color_class = ($i_val >= 50) ? 'accelerated' : 'delayed';
+									if ($i_val == 50) $meter_color_class = 'neutral';
+									?>
+
+									<article id="post-<?php the_ID(); ?>" class="dashboard-card">
+										<a href="<?php the_permalink(); ?>" class="card-overlay-link" aria-hidden="true" tabindex="-1"></a>
+										
+										<!-- 1. Header: Sector & Date -->
+										<div class="card-header-line">
+											<span class="sector-badge">
+												<span class="sector-icon">●</span> <?php echo esc_html($theme_tag['name']); ?>
+											</span>
+											<span class="date-label" style="font-family:var(--font-heading);"><?php echo get_the_date('Y.m.d'); ?></span>
+										</div>
+
+										<!-- 2. Body: Thumbnail + Content -->
+										<div class="card-body-flex">
+											<div class="card-content-side">
+												<h3 class="dashboard-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+												<?php if ($summary_text): ?>
+													<p class="card-summary"><?php echo esc_html($summary_text); ?></p>
+												<?php endif; ?>
+											</div>
+											<?php if (has_post_thumbnail()): ?>
+											<div class="card-thumbnail-side">
+												<?php the_post_thumbnail('thumbnail'); ?>
+											</div>
 											<?php endif; ?>
 										</div>
-										<div class="article-content">
-											<div class="article-meta">
-												<?php
-												$categories = get_the_category();
-												if ( ! empty( $categories ) ) :
-													?>
-													<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
-												<?php endif; ?>
-												<span class="posted-on"><?php echo get_the_date(); ?></span>
+										
+										<!-- 3. Footer: Phase & Diverging Impact Meter -->
+										<div style="margin-top: auto;">
+											<?php if ($phase) : ?>
+												<div class="phase-status-line" style="margin-bottom: 12px;">
+													<span class="phase-label-mini">Phase Shift (Before &rarr; After)</span>
+													<span class="phase-value-text"><?php echo esc_html($phase); ?></span>
+												</div>
+											<?php endif; ?>
+
+											<?php if ($impact !== '') : ?>
+											<!-- Diverging Impact Meter -->
+											<div class="impact-section">
+												<div class="impact-header-row">
+													<span class="impact-title">Timeline Impact</span>
+													<span class="impact-score-display"><?php echo $impact_label_text; ?></span>
+												</div>
+												
+												<div class="diverging-meter-container">
+													<!-- Center Line -->
+													<div class="meter-center-line"></div>
+													<!-- The Bar -->
+													<div class="diverging-bar <?php echo $meter_color_class; ?>" 
+														 style="left: <?php echo $bar_left; ?>%; width: <?php echo $bar_width; ?>%;">
+													</div>
+												</div>
+												
+												<div class="meter-axis-labels">
+													<span>Delayed</span>
+													<span>Neutral</span>
+													<span>Accelerated</span>
+												</div>
 											</div>
-											<h3 class="article-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+											<?php endif; ?>
+
+											<!-- Link -->
+											<div class="card-footer-link" style="margin-top: 12px;">
+												Read Analysis <span class="arrow">&rarr;</span>
+											</div>
 										</div>
 									</article>
 									<?php

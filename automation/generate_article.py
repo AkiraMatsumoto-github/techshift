@@ -444,6 +444,38 @@ Select the most relevant ones (if any) and include them in the article using sta
             json_ld_string = optimizer.create_json_ld(article_data_ld, schema_type=schema_type)
             meta_fields["_techshift_json_ld"] = json_ld_string
 
+        # --- 4.5 Generate TechShift Impact Analysis (New) ---
+        print("Generating TechShift Impact Analysis...")
+        try:
+            # Call specialized single-article analyzer
+            impact_analysis = gemini.analyze_single_article_impact(
+                title=title,
+                content=content
+            )
+            
+            if impact_analysis:
+                shift_score = impact_analysis.get('shift_score', 50)
+                shift_data = impact_analysis.get('shift_analysis', {})
+                the_shift = shift_data.get('the_shift', '')
+                
+                print(f"  - Impact Score: {shift_score}")
+                print(f"  - Phase Shift: {the_shift}")
+                
+                # Save to meta_fields using new TechShift keys
+                meta_fields["_techshift_impact"] = shift_score
+                meta_fields["_techshift_phase"] = the_shift[:255]
+                
+                meta_fields["_techshift_catalyst"] = shift_data.get('catalyst', '')
+                meta_fields["_techshift_next_wall"] = shift_data.get('next_wall', '')
+                meta_fields["_techshift_signal"] = shift_data.get('signal', '')
+                
+            else:
+                print("  - Warning: Impact analysis returned empty.")
+                
+        except Exception as e:
+            print(f"  - Warning: Impact analysis failed: {e}") 
+            # Non-critical failure, proceed with posting
+
 
 
         result = wp.create_post(
