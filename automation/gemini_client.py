@@ -351,7 +351,7 @@ class GeminiClient:
             - 目的: テクノロジーの進化予測・ロードマップの可視化
             - 収集データ: アクセスログ、Cookie、デバイス情報
             - 利用ツール: Google Analytics, Microsoft Clarity
-            - お問い合わせ: info@techshift.net
+            - お問い合わせ: info@techshift.jp
             
             ## ポリシーの構成要素
             1. **はじめに**: TechShiftのデータ保護に対する姿勢（透明性と技術的セキュリティの重視）。
