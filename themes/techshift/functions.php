@@ -204,10 +204,106 @@ function techshift_seo_meta() {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
     <meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
+
     <meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
     <?php
 }
 
+/**
+ * ==============================================================================
+ * SEO Optimizations (Additional)
+ * ==============================================================================
+ */
+
+/**
+ * 1. Feed Noindex
+ */
+function techshift_noindex_feeds( $headers ) {
+    if ( is_feed() ) {
+        $headers['X-Robots-Tag'] = 'noindex, follow';
+    }
+    return $headers;
+}
+add_filter( 'wp_headers', 'techshift_noindex_feeds' );
+
+/**
+ * 2. Head Cleanup
+ */
+function techshift_cleanup_head() {
+    remove_action( 'wp_head', 'wp_generator' );
+    remove_action( 'wp_head', 'wlwmanifest_link' );
+    remove_action( 'wp_head', 'rsd_link' );
+    remove_action( 'wp_head', 'wp_shortlink_wp_head' );
+}
+add_action( 'init', 'techshift_cleanup_head' );
+
+/**
+ * 3. Pagination Canonical Fix
+ */
+function techshift_filter_canonical( $canonical ) {
+    if ( is_paged() ) {
+        $canonical = get_pagenum_link( get_query_var( 'paged' ) );
+    }
+    return $canonical;
+}
+add_filter( 'get_canonical_url', 'techshift_filter_canonical' );
+
+/**
+ * 4. Breadcrumb JSON-LD
+ */
+function techshift_breadcrumb_json_ld() {
+    if ( is_admin() || is_feed() ) {
+        return;
+    }
+
+    $breadcrumbs = array(
+        '@context' => 'https://schema.org',
+        '@type'    => 'BreadcrumbList',
+        'itemListElement' => array(
+            array(
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => get_bloginfo( 'name' ),
+                'item' => home_url()
+            )
+        )
+    );
+
+    if ( is_singular() ) {
+        $categories = get_the_category();
+        if ( ! empty( $categories ) ) {
+            $breadcrumbs['itemListElement'][] = array(
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => $categories[0]->name,
+                'item' => get_category_link( $categories[0]->term_id )
+            );
+            $breadcrumbs['itemListElement'][] = array(
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => get_the_title(),
+                'item' => get_permalink()
+            );
+        } else {
+             $breadcrumbs['itemListElement'][] = array(
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => get_the_title(),
+                'item' => get_permalink()
+            );
+        }
+    } elseif ( is_category() ) {
+         $breadcrumbs['itemListElement'][] = array(
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => single_cat_title( '', false ),
+            'item' => get_category_link( get_queried_object_id() )
+        );
+    }
+    
+    echo '<script type="application/ld+json">' . json_encode( $breadcrumbs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}
+add_action( 'wp_head', 'techshift_breadcrumb_json_ld' );
 
 /**
  * Conditionally load Theme SEO only if no SEO plugin is active.
