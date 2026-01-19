@@ -218,27 +218,27 @@ function techshift_seo_meta() {
 /**
  * 1. Feed Noindex
  */
-function techshift_noindex_feeds( $headers ) {
+function techshift_feed_noindex() {
     if ( is_feed() ) {
-        $headers['X-Robots-Tag'] = 'noindex, follow';
+        header( 'X-Robots-Tag: noindex, follow', true );
     }
-    return $headers;
 }
-add_filter( 'wp_headers', 'techshift_noindex_feeds' );
+add_action( 'template_redirect', 'techshift_feed_noindex' );
 
 /**
  * 2. Head Cleanup
  */
-function techshift_cleanup_head() {
+function techshift_head_cleanup() {
     remove_action( 'wp_head', 'wp_generator' );
     remove_action( 'wp_head', 'wlwmanifest_link' );
     remove_action( 'wp_head', 'rsd_link' );
     remove_action( 'wp_head', 'wp_shortlink_wp_head' );
 }
-add_action( 'init', 'techshift_cleanup_head' );
+add_action( 'init', 'techshift_head_cleanup' );
 
 /**
  * 3. Pagination Canonical Fix
+ * Filter the canonical URL to ensure paginated archives point to themselves.
  */
 function techshift_filter_canonical( $canonical ) {
     if ( is_paged() ) {
@@ -249,13 +249,17 @@ function techshift_filter_canonical( $canonical ) {
 add_filter( 'get_canonical_url', 'techshift_filter_canonical' );
 
 /**
- * 4. Breadcrumb JSON-LD
+ * 4. JSON-LD Structured Data (Enhanced)
+ * Implements BreadcrumbList and Article schema with Publisher Logo.
  */
-function techshift_breadcrumb_json_ld() {
+function techshift_output_json_ld() {
     if ( is_admin() || is_feed() ) {
         return;
     }
 
+    $schema = array();
+    
+    // BreadcrumbList
     $breadcrumbs = array(
         '@context' => 'https://schema.org',
         '@type'    => 'BreadcrumbList',
@@ -300,55 +304,61 @@ function techshift_breadcrumb_json_ld() {
             'item' => get_category_link( get_queried_object_id() )
         );
     }
-    
-    echo '<script type="application/ld+json">' . json_encode( $breadcrumbs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
-}
-add_action( 'wp_head', 'techshift_breadcrumb_json_ld' );
+    $schema[] = $breadcrumbs;
 
-/**
- * Conditionally load Theme SEO only if no SEO plugin is active.
- * Prevents duplicate tags.
- */
-function techshift_load_theme_seo() {
-    // Check for Yoast SEO or All in One SEO
-    $yoast_active = defined('WPSEO_VERSION');
-    $aioseo_active = defined('AIOSEO_VERSION');
-
-    if ( ! $yoast_active && ! $aioseo_active ) {
-        add_action( 'wp_head', 'techshift_seo_meta', 1 );
-    }
-}
-add_action( 'wp', 'techshift_load_theme_seo' );
-
-
-/**
- * Output JSON-LD Structured Data
- * Retrieves pre-generated JSON-LD from post meta or generates default.
- */
-function techshift_output_json_ld() {
+    // Article Schema
     if ( is_singular( 'post' ) ) {
         global $post;
-        $json_ld = get_post_meta( $post->ID, '_techshift_json_ld', true );
+        $description = '';
         
-        if ( ! empty( $json_ld ) ) {
-            // Check if URL placeholder needs update (if Python side left it empty)
-            // Python side generated strictly static JSON. 
-            // Ideally we should inject the Current URL here if missing.
-            $data = json_decode( $json_ld, true );
-            if ( $data && ( empty( $data['url'] ) || empty( $data['mainEntityOfPage']['@id'] ) ) ) {
-                $permalink = get_permalink( $post->ID );
-                $data['url'] = $permalink;
-                $data['mainEntityOfPage'] = array(
-                    '@type' => 'WebPage',
-                    '@id'   => $permalink
-                );
-                $json_ld = json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+        // Try to get AI summary (TechShift Specific)
+        $ai_summary = get_post_meta( $post->ID, 'ai_structured_summary', true );
+        if ( ! empty( $ai_summary ) ) {
+            $summary_data = is_string($ai_summary) ? json_decode($ai_summary, true) : $ai_summary;
+            if ( isset($summary_data['summary']) ) {
+                 $description = $summary_data['summary'];
             }
-            
-            echo '<script type="application/ld+json">' . "\n";
-            echo $json_ld . "\n";
-            echo '</script>' . "\n";
         }
+        
+        if ( empty( $description ) ) {
+            $description = has_excerpt() ? get_the_excerpt() : wp_trim_words( $post->post_content, 120, '...' );
+        }
+        
+        // Image
+        $image_url = has_post_thumbnail() ? get_the_post_thumbnail_url( $post->ID, 'large' ) : get_template_directory_uri() . '/assets/images/hero-bg.png';
+
+        $article = array(
+            '@context'      => 'https://schema.org',
+            '@type'         => 'Article',
+            'headline'      => get_the_title(),
+            'description'   => wp_strip_all_tags( $description ),
+            'image'         => array( $image_url ),
+            'datePublished' => get_the_date( 'c' ),
+            'dateModified'  => get_the_modified_date( 'c' ),
+            'author'        => array(
+                '@type' => 'Organization',
+                'name'  => get_bloginfo( 'name' ),
+                'url'   => home_url()
+            ),
+            'publisher'     => array(
+                '@type' => 'Organization',
+                'name'  => get_bloginfo( 'name' ),
+                'logo'  => array(
+                    '@type' => 'ImageObject',
+                    'url'   => get_template_directory_uri() . '/assets/images/logo.svg'
+                )
+            ),
+            'mainEntityOfPage' => array(
+                '@type' => 'WebPage',
+                '@id'   => get_permalink()
+            )
+        );
+        $schema[] = $article;
+    }
+
+    // Output all schemas
+    foreach ( $schema as $entity ) {
+        echo '<script type="application/ld+json">' . json_encode( $entity, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
     }
 }
 add_action( 'wp_head', 'techshift_output_json_ld', 5 );
