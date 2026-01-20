@@ -55,7 +55,12 @@ class DBClient:
             }
             resp = requests.get(f"{self.api_url}/{endpoint}", params=params, headers=headers, auth=self.auth)
             resp.raise_for_status()
-            return resp.json()
+            try:
+                return resp.json()
+            except json.JSONDecodeError:
+                print(f"API Error (GET {endpoint}): Response is not valid JSON.")
+                print(f"Response preview: {resp.text[:200]}...")
+                return None
         except Exception as e:
             print(f"API Error (GET {endpoint}): {e}")
             return None

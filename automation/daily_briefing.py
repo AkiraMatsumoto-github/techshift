@@ -236,6 +236,13 @@ def phase_2_analysis(args):
             
         print(f"Analysis Complete (Hero Topic: {analysis.get('hero_topic', 'N/A')})")
         
+        # Extract variables for later use (default to None for DB NULL)
+        evolution_phase = analysis.get('evolution_phase')
+        timeline_impact = analysis.get('timeline_impact')
+        scenarios_data = analysis.get('scenarios')
+
+
+        
         # 2.5 Internal Linking Suggestions
         internal_links_context = ""
         try:
@@ -291,7 +298,7 @@ def phase_2_analysis(args):
             "region": region,
             "timeline_impact": timeline_impact,
             "impact_label": "Shift", # Fixed label for TechShift
-            "evolution_phase": evolution_phase[:255], # Truncate if needed for DB
+            "evolution_phase": evolution_phase[:50] if evolution_phase else None, # Truncate to DB schema match
             "hero_topic": analysis.get("hero_topic"),
             "scenarios": scenarios_data, # Save full shift analysis structure
             "ai_structured_summary": analysis.get("ai_structured_summary"),
