@@ -925,3 +925,97 @@ function techshift_api_get_articles( $request ) {
 
 
 
+
+/**
+ * 5. Custom XML Sitemap
+ * Generates a lightweight XML sitemap at /sitemap.xml
+ */
+function techshift_sitemap_init() {
+    add_rewrite_rule( 'sitemap\.xml$', 'index.php?techshift_sitemap=1', 'top' );
+}
+add_action( 'init', 'techshift_sitemap_init' );
+
+function techshift_sitemap_query_vars( $vars ) {
+    $vars[] = 'techshift_sitemap';
+    return $vars;
+}
+add_filter( 'query_vars', 'techshift_sitemap_query_vars' );
+
+function techshift_sitemap_render() {
+    if ( get_query_var( 'techshift_sitemap' ) ) {
+        header( 'Content-Type: application/xml; charset=utf-8' );
+        echo '<?xml version="1.0" encoding="UTF-8"?>';
+        ?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <!-- Home -->
+            <url>
+                <loc><?php echo esc_url( home_url( '/' ) ); ?></loc>
+                <lastmod><?php echo date( 'c' ); ?></lastmod>
+                <changefreq>daily</changefreq>
+                <priority>1.0</priority>
+            </url>
+
+            <!-- Posts -->
+            <?php
+            $posts = get_posts( array(
+                'numberposts' => 1000,
+                'post_type'   => 'post',
+                'post_status' => 'publish',
+                'orderby'     => 'date',
+                'order'       => 'DESC',
+            ) );
+            foreach ( $posts as $p ) : ?>
+            <url>
+                <loc><?php echo esc_url( get_permalink( $p->ID ) ); ?></loc>
+                <lastmod><?php echo get_the_modified_date( 'c', $p->ID ); ?></lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>0.8</priority>
+            </url>
+            <?php endforeach; ?>
+
+            <!-- Pages -->
+            <?php
+            $pages = get_posts( array(
+                'numberposts' => 100,
+                'post_type'   => 'page',
+                'post_status' => 'publish',
+            ) );
+            foreach ( $pages as $p ) : ?>
+            <url>
+                <loc><?php echo esc_url( get_permalink( $p->ID ) ); ?></loc>
+                <lastmod><?php echo get_the_modified_date( 'c', $p->ID ); ?></lastmod>
+                <changefreq>monthly</changefreq>
+                <priority>0.5</priority>
+            </url>
+            <?php endforeach; ?>
+
+            <!-- Categories -->
+            <?php
+            $categories = get_categories();
+            foreach ( $categories as $cat ) : ?>
+            <url>
+                <loc><?php echo esc_url( get_category_link( $cat->term_id ) ); ?></loc>
+                <changefreq>weekly</changefreq>
+                <priority>0.6</priority>
+            </url>
+            <?php endforeach; ?>
+
+        </urlset>
+        <?php
+        exit;
+    }
+}
+add_action( 'template_redirect', 'techshift_sitemap_render' );
+
+/**
+ * Flush rewrite rules if sitemap rule is missing.
+ * Runs only once per admin pageload if needed.
+ */
+function techshift_check_sitemap_rules() {
+    $rules = get_option( 'rewrite_rules' );
+    if ( ! isset( $rules['sitemap\.xml$'] ) ) {
+        global $wp_rewrite;
+        $wp_rewrite->flush_rules();
+    }
+}
+add_action( 'admin_init', 'techshift_check_sitemap_rules' );
