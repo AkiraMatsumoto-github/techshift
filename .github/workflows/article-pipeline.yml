@@ -2,8 +2,8 @@ name: Article Generation Pipeline
 
 on:
   schedule:
-    # 毎日 05:00 JST (前日 20:00 UTC) と 17:00 JST (08:00 UTC)
-    - cron: '0 8,20 * * *'
+    # 毎日 01:00 JST (前日 16:00 UTC) と 13:00 JST (04:00 UTC)
+    - cron: '0 4,16 * * *'
   workflow_dispatch: # 手動実行も可能
 
 jobs:

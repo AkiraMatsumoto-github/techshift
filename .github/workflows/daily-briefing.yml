@@ -2,8 +2,8 @@ name: Daily Briefing Generation
 
 on:
   schedule:
-    # 毎日 07:00 JST (前日 22:00 UTC)
-    - cron: '0 22 * * *'
+    # 毎日 17:00 JST (08:00 UTC)
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:

@@ -63,8 +63,7 @@ class WordPressClient:
         except requests.exceptions.RequestException as e:
             print(f"Error creating post: {e}")
             if hasattr(e, 'response') and e.response is not None:
-                print(f"Response content: {e.response.text}")
-            return None
+                print(f"Response content: {e.response.text[:200]}...")  # Truncate to avoid HTML dump
             return None
 
 
@@ -80,7 +79,7 @@ class WordPressClient:
         except requests.exceptions.RequestException as e:
             print(f"Error updating resource {resource_id}: {e}")
             if hasattr(e, 'response') and e.response is not None:
-                print(f"Response content: {e.response.text}")
+                print(f"Response content: {e.response.text[:200]}...")
             return None
 
     def get_pages_by_meta(self, meta_key, meta_value):
@@ -157,7 +156,7 @@ class WordPressClient:
         except requests.exceptions.RequestException as e:
             print(f"Error creating page: {e}")
             if hasattr(e, 'response') and e.response is not None:
-                print(f"Response content: {e.response.text}")
+                print(f"Response content: {e.response.text[:200]}...")
             return None
 
     def get_category_id(self, slug):
@@ -236,7 +235,7 @@ class WordPressClient:
         except Exception as e:
             print(f"Error fetching posts: {e}")
             if hasattr(e, 'response') and e.response is not None:
-                print(f"Response content: {e.response.text}")
+                print(f"Response content: {e.response.text[:200]}...")
             return None
 
     def get_post(self, post_id):
@@ -321,7 +320,7 @@ class WordPressClient:
         except Exception as e:
             print(f"Error uploading media {file_path}: {e}")
             if hasattr(e, 'response') and e.response is not None:
-                print(f"Response content: {e.response.text}")
+                print(f"Response content: {e.response.text[:200]}...")
             return None
 
 if __name__ == "__main__":

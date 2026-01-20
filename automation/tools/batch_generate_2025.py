@@ -7,58 +7,84 @@ import time
 import sys
 from datetime import datetime
 
-MARKDOWN_FILE = "/Users/matsumotoakira/Documents/Private_development/media/docs/03_automation/seo_target_keywords_2025.md"
-SCRIPT_PATH = "/Users/matsumotoakira/Documents/Private_development/media/automation/generate_article.py"
-PYTHON_EXEC = "/Users/matsumotoakira/Documents/Private_development/media/automation/venv/bin/python"
+# Path Configuration for TechShift
+BASE_DIR = "/Users/matsumotoakira/Documents/Private_development/Techshift"
+MARKDOWN_FILE = os.path.join(BASE_DIR, "docs/03_automation/seo_target_keywords_2025.md")
+SCRIPT_PATH = os.path.join(BASE_DIR, "automation/generate_article.py")
+# Assume running in the same venv or system python if explicit venv not found
+PYTHON_EXEC = sys.executable 
 
 def parse_markdown_table(file_path):
     tasks = []
+    if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
+        return []
+
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     
     in_table = False
+    current_domain = "General"
+
     for line in lines:
         line = line.strip()
+        
+        # Track Domain Headers for context
+        if line.startswith('#### Domain:'):
+            current_domain = line.replace('#### Domain:', '').strip()
+            continue
+
+        # Detect Table Start (New Format)
         if line.startswith('| Keyword'):
             in_table = True
             continue
         if line.startswith('| :---'):
             continue
+        
+        # Skip empty lines or non-table lines
         if not line.startswith('|') or not in_table:
+            # If we hit an empty line after being in a table, we might be out of it, 
+            # but markdown tables can be adjacent. 
+            # Simple heuristic: if line is empty, we are out.
+            if in_table and not line:
+                in_table = False
             continue
             
         parts = [p.strip() for p in line.split('|')]
-        # Expected parts: ['', 'Keyword (Vol)', 'Article Topic Idea', 'Type', '']
-        if len(parts) >= 4:
-            raw_keyword = parts[1]
-            topic_idea = parts[2]
-            raw_type = parts[3]
+        # Parts check: split('|') on "| A | B | C |" gives ['', 'A', 'B', 'C', ''] -> len 5
+        # We need at least 3 content columns
+        if len(parts) >= 5:
+            raw_keyword_col = parts[1] # Keyword (JP/EN)
+            intent = parts[2]          # Intent
+            content_type = parts[3]    # Content Type
             
-            # Clean keyword: "**物流 ニュース** (50,000)" -> "物流 ニュース"
-            keyword_match = re.search(r'\*\*(.+?)\*\*', raw_keyword)
-            if not keyword_match:
-                # Try without bold
-                keyword = raw_keyword.split('(')[0].strip()
-            else:
-                keyword = keyword_match.group(1)
+            # --- Keyword Extraction ---
+            # Format: "**AGI ロードマップ**<br>AGI Roadmap"
+            # We want "AGI ロードマップ"
             
-            # Map type
-            type_lower = raw_type.lower()
-            article_type = 'know' # default
-            if 'news' in type_lower or 'trend' in type_lower:
-                article_type = 'news'
-            elif 'global' in type_lower:
-                article_type = 'global'
-            elif 'how-to' in type_lower or 'do' in type_lower or 'case' in type_lower or 'issue' in type_lower:
-                article_type = 'do'
-            elif 'buy' in type_lower or 'comparison' in type_lower or 'selection' in type_lower or 'cost' in type_lower:
-                article_type = 'buy'
+            # 1. Remove <br> and everything after it
+            keyword_primary = raw_keyword_col.split('<br>')[0].strip()
+            
+            # 2. Remove markdown bold/italic
+            keyword_clean = re.sub(r'[*_]+', '', keyword_primary).strip()
+            
+            # Skip if empty
+            if not keyword_clean:
+                continue
+
+            # --- Type Mapping ---
+            # All automated SEO articles map to 'topic-focus' structure in generate_article.py
+            # We pass the specific "Content Type" as context.
+            gen_type = 'topic-focus'
+            
+            # --- Context Construction ---
+            summary_context = f"Domain: {current_domain}. User Intent: {intent}. Content Type: {content_type}."
             
             tasks.append({
-                'keyword': keyword,
-                'topic': topic_idea,
-                'type': article_type,
-                'raw_type': raw_type
+                'keyword': keyword_clean,
+                'type': gen_type,
+                'context_summary': summary_context,
+                'raw_type': content_type
             })
             
     return tasks
@@ -68,17 +94,18 @@ def main():
         print(f"Error: File not found: {MARKDOWN_FILE}")
         return
 
+    print(f"Reading target definitions from: {MARKDOWN_FILE}")
     tasks = parse_markdown_table(MARKDOWN_FILE)
-    print(f"Found {len(tasks)} articles to generate.")
+    print(f"Found {len(tasks)} target articles.")
     
     for i, task in enumerate(tasks):
-        print(f"\n[{i+1}/{len(tasks)}] Processing: {task['keyword']} ({task['type']})")
-        print(f"Topic: {task['topic']}")
+        print(f"\n[{i+1}/{len(tasks)}] Target: {task['keyword']}")
+        print(f"  Context: {task['context_summary']}")
         
         # Prepare context JSON
         context = {
-            "summary": f"Article Plan: {task['topic']}. \nPlease strictly follow this topic idea when generating the article.",
-            "key_facts": []
+            "summary": f"{task['context_summary']} Please write a high-quality article satisfying this intent.",
+            "key_facts": [] 
         }
         context_json = json.dumps(context, ensure_ascii=False)
         
@@ -87,32 +114,38 @@ def main():
             '--keyword', task['keyword'],
             '--type', task['type'],
             '--context', context_json,
-            # '--dry-run' # Uncomment for testing
+            # '--dry-run' # Uncomment to test without generating
         ]
         
         try:
-            # Check for existing file to avoid duplicate work if re-run
+            # Check for existing file (Simple check by keyword match in directory)
+            # generate_article.py does its own saving, but we can skip early if we want.
+            # For now, we let generate_article.py run, or we can check output dir.
+            
             date_str = datetime.now().strftime("%Y-%m-%d")
             safe_keyword = re.sub(r'[\\/*?:"<>| ]', '_', task['keyword'])
-            filename = f"{date_str}_{safe_keyword}.md"
-            filepath = os.path.join(os.path.dirname(SCRIPT_PATH), "generated_articles", filename)
+            # Note: generate_article.py uses slightly different slugification logic depending on impl
+            # But let's rely on the script execution.
             
-            if os.path.exists(filepath):
-                 print(f"Skipping {task['keyword']} (File exists: {filename})")
-                 continue
+            print(f"  Executing: {' '.join(cmd)}")
             
+            # Run the generation script
+            # We capture output to avoid spamming the console, but print errors
             result = subprocess.run(cmd, check=True, text=True, capture_output=True)
-            print("Success:")
-            # Print only relevant validation info from output
+            
+            print("  > Success!")
+            # Extract generated file path or title from stdout if needed
             for line in result.stdout.split('\n'):
-                if "Generated Title:" in line or "Successfully created post" in line:
-                    print(f"  {line}")
+                if "Generated Title:" in line or "Saved local copy" in line:
+                    print(f"    {line.strip()}")
+            
         except subprocess.CalledProcessError as e:
-            print(f"Error generating article for {task['keyword']}:")
-            print(e.stderr)
-            print(e.stdout)
+            print(f"  > Error generating article for {task['keyword']}:")
+            print(f"    STDOUT: {e.stdout[-500:]}") # Last 500 chars
+            print(f"    STDERR: {e.stderr[-500:]}")
         
-        # Wait a bit between calls to be nice to APIs
+        # Usage throttling
+        print("  Waiting 10s...")
         time.sleep(10)
 
 if __name__ == "__main__":
