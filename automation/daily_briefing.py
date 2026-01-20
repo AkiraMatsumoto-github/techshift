@@ -147,257 +147,258 @@ def phase_2_analysis(args):
     
     # Define Target Regions (TechShift Domains)
     if args.region == "all":
+        # Consolidated Global Briefing Mode
+        # Iterate all sectors to gather data, but produce ONE analysis/article
         target_regions = ["AI", "Quantum", "Green", "Robotics", "General"]
+        primary_region_label = "Global"
     else:
+        # Legacy/Single Region Mode
         target_regions = [args.region]
+        primary_region_label = args.region
         
     db = DBClient()
     gemini = GeminiClient()
     wp = WordPressClient()
     today_str = datetime.now().strftime('%Y-%m-%d')
 
+    # Data Collection Container
+    all_news = []
+    full_str_context = ""
+    seen_urls = set()
+    
+    internal_links_context = ""
+
+    print(f">> Consolidating News from: {target_regions}")
+
+    # 1. Iterate Sub-regions to collect CONTEXT
     for region in target_regions:
-        print(f"\n>> Processing Region: {region}")
+        print(f"   [Collecting] {region}...")
         
-        # 1. Get Context
+        # Get News
         news = db.get_articles(region=region, hours=args.hours)
-        # market_snap = db.get_latest_market_snapshot() # Deprecated
-        
-        # Get Upcoming Events (Future 7 days)
-        # upcoming_events = db.get_upcoming_events(days=7) # Deprecated
-        # Get Recent Events (Past 24-48h) for Context
-        # recent_events = db.get_recent_events(days=2) # Needed for "Review"
-        
-        # Get Previous Analysis for Continuity
-        prev_analysis = db.get_latest_analysis_by_region(region)
-        
-        print(f"Context: {len(news)} articles")
-        
-        if not news:
-            print("Skipping due to lack of data.")
-            continue
-            
-        # 2. Analyze
-        print("Analyzing Market...")
-        recent_events_str = ""
-
-        # Format Previous Analysis Context
-        prev_context_str = ""
-        if prev_analysis:
-            scenarios = prev_analysis.get('scenarios')
-            if not isinstance(scenarios, dict):
-                scenarios = {}
+        if news:
+            for n in news:
+                # Deduplicate
+                # Try url_hash, fallback to title if API not updated yet
+                unique_key = n.get('url_hash') or n.get('title')
                 
-            main_cond = scenarios.get('main', {}).get('condition', 'N/A')
-            bull_cond = scenarios.get('bull', {}).get('condition', 'N/A')
-            bear_cond = scenarios.get('bear', {}).get('condition', 'N/A')
-            
-            prev_context_str = f"""
-            ## Yesterday's Analysis Context (verification target)
-            - Market Regime: {prev_analysis.get('market_regime')}
-            - Main Scenario (Base Case): {main_cond}
-            - Bull Scenario: {bull_cond}
-            - Bear Scenario: {bear_cond}
-            """
-
+                if unique_key and unique_key not in seen_urls:
+                    n['sub_region'] = region # Tag source region
+                    all_news.append(n)
+                    seen_urls.add(unique_key)
         
-        if args.dry_run:
-            print(" [Dry-Run] Generating Analysis with Context...")
-            print(f"   - Prev Analysis: {'Available' if prev_analysis else 'None'}")
-
-        # 1.5 Fetch Today's Created Articles (Deep Dives)
-        # This ensures we link to articles created by pipeline.py earlier today
+        # Get Deep Dives (Created Today)
         created_articles = db.get_todays_generated_articles(region=region)
-        created_articles_str = ""
-        full_links_context_addendum = ""
-        
         if created_articles:
-            print(f"   - Found {len(created_articles)} Deep Dive articles created today.")
-            created_articles_str = "## Today's Deep Dives (MUST FEATURE/LINK)\n"
-            full_links_context_addendum = "\n\n## Today's Featured Articles (Priority Links)\n"
-            for art in created_articles:
-                 art_info = f"- Title: {art.get('title')}\n  URL: {art.get('article_url')}\n  Summary: {art.get('summary', '')[:100]}...\n"
-                 created_articles_str += art_info
-                 full_links_context_addendum += art_info
-        
-        # Add to extra_context for Analysis
-        full_context = recent_events_str + "\n" + prev_context_str + "\n" + created_articles_str
+             full_str_context += f"\n## {region} Deep Dives (Must Feature/Link)\n"
+             for art in created_articles:
+                 art_info = f"- [{region}] Title: {art.get('title')}\n  URL: {art.get('article_url')}\n  Summary: {art.get('summary', '')[:100]}...\n"
+                 full_str_context += art_info
 
-        # Call Generic Analysis Method
-        analysis = gemini.analyze_tech_impact(
-            news, 
-            region, 
-            extra_context=full_context
-        )
-        
-        if not analysis:
-            print("Analysis failed.")
-            continue
-            
-        print(f"Analysis Complete (Hero Topic: {analysis.get('hero_topic', 'N/A')})")
-        
-        # Extract variables for later use (default to None for DB NULL)
-        evolution_phase = analysis.get('evolution_phase')
-        timeline_impact = analysis.get('timeline_impact')
-        scenarios_data = analysis.get('scenarios')
+    # 2. Get High-Level Context (Prev Analysis from "Global" or generic)
+    # Ideally checking previous "Global" analysis
+    prev_analysis = db.get_latest_analysis_by_region(primary_region_label) # e.g. "Global"
+    
+    print(f"Context: {len(all_news)} articles total.")
+    
+    if not all_news:
+        print("Skipping due to lack of data.")
+        return # Exit function
 
+    # 3. Analyze (Global Scope)
+    print(f"Analyzing Market ({primary_region_label})...")
+    
+    # Format Previous Analysis Context
+    prev_context_str = ""
+    if prev_analysis:
+        scenarios = prev_analysis.get('scenarios')
+        if not isinstance(scenarios, dict):
+            scenarios = {}
+            
+        main_cond = scenarios.get('main', {}).get('condition', 'N/A')
+        prev_context_str = f"""
+        ## Yesterday's Analysis Context (verification target)
+        - Market Regime: {prev_analysis.get('market_regime')}
+        - Main Scenario: {main_cond}
+        """
 
-        
-        # 2.5 Internal Linking Suggestions
-        internal_links_context = ""
-        try:
-            print(">> Fetching Internal Link Suggestions...")
-            linker = InternalLinkSuggester(wp, gemini)
-            candidates = linker.fetch_candidates(limit=50)
-            
-            if candidates:
-                # Context: Region + The Shift
-                scoring_context = f"Region: {region}\nShift: {evolution_phase}"
-                
-                relevant_links = linker.score_relevance(f"{region} Tech Impact Analysis", scoring_context, candidates)
-                
-                if relevant_links:
-                    print(f"   Found {len(relevant_links)} relevant articles.")
-                    top_links = relevant_links[:5]
-                    for l in top_links:
-                        internal_links_context += f"- ID: {l['id']} | Title: {l['title']} | URL: {l['url']}\n"
-                else:
-                    print("   No relevant links found.")
-        except Exception as e:
-            print(f"   Internal Linking Warning: {e}")
+    full_context = prev_context_str + "\n" + full_str_context
 
-        # 3. Write Briefing
-        print("Writing Briefing...")
-        article_md = gemini.write_briefing(
-            analysis, 
-            region, 
-            context_news=news, 
-            date_str=today_str,
-            internal_links_context=internal_links_context + full_links_context_addendum
-        )
+    # Call Generic Analysis Method with "Global" (or primary label)
+    analysis = gemini.analyze_tech_impact(
+        all_news, 
+        primary_region_label, 
+        extra_context=full_context
+    )
+    
+    if not analysis:
+        print("Analysis failed.")
+        return
 
-        # SEO: Add Internal Link to Previous Analysis
-        if prev_analysis and prev_analysis.get('article_url'):
-            link_title = prev_analysis.get('article_title', '昨日の分析')
-            link_url = prev_analysis.get('article_url')
-            article_md += f"\n\n---\n**前日の分析**: [{link_title}]({link_url})"
-            
-        if args.dry_run:
-            print("\n[Dry-Run] Generated Briefing (Excerpt):")
-            print("-" * 40)
-            print(article_md[:500] + "...\n(truncated)")
-            print("-" * 40)
-            
-        if not article_md:
-            print("Writing failed.")
-            continue
-            
-        # 4. Save to DB & Local File
-        analysis_record = {
-            "date": today_str,
-            "region": region,
-            "timeline_impact": timeline_impact,
-            "impact_label": "Shift", # Fixed label for TechShift
-            "evolution_phase": evolution_phase[:50] if evolution_phase else None, # Truncate to DB schema match
-            "hero_topic": analysis.get("hero_topic"),
-            "scenarios": scenarios_data, # Save full shift analysis structure
-            "ai_structured_summary": analysis.get("ai_structured_summary"),
-            "full_briefing_md": article_md
-        }
-        
-        if not args.dry_run:
-            db.save_daily_analysis(analysis_record)
-            print("Analysis & Article saved to DB.")
-        
-        # Save to local generated_articles
-        output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
-        os.makedirs(output_dir, exist_ok=True)
-        filename_base = f"{today_str}_{region}_briefing"
-        md_path = os.path.join(output_dir, f"{filename_base}.md")
-        with open(md_path, "w", encoding="utf-8") as f:
-            f.write(article_md)
-        print(f"Article saved locally to: {md_path}")
-        
-        # 5. Post to WordPress
-        print("Posting to WordPress...")
-        lines = article_md.strip().split('\n')
-        # (Title extraction logic remains same, simplified here for context match)
-        title_line = lines[0].strip()
-        if title_line.startswith("#"):
-            title = title_line.lstrip("#").strip()
-            content_body_md = "\n".join(lines[1:]).strip()
-        elif "Title:" in title_line or "**Title**:" in title_line:
-             parts = title_line.split("itle", 1)[1]
-             if ":" in parts:
-                 title = parts.split(":", 1)[1].strip(" *")
-                 content_body_md = "\n".join(lines[1:]).strip()
-             else:
-                 title = f"Daily Briefing ({region}) - {today_str}"
-                 content_body_md = article_md
-        else:
-             if len(title_line) < 100 and len(lines) > 1:
-                 title = title_line.strip(" *#")
-                 content_body_md = "\n".join(lines[1:]).strip()
-             else:
-                 title = f"Daily Briefing ({region}) - {today_str}"
-                 content_body_md = article_md
+    print(f"Analysis Complete (Hero Topic: {analysis.get('hero_topic', 'N/A')})")
+    
+    # Extract variables for later use (default to None for DB NULL)
+    evolution_phase = analysis.get('evolution_phase')
+    timeline_impact = analysis.get('timeline_impact')
+    scenarios_data = analysis.get('scenarios')
 
-        content_body_html = markdown.markdown(content_body_md, extensions=['tables', 'fenced_code', 'nl2br'])
+    # 4. Internal Linking Suggestions (Global Scope)
+    try:
+        print(">> Fetching Internal Link Suggestions...")
+        linker = InternalLinkSuggester(wp, gemini)
+        candidates = linker.fetch_candidates(limit=50)
         
-        featured_media_id = None
-        if not args.dry_run:
-            try:
-                print("Generating Feature Image...")
-                img_prompt = gemini.generate_image_prompt(title, content_body_md[:2000], "daily-briefing")
-                img_path = os.path.join(output_dir, f"{filename_base}.png")
-                saved_img = gemini.generate_image(img_prompt, img_path)
-                if saved_img:
-                    media_res = wp.upload_media(saved_img, alt_text=title)
-                    if media_res: featured_media_id = media_res.get('id')
-            except Exception as e:
-                print(f"Image generation failed: {e}")
-
-        # Post Meta - Map TechShift keys to Custom Fields
-        # Re-purpose the legacy scenario fields for the new structure
-        shift_analysis = analysis.get("shift_analysis", {})
-        
-        post_meta = {
-            "_ai_structured_summary": json.dumps(analysis.get("ai_structured_summary", {}), ensure_ascii=False)
-        }
-
-        if not args.dry_run:
-            # Get Categories
-            cat_id = wp.get_category_id("summary")
-            tag_ids = []
+        if candidates:
+            # Context: Global + The Shift
+            scoring_context = f"Region: {primary_region_label}\nShift: {evolution_phase}"
             
-            # Add 'Daily' tag
-            daily_tag = wp.get_tag_id("daily")
-            if daily_tag: tag_ids.append(daily_tag)
+            relevant_links = linker.score_relevance(f"{primary_region_label} Tech Impact Analysis", scoring_context, candidates)
             
-            reg_tag = wp.get_tag_id(region)
-            if reg_tag: tag_ids.append(reg_tag)
-            
-            res = wp.create_post(
-                title=title,
-                content=content_body_html,
-                status="publish",
-                categories=[cat_id] if cat_id else [],
-                tags=tag_ids,
-                featured_media=featured_media_id,
-                meta=post_meta
-            )
-            if res:
-                print(f"Posted to WordPress (ID: {res.get('id')}). Status: publish")
-                if res.get('link'):
-                    analysis_record['article_url'] = res.get('link')
-                    db.save_daily_analysis(analysis_record)
+            if relevant_links:
+                print(f"   Found {len(relevant_links)} relevant articles.")
+                top_links = relevant_links[:5]
+                for l in top_links:
+                    internal_links_context += f"- ID: {l['id']} | Title: {l['title']} | URL: {l['url']}\n"
             else:
-                print("Failed to post to WordPress.")
+                print("   No relevant links found.")
+    except Exception as e:
+        print(f"   Internal Linking Warning: {e}")
 
+    # 5. Write Briefing
+    print("Writing Briefing...")
+    # Add deep dive links to linking context so writer knows they are internal assets
+    full_links_context_addendum = "\n\n## Today's Deep Dive Articles (Priority Links)\n" + full_str_context
+
+    article_md = gemini.write_briefing(
+        analysis, 
+        primary_region_label, 
+        context_news=all_news, 
+        date_str=today_str,
+        internal_links_context=internal_links_context + full_links_context_addendum
+    )
+
+    # SEO: Add Internal Link to Previous Analysis
+    if prev_analysis and prev_analysis.get('article_url'):
+        link_title = prev_analysis.get('article_title', '昨日の分析')
+        link_url = prev_analysis.get('article_url')
+        article_md += f"\n\n---\n**前日の分析**: [{link_title}]({link_url})"
+        
+    if args.dry_run:
+        print("\n[Dry-Run] Generated Briefing (Excerpt):")
+        print("-" * 40)
+        print(article_md[:500] + "...\n(truncated)")
+        print("-" * 40)
+        
+    if not article_md:
+        print("Writing failed.")
+        return
+        
+    # 6. Save to DB & Local File
+    analysis_record = {
+        "date": today_str,
+        "region": primary_region_label,
+        "timeline_impact": timeline_impact,
+        "impact_label": "Shift",
+        "evolution_phase": evolution_phase[:50] if evolution_phase else None,
+        "hero_topic": analysis.get("hero_topic"),
+        "scenarios": scenarios_data, 
+        "ai_structured_summary": analysis.get("ai_structured_summary"),
+        "full_briefing_md": article_md
+    }
+    
+    if not args.dry_run:
+        db.save_daily_analysis(analysis_record)
+        print("Analysis & Article saved to DB.")
+    
+    # Save to local generated_articles
+    output_dir = os.path.join(os.path.dirname(__file__), "generated_articles")
+    os.makedirs(output_dir, exist_ok=True)
+    filename_base = f"{today_str}_{primary_region_label}_briefing"
+    md_path = os.path.join(output_dir, f"{filename_base}.md")
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write(article_md)
+    print(f"Article saved locally to: {md_path}")
+    
+    # 7. Post to WordPress
+    print("Posting to WordPress...")
+    lines = article_md.strip().split('\n')
+    title_line = lines[0].strip()
+    if title_line.startswith("#"):
+        title = title_line.lstrip("#").strip()
+        content_body_md = "\n".join(lines[1:]).strip()
+    elif "Title:" in title_line or "**Title**:" in title_line:
+            parts = title_line.split("itle", 1)[1]
+            if ":" in parts:
+                title = parts.split(":", 1)[1].strip(" *")
+                content_body_md = "\n".join(lines[1:]).strip()
+            else:
+                title = f"Daily Briefing ({primary_region_label}) - {today_str}"
+                content_body_md = article_md
+    else:
+            if len(title_line) < 100 and len(lines) > 1:
+                title = title_line.strip(" *#")
+                content_body_md = "\n".join(lines[1:]).strip()
+            else:
+                title = f"Daily Briefing ({primary_region_label}) - {today_str}"
+                content_body_md = article_md
+
+    content_body_html = markdown.markdown(content_body_md, extensions=['tables', 'fenced_code', 'nl2br'])
+    
+    featured_media_id = None
+    if not args.dry_run:
+        try:
+            print("Generating Feature Image...")
+            img_prompt = gemini.generate_image_prompt(title, content_body_md[:2000], "daily-briefing")
+            img_path = os.path.join(output_dir, f"{filename_base}.png")
+            saved_img = gemini.generate_image(img_prompt, img_path)
+            if saved_img:
+                media_res = wp.upload_media(saved_img, alt_text=title)
+                if media_res: featured_media_id = media_res.get('id')
+        except Exception as e:
+            print(f"Image generation failed: {e}")
+
+    # Post Meta - Map TechShift keys to Custom Fields
+    post_meta = {
+        "_ai_structured_summary": json.dumps(analysis.get("ai_structured_summary", {}), ensure_ascii=False)
+    }
+
+    if not args.dry_run:
+        # Get Categories
+        cat_id = wp.get_category_id("summary")
+        tag_ids = []
+        
+        # Add 'Daily' tag
+        daily_tag = wp.get_tag_id("daily")
+        if daily_tag: tag_ids.append(daily_tag)
+        
+        reg_tag = wp.get_tag_id(primary_region_label) # "Global" tag might need to be created?
+        if reg_tag: 
+            tag_ids.append(reg_tag)
         else:
-            print(f"[Dry-Run] Would post: {title}")
-            print(f"[Dry-Run] With Meta: {json.dumps(post_meta, ensure_ascii=False)}")
-            print(f"[Dry-Run] Image ID: {featured_media_id}")
+            # Maybe fall back to General if Global tag doesn't exist, or just skip
+            pass
+        
+        res = wp.create_post(
+            title=title,
+            content=content_body_html,
+            status="publish",
+            categories=[cat_id] if cat_id else [],
+            tags=tag_ids,
+            featured_media=featured_media_id,
+            meta=post_meta
+        )
+        if res:
+            print(f"Posted to WordPress (ID: {res.get('id')}). Status: publish")
+            if res.get('link'):
+                analysis_record['article_url'] = res.get('link')
+                db.save_daily_analysis(analysis_record)
+        else:
+            print("Failed to post to WordPress.")
+
+    else:
+        print(f"[Dry-Run] Would post: {title}")
+        print(f"[Dry-Run] With Meta: {json.dumps(post_meta, ensure_ascii=False)}")
+        print(f"[Dry-Run] Image ID: {featured_media_id}")
 
 
 def main():

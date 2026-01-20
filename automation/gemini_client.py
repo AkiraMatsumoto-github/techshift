@@ -962,12 +962,12 @@ class GeminiClient:
            - **Rule**: Only include sectors with significant updates (Torutsume).
            - **Mandatory**: If a "Deep Dive Article" exists for a sector (Context 4), you MUST introduce it here with a link.
            - Official Sectors:
-             - **Advanced AI**
-             - **Robotics & Mobility**
-             - **Quantum & Tech**
-             - **Green Tech**
-             - **Life Science**
-             - **Space & Aero**
+             - **AI・人工知能 (Advanced AI)**
+             - **ロボティクス・モビリティ (Robotics & Mobility)**
+             - **量子・先端技術 (Quantum & Tech)**
+             - **環境・エネルギー (Green Tech)**
+             - **ライフサイエンス (Life Science)**
+             - **宇宙・航空 (Space & Aero)**
         
         4. **複合的影響**
            - Discuss how these shifts affect each other (Synergy).
@@ -980,7 +980,13 @@ class GeminiClient:
         ## Internal Linking
         - **MANDATORY**: Embed links to "Today's Featured Articles" naturally within the relevant Sector Update.
         - Format: `[Title](URL)`
-        
+
+        ## フォーマット
+        - Markdown形式
+        - 4000文字程度
+        - 技術仕様はテーブルで比較
+        - HTMLタグ使用禁止
+
         ## Title Rules (Pure SEO)
         1. **Goal**: Maximize Click-Through Rate (CTR) and Search Volume.
         2. **Format**: [Hero Keyword] + [Impact/Action]

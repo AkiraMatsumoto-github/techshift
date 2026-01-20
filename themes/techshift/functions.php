@@ -907,7 +907,7 @@ function techshift_api_get_articles( $request ) {
     $region = $request->get_param('region');
     $limit = $request->get_param('limit') ? intval($request->get_param('limit')) : 50;
 
-    $query = "SELECT title, summary, source, region, published_at FROM $table WHERE is_relevant = 1";
+    $query = "SELECT url_hash, title, summary, source, region, published_at FROM $table WHERE is_relevant = 1";
     $query .= $wpdb->prepare( " AND published_at >= DATE_SUB(NOW(), INTERVAL %d HOUR)", $hours );
 
     if ( $region && $region !== 'Global' ) {
