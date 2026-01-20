@@ -787,7 +787,8 @@ class GeminiClient:
            - **CRITICAL RULES**: 
              - **Do NOT hallucinate**. If the article is about "Sovereign AI" (National Data Sovereignty), the shift MUST be about "Dependency -> Sovereignty", NOT about "Autonomous Agents".
              - The shift must reflect the *main topic* of the article.
-             - Must be short (max 40 chars) for Card UI display in **JAPANESE**.
+             - Must be descriptive enough to visualize the transition (max 80 chars) for Card UI display in **JAPANESE**.
+             - **AVOID ABSTRACT TERMS**: Do not just say "High Performance" or "Optimized". Use concrete states like "Manual Drug Discovery -> AI-Generated Candidates".
            
            - **Catalyst**: "Why Now?". In Japanese.
            - **Next Wall**: "New Bottleneck". In Japanese.

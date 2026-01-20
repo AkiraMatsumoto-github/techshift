@@ -1633,7 +1633,7 @@ section {
     .featured-grid,
     .global-grid {
         grid-template-columns: 1fr;
-        gap: var(--spacing-lg);
+        gap: var(--spacing-sm);
         /* Increased gap for premium feel */
     }
 
@@ -2199,7 +2199,7 @@ section {
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing-lg);
+    gap: var(--spacing-sm);
 }
 
 .dashboard-card {
@@ -2650,7 +2650,7 @@ section {
 
 /* Content */
 .dashboard-title {
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     font-weight: 700;
     line-height: 1.5;
     margin: 0;
@@ -2666,23 +2666,29 @@ section {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 10px 12px;
-    background-color: var(--color-bg-secondary);
-    border-radius: 8px;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
     font-size: 0.85rem;
-    border-left: 3px solid var(--color-tech-blue);
+    border-left: none;
+    margin-bottom: 4px;
+    /* Reduced from 12px to link with Impact */
 }
 
 .phase-label-mini {
     font-size: 0.7rem;
     font-weight: 700;
-    color: var(--color-text-muted);
+    color: var(--color-tech-blue);
+    /* Changed from muted to accent to act as header */
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .phase-value-text {
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-weight: 500;
+    /* Slightly lighter than 600 for better balance */
+    color: var(--color-text-primary);
+    /* Darker for readability on white */
     line-height: 1.4;
 }
 
@@ -2820,24 +2826,32 @@ section {
 /* --- FINAL FIX: Diverging Impact Meter --- */
 
 .impact-section {
-    margin-top: 16px;
+    margin-top: 4px;
+    /* Reduced from 16px to group with Phase Shift */
 }
 
 .impact-header-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    /* Slightly tighter */
     font-size: 0.8rem;
     font-weight: 500;
 }
 
 .impact-title {
-    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-tech-blue);
+    /* Match Phase Shift */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .impact-score-display {
     color: var(--color-text-primary);
     font-family: monospace;
+    font-weight: 700;
 }
 
 .diverging-meter-container {

@@ -205,7 +205,7 @@ get_header();
 											<?php if ($impact !== '') : ?>
 											<div class="impact-section">
 												<div class="impact-header-row">
-													<span class="impact-title">Timeline Impact</span>
+													<span class="impact-title">Impact</span>
 													<span class="impact-score-display"><?php echo $impact_label_text; ?></span>
 												</div>
 												<div class="diverging-meter-container">
@@ -222,9 +222,9 @@ get_header();
 											</div>
 											<?php endif; ?>
 
-											<div class="card-footer-link" style="margin-top: 12px;">
+											<a href="<?php the_permalink(); ?>" class="card-footer-link" style="margin-top: 12px; display: block;">
 												Read Analysis <span class="arrow">&rarr;</span>
-											</div>
+											</a>
 										</div>
 									</article>
 									<?php

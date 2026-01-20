@@ -76,9 +76,7 @@ get_header();
 								<div class="card-body-flex">
 									<div class="card-content-side">
 										<h2 class="dashboard-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-										<?php if ($summary_text): ?>
-											<p class="card-summary"><?php echo esc_html($summary_text); ?></p>
-										<?php endif; ?>
+
 									</div>
 									<?php if (has_post_thumbnail()): ?>
 									<div class="card-thumbnail-side">
@@ -98,7 +96,7 @@ get_header();
 									<?php if ($impact !== '') : ?>
 									<div class="impact-section">
 										<div class="impact-header-row">
-											<span class="impact-title">Timeline Impact</span>
+											<span class="impact-title">Impact</span>
 											<span class="impact-score-display"><?php echo $impact_label_text; ?></span>
 										</div>
 										<div class="diverging-meter-container">
@@ -115,9 +113,9 @@ get_header();
 									</div>
 									<?php endif; ?>
 
-									<div class="card-footer-link" style="margin-top: 12px;">
+									<a href="<?php the_permalink(); ?>" class="card-footer-link" style="margin-top: 12px; display: block;">
 										Read Analysis <span class="arrow">&rarr;</span>
-									</div>
+									</a>
 								</div>
 							</article>
 							<?php
