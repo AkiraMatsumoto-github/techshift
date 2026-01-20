@@ -2,6 +2,8 @@ import os
 import requests
 import base64
 from dotenv import load_dotenv
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(env_path, override=True)
@@ -16,6 +18,23 @@ class WordPressClient:
             raise ValueError("Missing WordPress credentials in .env")
 
         self.auth = (self.wp_user, self.wp_password)
+        
+        # Initialize Session with Retries and Connection Pooling
+        self.session = requests.Session()
+        self.session.auth = self.auth
+        
+        retries = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[500, 502, 503, 504],
+            allowed_methods=frozenset(['GET', 'POST'])
+        )
+        
+        adapter = HTTPAdapter(max_retries=retries)
+        # Mount adapter for both http and https
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
+
         # Use query param format for default permalink structure
         self.api_url = f"{self.wp_url}/?rest_route=/wp/v2"
 
@@ -57,7 +76,7 @@ class WordPressClient:
             data["featured_media"] = featured_media
 
         try:
-            response = requests.post(url, json=data, auth=self.auth)
+            response = self.session.post(url, json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -73,7 +92,7 @@ class WordPressClient:
         """
         url = f"{self.api_url}/{endpoint}/{resource_id}"
         try:
-            response = requests.post(url, json=data, auth=self.auth)
+            response = self.session.post(url, json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -92,7 +111,7 @@ class WordPressClient:
             # Fetch all pages (limit 100)
             url = f"{self.api_url}/pages"
             params = {"per_page": 100, "status": "publish"}
-            response = requests.get(url, params=params, auth=self.auth)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
             
             pages = response.json()
@@ -107,7 +126,7 @@ class WordPressClient:
             
             # Re-fetch with context=edit to ensure meta is present
             params['context'] = 'edit'
-            response = requests.get(url, params=params, auth=self.auth)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
             pages = response.json()
             
@@ -150,7 +169,7 @@ class WordPressClient:
             data["parent"] = parent
 
         try:
-            response = requests.post(url, json=data, auth=self.auth)
+            response = self.session.post(url, json=data)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -164,7 +183,7 @@ class WordPressClient:
         try:
             # Use query param format for default permalink structure
             url = f"{self.wp_url}/?rest_route=/wp/v2/categories&slug={slug}"
-            response = requests.get(url, auth=self.auth)
+            response = self.session.get(url)
             response.raise_for_status()
             data = response.json()
             if data:
@@ -179,7 +198,7 @@ class WordPressClient:
         try:
             # Try to get existing tag
             url = f"{self.wp_url}/?rest_route=/wp/v2/tags&slug={slug}"
-            response = requests.get(url, auth=self.auth)
+            response = self.session.get(url)
             response.raise_for_status()
             data = response.json()
             if data:
@@ -188,7 +207,7 @@ class WordPressClient:
             # Create if not exists
             create_url = f"{self.api_url}/tags"
             create_data = {"name": slug, "slug": slug}
-            response = requests.post(create_url, json=create_data, auth=self.auth)
+            response = self.session.post(create_url, json=create_data)
             response.raise_for_status()
             return response.json()['id']
             
@@ -227,7 +246,7 @@ class WordPressClient:
             if after:
                 params["after"] = after
                 
-            response = requests.get(url, params=params, auth=self.auth)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
             response.raise_for_status()
             return response.json()
@@ -245,7 +264,7 @@ class WordPressClient:
         try:
             url = f"{self.api_url}/posts/{post_id}"
             params = {"context": "edit"} # 'edit' context returns all meta fields
-            response = requests.get(url, params=params, auth=self.auth)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -263,7 +282,7 @@ class WordPressClient:
                 "limit": limit
             }
             
-            response = requests.get(url, params=params, auth=self.auth)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
             return response.json()
             
@@ -295,10 +314,9 @@ class WordPressClient:
                 }
                 
                 # Upload file
-                response = requests.post(
+                response = self.session.post(
                     url,
-                    files=files,
-                    auth=self.auth
+                    files=files
                 )
             
             response.raise_for_status()
@@ -310,7 +328,7 @@ class WordPressClient:
                 media_id = result['id']
                 update_url = f"{self.api_url}/media/{media_id}"
                 update_data = {"alt_text": alt_text}
-                requests.post(update_url, json=update_data, auth=self.auth)
+                self.session.post(update_url, json=update_data)
             
             return {
                 'id': result.get('id'),
