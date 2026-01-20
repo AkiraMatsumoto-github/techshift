@@ -73,9 +73,13 @@ def parse_markdown_table(file_path):
                 continue
 
             # --- Type Mapping ---
-            # All automated SEO articles map to 'topic-focus' structure in generate_article.py
-            # We pass the specific "Content Type" as context.
-            gen_type = 'topic-focus'
+            # All automated SEO articles map to 'stock-analysis' structure by default
+            # per updated strategy (Stock-First).
+            gen_type = 'stock-analysis'
+            
+            # Optional: Override if needed based on Content Type, but default is Stock.
+            if 'news' in content_type.lower():
+                gen_type = 'topic-focus'
             
             # --- Context Construction ---
             summary_context = f"Domain: {current_domain}. User Intent: {intent}. Content Type: {content_type}."

@@ -166,6 +166,71 @@ class GeminiClient:
               - 「全固体電池の量産はいつ？最新ロードマップと2つの技術的課題」
               - 「AIエージェントの仕組みとは？自律動作の原理と3つの実用例」
               - 「核融合発電のメリット・デメリットを徹底解説｜2030年の実用化予測」
+            """),
+
+            # --- Stock Analysis Prompt (New) ---
+            # [Educational/Timeless] Encyclopedia style for SEO targets.
+            "stock-analysis": textwrap.dedent(f"""
+            {context_section}あなたはテクノロジー教育の専門家であり、TechShiftのシニアエディターです。
+            キーワード「{keyword}」について、今後数年間読み継がれる「教科書的（Stock型）」な解説記事を執筆してください。
+            
+            キーワード: {keyword}
+            
+            ## ターゲット
+            - この技術について初めて学ぶ、あるいは基礎から体系的に理解したい実務者・投資家。
+            - ニュースの断片的な情報ではなく、全体像（Big Picture）を求めている層。
+            
+            ## 執筆ロジック (Encyclopedia Tone)
+            - **Timeless**: 「昨日発表された」といった一過性の表現は避け、「2020年代においては」といった普遍的な記述にする。
+            - **Educational**: 専門用語には必ず簡潔な補足を入れ、前提知識がなくても読めるようにする。
+            - **Structured**: 論理的で美しい構成（定義→仕組み→歴史→応用→未来）。
+            
+            ## 構成案 (Stock Standard)
+            
+            1. **{keyword}とは？（定義と背景）**:
+               - 一言でいうと何か？（One-liner Definition）
+               - なぜ今、重要なのか？（社会背景、技術的成熟）。
+            
+            2. **仕組みと技術構造（メカニズム）**:
+               - どうやって動くのか？ブラックボックスを開ける解説。
+               - 必要な構成要素（ハードウェア、ソフトウェア、インフラ）。
+               - 従来技術との比較表（性能、コスト、拡張性）。
+            
+            3. **技術の進化と歴史**:
+               - 過去の技術から、現在のSOTA（最先端）への変遷。
+               - どのような技術的ブレイクスルーが現状を可能にしたか。
+            
+            4. **実用例と産業へのインパクト**:
+               - どの産業が最も恩恵を受けるか？（金融、医療、モビリティなど）
+               - 具体的な活用シナリオ（Before/After）。
+            
+            5. **課題と2030年へのロードマップ**:
+               - まだ解決されていない課題（コスト、電力、倫理など）。
+               - 今後5年（〜2030年）のマイルストーン予測。
+            
+            6. **結論（サマリー）**:
+               - 学びのまとめ。
+            
+            ## 執筆トーン
+            - **Academic yet Accessible**: 大学の講義のように正確だが、平易な言葉で。
+            - **Neutral**: メリットとデメリットを公平に記述する。
+            
+            ## 執筆ルール
+            - **情報の鮮度**: Stock型であっても、データは最新のもの（最新の論文や統計）を参照する。
+            - **可読性**: 3行以上の長文段落を避け、箇条書きやボールドを適切に使う。
+            
+            ## フォーマット
+            - Markdown形式
+            - 5000文字程度（網羅性を重視）
+            - HTMLタグ使用禁止
+            
+            ## タイトル作成ルール (SEO - High Intent)
+            - **目的**: "Know" クエリ（知りたい）への完全回答。
+            - **形式**: [キーワード]とは？[サジェスト]を徹底解説
+            - **良い例**: 
+              - 「量子アニーリングとは？ゲート方式との違いや実用例をわかりやすく解説」
+              - 「ソブリンAIの必要性とは？各国の導入事例とメリット・デメリット」
+              - 「全固体電池の仕組み図解｜リチウムイオン電池との違いと量産への課題」
             """)
         }
         
@@ -699,23 +764,31 @@ class GeminiClient:
                 }
             return fallback_map
 
-    def analyze_single_article_impact(self, title, content):
+    def analyze_single_article_impact(self, title, content, article_type="topic-focus"):
         """
         Analyze a SINGLE article to generate "The Shift" and "Impact Score".
         Optimized for individual article generation without macro context.
         """
+        # Increase content context for better accuracy
+        content_excerpt = content[:3000]
+        
         prompt = textwrap.dedent(f"""
         You are the "Shift Intelligence Engine". Analyze this specific article to determine its "TechShift Impact".
 
         ## Target Article
         Title: {title}
+        Type: {article_type}
         Content Summary:
-        {content[:1500]}
+        {content_excerpt}
 
         ## Analysis Tasks
-        1. **The Shift**: Describe the structural change in **JAPANESE**.
-           - Format: "Before State -> After State" (e.g. "孤立した自動化 -> 重層的な身体性AI").
-           - **CRITICAL**: Must be short (max 40 chars) for Card UI display.
+        1. **The Shift**: Describe the structural change defined **strictly within the text**.
+           - Format: "Before State -> After State" (e.g. "ブラックボックスAI -> 説明可能なAI").
+           - **CRITICAL RULES**: 
+             - **Do NOT hallucinate**. If the article is about "Sovereign AI" (National Data Sovereignty), the shift MUST be about "Dependency -> Sovereignty", NOT about "Autonomous Agents".
+             - The shift must reflect the *main topic* of the article.
+             - Must be short (max 40 chars) for Card UI display in **JAPANESE**.
+           
            - **Catalyst**: "Why Now?". In Japanese.
            - **Next Wall**: "New Bottleneck". In Japanese.
            - **Signal**: "What to Watch". In Japanese.

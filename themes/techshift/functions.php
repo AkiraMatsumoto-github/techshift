@@ -208,6 +208,7 @@ function techshift_seo_meta() {
     <meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
     <?php
 }
+add_action( 'wp_head', 'techshift_seo_meta' );
 
 /**
  * ==============================================================================

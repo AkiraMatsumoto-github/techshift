@@ -450,7 +450,8 @@ Select the most relevant ones (if any) and include them in the article using sta
             # Call specialized single-article analyzer
             impact_analysis = gemini.analyze_single_article_impact(
                 title=title,
-                content=content
+                content=content,
+                article_type=args.type
             )
             
             if impact_analysis:
@@ -546,7 +547,7 @@ Select the most relevant ones (if any) and include them in the article using sta
 def main():
     parser = argparse.ArgumentParser(description="Generate and post an article to WordPress.")
     parser.add_argument('--keyword', type=str, required=True, help='Keyword for the article')
-    parser.add_argument('--type', type=str, default='topic-focus', choices=['topic-focus', 'daily-briefing'], help='Article type')
+    parser.add_argument('--type', type=str, default='topic-focus', choices=['topic-focus', 'daily-briefing', 'stock-analysis'], help='Article type')
     parser.add_argument('--dry-run', action='store_true', help='Generate content but do not post to WordPress')
     parser.add_argument('--schedule', type=str, help='Schedule date (YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS)')
     parser.add_argument('--context', type=str, help='Article context for News/Global articles (JSON string, optional)')
