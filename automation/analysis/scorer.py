@@ -36,6 +36,7 @@ SHARED_CRITERIA = """あなたは「TechShift Lead Analyst」です。
 
 3. **Business/Social Implication (社会実装・コスト)** (0-30点)
     - コスト1/10化、規制の壁の突破、主要プレイヤーの戦略転換など。
+    - **【重要】** 技術普及の障壁となる「法規制の強化」「地政学的リスク」など、ロードマップを遅延・阻害するネガティブインパクトも、その影響が大きければ高スコアを与える。
 """
 
 SCORING_PROMPT = SHARED_CRITERIA + """
