@@ -955,6 +955,33 @@ function techshift_sitemap_render() {
                 <priority>1.0</priority>
             </url>
 
+            <!-- Pages -->
+            <?php
+            $pages = get_posts( array(
+                'numberposts' => 100,
+                'post_type'   => 'page',
+                'post_status' => 'publish',
+            ) );
+            foreach ( $pages as $p ) : ?>
+            <url>
+                <loc><?php echo esc_url( get_permalink( $p->ID ) ); ?></loc>
+                <lastmod><?php echo get_the_modified_date( 'c', $p->ID ); ?></lastmod>
+                <changefreq>daily</changefreq>
+                <priority>0.8</priority>
+            </url>
+            <?php endforeach; ?>
+
+            <!-- Categories -->
+            <?php
+            $categories = get_categories();
+            foreach ( $categories as $cat ) : ?>
+            <url>
+                <loc><?php echo esc_url( get_category_link( $cat->term_id ) ); ?></loc>
+                <changefreq>daily</changefreq>
+                <priority>0.6</priority>
+            </url>
+            <?php endforeach; ?>
+
             <!-- Posts -->
             <?php
             $posts = get_posts( array(
@@ -968,35 +995,8 @@ function techshift_sitemap_render() {
             <url>
                 <loc><?php echo esc_url( get_permalink( $p->ID ) ); ?></loc>
                 <lastmod><?php echo get_the_modified_date( 'c', $p->ID ); ?></lastmod>
-                <changefreq>weekly</changefreq>
-                <priority>0.8</priority>
-            </url>
-            <?php endforeach; ?>
-
-            <!-- Pages -->
-            <?php
-            $pages = get_posts( array(
-                'numberposts' => 100,
-                'post_type'   => 'page',
-                'post_status' => 'publish',
-            ) );
-            foreach ( $pages as $p ) : ?>
-            <url>
-                <loc><?php echo esc_url( get_permalink( $p->ID ) ); ?></loc>
-                <lastmod><?php echo get_the_modified_date( 'c', $p->ID ); ?></lastmod>
                 <changefreq>monthly</changefreq>
                 <priority>0.5</priority>
-            </url>
-            <?php endforeach; ?>
-
-            <!-- Categories -->
-            <?php
-            $categories = get_categories();
-            foreach ( $categories as $cat ) : ?>
-            <url>
-                <loc><?php echo esc_url( get_category_link( $cat->term_id ) ); ?></loc>
-                <changefreq>weekly</changefreq>
-                <priority>0.6</priority>
             </url>
             <?php endforeach; ?>
 
