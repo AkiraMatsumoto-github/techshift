@@ -954,11 +954,11 @@ class GeminiClient:
         
         1. **Title**: Generated based on rules below.
         
-        2. **【Today's Landscape】 (本日の重要ポイント)**
+        2. **本日の重要ポイント**
            - High-level summary of the day's tectonic shifts.
            - Bullet points of top 3 takeaways.
 
-        3. **【Sector Updates】 (分野別動向)**
+        3. **分野別動向**
            - **Rule**: Only include sectors with significant updates (Torutsume).
            - **Mandatory**: If a "Deep Dive Article" exists for a sector (Context 4), you MUST introduce it here with a link.
            - Official Sectors:
@@ -969,16 +969,13 @@ class GeminiClient:
              - **Life Science**
              - **Space & Aero**
         
-        4. **【Cross-Sector Impact】 (複合的影響)**
+        4. **複合的影響**
            - Discuss how these shifts affect each other (Synergy).
            - e.g., "Quantum advancements accelerating Bio-simulation."
 
-        5. **【Strategic Signal】 (今後の注目点)**
+        5. **今後の注目点**
            - What to watch next week/month.
            - Specific KPIs or Events.
-
-        6. **【Verdict】 (結論)**
-           - Final thought on the overall market direction.
         
         ## Internal Linking
         - **MANDATORY**: Embed links to "Today's Featured Articles" naturally within the relevant Sector Update.
