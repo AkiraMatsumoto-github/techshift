@@ -926,23 +926,24 @@ function techshift_api_get_articles( $request ) {
 
 
 
+
 /**
  * 5. Custom XML Sitemap
  * Generates a lightweight XML sitemap at /sitemap.xml
  */
-function techshift_sitemap_init() {
-    add_rewrite_rule( 'sitemap\.xml$', 'index.php?techshift_sitemap=1', 'top' );
+function logishift_sitemap_init() {
+    add_rewrite_rule( 'sitemap\.xml$', 'index.php?logishift_sitemap=1', 'top' );
 }
-add_action( 'init', 'techshift_sitemap_init' );
+add_action( 'init', 'logishift_sitemap_init' );
 
-function techshift_sitemap_query_vars( $vars ) {
-    $vars[] = 'techshift_sitemap';
+function logishift_sitemap_query_vars( $vars ) {
+    $vars[] = 'logishift_sitemap';
     return $vars;
 }
-add_filter( 'query_vars', 'techshift_sitemap_query_vars' );
+add_filter( 'query_vars', 'logishift_sitemap_query_vars' );
 
-function techshift_sitemap_render() {
-    if ( get_query_var( 'techshift_sitemap' ) ) {
+function logishift_sitemap_render() {
+    if ( get_query_var( 'logishift_sitemap' ) ) {
         header( 'Content-Type: application/xml; charset=utf-8' );
         echo '<?xml version="1.0" encoding="UTF-8"?>';
         ?>
@@ -1005,17 +1006,17 @@ function techshift_sitemap_render() {
         exit;
     }
 }
-add_action( 'template_redirect', 'techshift_sitemap_render' );
+add_action( 'template_redirect', 'logishift_sitemap_render' );
 
 /**
  * Flush rewrite rules if sitemap rule is missing.
  * Runs only once per admin pageload if needed.
  */
-function techshift_check_sitemap_rules() {
+function logishift_check_sitemap_rules() {
     $rules = get_option( 'rewrite_rules' );
     if ( ! isset( $rules['sitemap\.xml$'] ) ) {
         global $wp_rewrite;
         $wp_rewrite->flush_rules();
     }
 }
-add_action( 'admin_init', 'techshift_check_sitemap_rules' );
+add_action( 'admin_init', 'logishift_check_sitemap_rules' );
