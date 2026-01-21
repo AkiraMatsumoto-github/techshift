@@ -1459,8 +1459,8 @@ section {
 }
 
 .entry-content table thead {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
+    background: var(--color-navy);
+    color: var(--color-white);
 }
 
 .entry-content table td {

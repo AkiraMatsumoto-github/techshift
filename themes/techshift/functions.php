@@ -7,7 +7,7 @@
 
 // Enqueue styles
 function techshift_scripts() {
-    wp_enqueue_style( 'techshift-style', get_stylesheet_uri(), array(), '1.0.24' );
+    wp_enqueue_style( 'techshift-style', get_stylesheet_uri(), array(), '1.0.25' );
 
     // Swiper
     if ( is_front_page() ) {
