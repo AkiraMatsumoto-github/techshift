@@ -88,11 +88,6 @@ get_header();
 													<span class="cat-label"><?php echo esc_html( $categories[0]->name ); ?></span>
 												<?php endif; ?>
 												<span class="posted-on"><?php echo get_the_date( '', $post->ID ); ?></span>
-												<?php if ( isset( $post->views ) ) : ?>
-													<span class="views-count" style="margin-left: 10px; color: #888; font-size: 0.9em;">
-														<i class="fas fa-eye"></i> <?php echo number_format( $post->views ); ?> views
-													</span>
-												<?php endif; ?>
 											</div>
 											<h3 class="featured-title"><a href="<?php echo get_permalink( $post->ID ); ?>"><?php echo get_the_title( $post->ID ); ?></a></h3>
 										</div>
