@@ -63,7 +63,7 @@ class GeminiClient:
                     # Not a quota error, raise immediately
                     raise e
 
-    def generate_content(self, prompt, model='gemini-3-pro-preview', config=None):
+    def generate_content(self, prompt, model='gemini-3.1-pro-preview', config=None):
         """
         Generic method to generate content with retry logic.
         """
@@ -274,7 +274,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt
             )
             return response.text
@@ -383,7 +383,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt
             )
             return response.text.strip()
@@ -500,7 +500,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt
             )
             return response.text
@@ -538,7 +538,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json"
@@ -598,7 +598,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json"
@@ -902,7 +902,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview', # High reasoning model
+                model='gemini-3.1-pro-preview', # High reasoning model
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json"
@@ -1005,7 +1005,7 @@ class GeminiClient:
         try:
             response = self._retry_request(
                 self.client.models.generate_content,
-                model='gemini-3-pro-preview',
+                model='gemini-3.1-pro-preview',
                 contents=prompt
             )
             return response.text
